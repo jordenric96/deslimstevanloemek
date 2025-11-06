@@ -1,0 +1,4472 @@
+<!DOCTYPE html>
+
+<html lang="nl">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Trivial time - Quiz</title>
+
+    
+    <style>
+
+        :root {
+
+            /* NIEUWE KLEUREN (AANGEPAAST) */
+
+            --primary-color: #73937E;   /* Achtergrond (Fel Groen) */
+
+            --secondary-color: #5B2E48; /* Hoofdaccent / Titels (Cyaan Blauw) */
+
+            --text-color: #471323;       /* Donkere tekst voor contrast */
+            /* LIGHT TEXT: #CEB992 (Lichtcrème) is nu cruciaal voor contrast op het donkere speelveld */
+            --light-text-color: #CEB992; /* Lichtcrème/Wit voor gebruik op donkere elementen */
+
+            --player-bg: #5B2E48;        /* Player Cards / Game Board BG (Donker) */
+
+            
+            --correct-color: #FF9914;    /* Juist Antwoord (Oranje/Goud) */
+
+            --wrong-color: #F21B3F;      /* Fout/Waarschuwing (Fel Rood) */
+            
+            /* EXTRA OPVALLENDE RANDEN */
+            --border-radius-card: 12px;
+            --border-radius-input: 8px;
+            --border-radius-button: 8px;
+
+            --puzzle-color-1: #F21B3F;  /* Rood/Paars (Antwoord 1 Kleur) */
+            --puzzle-color-2: #5B2E48;  /* Lichtgroen (Antwoord 2 Kleur) */
+            --puzzle-color-3: #5B2E48;  /* Cyaan Blauw (Antwoord 3 Kleur) */
+
+            
+            --input-bg: #444444; /* Donkere input achtergrond voor contrast */
+
+            --input-border-color: #5B2E48;  
+
+        }
+
+
+        body {
+
+            /* LETTERTYPE GEWIJZIGD */
+            font-family: 'Verdana', 'Arial', sans-serif; 
+
+            background-color: var(--primary-color);
+
+            color: var(--text-color);
+
+            margin: 0;
+
+            padding: 20px;
+
+            text-align: center;
+
+        }
+
+
+        h1 {
+            /* TITEL VERBERGEN */
+            display: none;
+        }
+
+
+        /* --- PLAYER CONTAINER EN KAARTEN (AANGEPAAST VOOR MEEER RUIMTE) --- */
+        #player-container {
+            display: grid;
+            /* Zorg voor smallere kaarten */
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); 
+            gap: 10px; /* VERHOOGD: Meer ruimte tussen de kaarten */ 
+            margin-bottom: 15px; /* VERHOOGD: Meer ruimte onder de kaarten */ 
+            background-color: var(--primary-color); 
+        }
+
+
+        .player-card {
+            background-color: var(--player-bg); 
+            color: var(--text-color); 
+            padding: 5px 8px; 
+            /* EXTRA AFGERONDE HOEKEN VOOR KAARTEN */
+            border-radius: var(--border-radius-card); 
+            border: 2px solid var(--primary-color);
+            cursor: pointer;    
+            opacity: 0.9;
+            transition: border-color 0.3s, opacity 0.3s, transform 0.3s, box-shadow 0.3s, background-color 0.3s;
+
+            /* NIEUWE STIJL: VERTICALE LAYOUT */
+            display: flex;
+            flex-direction: column;
+            align-items: center; /* Horizontaal alles centreren */
+            min-height: 80px;   
+            position: relative; 
+        }
+        
+        /* RONDE 1 BONUS FEEDBACK */
+        .player-card .bonus-feedback {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 2.5em;
+            font-weight: bold;
+            color: var(--wrong-color); /* Fel Rood */
+            opacity: 0;
+            transition: all 0.5s ease-out;
+            pointer-events: none;
+            text-shadow: 2px 2px 5px rgba(0,0,0,0.8);
+            z-index: 5;
+        }
+        
+        /* DUIDELIJKERE ACTIEVE SPELER: ACHTERGROND F21B3F */
+        .player-card.active {
+            background-color: var(--wrong-color); /* F21B3F */
+            color: var(--light-text-color); 
+            border-color: var(--secondary-color);
+            border-width: 5px;  
+            opacity: 1;
+            transform: scale(1.05); 
+            box-shadow: 0 0 15px var(--secondary-color), 0 0 25px var(--secondary-color); 
+        }
+
+
+        /* FINALE SPELER KAART STIJL */
+        .player-card.active.final-player {
+             border-color: var(--correct-color);
+             box-shadow: 0 0 15px var(--correct-color), 0 0 25px var(--correct-color);
+        }
+        .player-card.active.opponent-player {
+             border-color: var(--wrong-color);
+             box-shadow: 0 0 15px var(--wrong-color), 0 0 25px var(--wrong-color);
+        }
+        /* EINDE FINALE SPELER KAART STIJL */
+
+
+        /* AANGEPAAST: Omvat naam, checkmark en timerknop */
+        .player-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;    
+            margin-bottom: 0px; 
+            min-height: 20px;
+        }
+
+        .player-name {
+            font-size: 0.9em;   
+            font-weight: bold;
+            overflow-wrap: break-word;
+            text-align: center;
+            flex-grow: 1;   
+            order: 1;   
+            margin-right: 0;    
+            line-height: 1.1;
+        }
+        
+        /* TIMER KNOP IN DE HOEK (Absolute positioning is in JS, hier basis styling) */
+        .player-timer-btn {
+              margin: 0; 
+              width: 35px; /* Grotere knop */
+              height: 35px; /* Grotere knop */
+              line-height: 35px; 
+              border-radius: 50%;
+              /* ZORGT DAT KNOP ALTIJD EEN VISUEEL VELD HEEFT */
+              background-color: var(--secondary-color); 
+              color: var(--light-text-color);
+        }
+        /* DUIDELIJKER: Running state */
+        .player-timer-btn.running {
+            background-color: var(--wrong-color);
+            color: var(--light-text-color);
+        }
+        
+        /* CHECKMARK NAAR LINKS */
+        .puzzle-starter-check {
+              font-size: 1.2em;
+              font-weight: bold;
+              color: var(--secondary-color);
+        }
+        .player-card.active .puzzle-starter-check {
+              color: var(--light-text-color);
+        }
+
+
+        /* SCORE (SECONDEN) ONDER DE NAAM, GECENTREERD */
+        .player-seconds {
+            font-size: 1.8em;   
+            font-weight: bold;
+            color: var(--secondary-color);  
+            text-align: center; 
+            width: 100%;    
+            line-height: 1.1;   
+            margin-top: 2px;    
+        }
+        
+        /* ACTIEVE SPELER: SECONDEN OPVALLENDER (FF9914) */
+        .player-card.active .player-seconds {
+              color: var(--correct-color); /* FF9914 */
+        }
+        
+        /* --- EINDE PLAYER CONTAINER --- */
+
+        
+        /* --- START SCHERM STIJLEN --- */
+        #setup-screen {
+            background-color: var(--player-bg);
+            padding: 40px;
+            /* EXTRA AFGERONDE HOEKEN */
+            border-radius: var(--border-radius-card);
+            max-width: 600px;
+            margin: 0 auto;
+            text-align: left;
+            display: none;
+        }
+        #setup-screen.visible {
+              display: block;
+        }
+        .setup-input-row {
+            display: grid;
+            grid-template-columns: 140px 1fr 100px;
+            gap: 10px;
+            align-items: center;
+        }
+        .setup-input-row label, #theme-selector-label {
+            font-weight: bold;
+            color: var(--secondary-color);  
+        }
+        .setup-input-row input, #theme-select {
+            padding: 8px;
+            border: 1px solid var(--input-border-color);
+            /* EXTRA AFGERONDE HOEKEN */
+            border-radius: var(--border-radius-input);
+            background-color: var(--input-bg);
+            color: var(--light-text-color); 
+            font-size: 1em;
+            box-sizing: border-box;
+        }
+        
+        #theme-selector-container { display: none; }
+        .setup-input-row input[type="number"] {
+            text-align: center;
+            width: 80px;
+        }
+        #start-quiz-btn {
+            width: 100%;
+            margin-top: 20px;
+        }
+
+
+        /* TEST KNOP STIJL */
+        #start-round2-test-btn, #start-round3-test-btn {
+            background-color: var(--puzzle-color-1);
+            color: var(--secondary-color);
+            width: 100%;
+            /* AFGERONDE HOEKEN */
+            border-radius: var(--border-radius-button);
+            margin-top: 10px;
+        }
+        
+        #start-round3-test-btn {
+            background-color: var(--wrong-color);
+            color: var(--light-text-color);
+        }
+        #start-round4-test-btn {
+            background-color: var(--wrong-color);
+            color: var(--light-text-color);
+        }
+        
+        #start-finale-test-btn {
+              background-color: var(--secondary-color);
+              color: var(--light-text-color);
+        }
+        /* EINDE NIEUWE TEST KNOP STIJL */
+
+
+        /* --- GAME BOARD STIJLEN --- */
+        #game-board {
+            background-color: var(--player-bg); 
+            padding: 25px;
+            /* EXTRA AFGERONDE HOEKEN */
+            border-radius: var(--border-radius-card);
+        }
+        
+        /* VRAAG TEKST GROOT/KLEIN */
+        #question-text {
+            /* Standaard grootte is te groot voor instructies. We verkleinen hem hier. */
+            font-size: 1.3em; /* IETS KLEINER */
+            font-weight: bold;
+            /* FIX: VRAAGTEKST ALTIJD LICHT OP HET DONKERE SPELBORD */
+            color: var(--light-text-color);  
+            margin: 20px 0;
+            min-height: 50px;
+        }
+        
+        /* INDIVIDUELE ID KLEIN EN SUBTIEL (ZONDER WAAS) */
+        #question-id {  
+            font-size: 0.7em;   
+            color: #666;    
+            font-style: italic; 
+            margin-top: -10px;
+            margin-bottom: 15px;    
+            min-height: 1em;
+            display: block !important;
+        }
+        
+        /* ** RONDE 1 BONUS TEKST GROOT ** */
+        #question-counter strong {
+            font-size: 1.5em; /* Maak de bonus +20s groter */
+            color: var(--wrong-color); /* Maak het extra fel rood */
+        }
+
+
+        #answer-input {
+            font-size: 1.2em;
+            padding: 10px;
+            border: 2px solid var(--secondary-color);
+            background-color: var(--input-bg);
+            color: var(--light-text-color); 
+            /* EXTRA AFGERONDE HOEKEN VOOR INPUTS */
+            border-radius: var(--border-radius-input);
+            transition: border-color 0.1s ease-in-out, box-shadow 0.1s ease-in-out;
+            width: 80%;
+            max-width: 400px;
+        }
+        
+        .controls-r2-input-group {
+              display: flex;
+              justify-content: center;
+              align-items: center;
+              gap: 10px;
+              margin-top: 15px; 
+              margin-bottom: 20px;
+              display: flex; 
+        }
+        .controls-r2-input-group #check-answer {
+              margin: 0;
+              /* AFGERONDE HOEKEN VOOR KNOP */
+              border-radius: var(--border-radius-button);
+        }
+        
+        #answer-input:disabled {
+            cursor: not-allowed;
+            opacity: 0.5;
+        }
+        
+        /* Feedback kleuren - KORTE FLASH DANKZIJ JS TIMEOUT */
+        #answer-input.correct-feedback {
+            border-color: var(--correct-color) !important;
+            box-shadow: 0 0 15px var(--correct-color);  
+        }
+        #answer-input.wrong-feedback {
+            border-color: var(--wrong-color) !important;
+            box-shadow: 0 0 15px var(--wrong-color);    
+        }
+        
+        /* KOPIEERBARE ID'S SUBTIEL */
+        #puzzle-ids {   
+            font-size: 0.8em;   
+            color: #666;    
+            opacity: 0.8;   
+            font-style: italic;
+            display: flex;
+            align-items: center;
+            justify-content: center;    
+            gap: 5px;   
+            margin-bottom: 15px;    
+            white-space: nowrap;    
+            overflow-x: auto;
+            max-width: 100%;
+        }
+        
+        #puzzle-ids .copy-ids-btn {
+            padding: 2px 6px;   
+            font-size: 0.8em;   
+            background-color: var(--input-bg);  
+            color: var(--light-text-color);
+            opacity: 1; 
+            /* AFGERONDE HOEKEN */
+            border-radius: var(--border-radius-button);
+        }
+
+
+        /* --- PUZZEL STIJLEN --- */
+        #puzzle-display-area {  
+            margin-top: 15px;   
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        #puzzle-answers-container {
+            /* HERSTELDE GRID LAYOUT */
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);  
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        .puzzle-answer {
+            background-color: var(--secondary-color);   
+            padding: 20px;
+            font-size: 1.2em;
+            color: var(--light-text-color); 
+            /* EXTRA AFGERONDE HOEKEN */
+            border-radius: 10px;
+            font-weight: bold;
+            min-height: 1.5em;  
+            display: flex;  
+            align-items: center;
+            justify-content: center;
+            
+            border: 2px solid var(--puzzle-color-1);    
+        }
+        
+        /* Gevonden answers stijlen (met 3 verschillende kleuren) */
+        .puzzle-answer.found {  
+            color: var(--text-color) !important;    
+            border: 3px solid var(--correct-color); 
+            box-shadow: 0 0 8px var(--correct-color);
+        }
+
+        /* FIX: Correcte kleuren voor de 3 antwoordvakken */
+        .puzzle-answer.found.color-1 { background-color: var(--puzzle-color-1) !important; color: var(--light-text-color) !important; }
+        .puzzle-answer.found.color-2 { background-color: var(--puzzle-color-2) !important; color: var(--text-color) !important; }
+        .puzzle-answer.found.color-3 { background-color: var(--puzzle-color-3) !important; color: var(--light-text-color) !important; }
+        
+        /* Gevonden clues/keywords (alle elementen) */
+        .puzzle-clue, .opendeur-keyword, .geheugen-item, .finale-keyword {
+            border-radius: var(--border-radius-button); /* Standaard afronding voor rechthoeken */
+        }
+        
+        /* CLUE DISPLAY AREA LAYOUT HERSTELD */
+        #puzzle-clues-container {
+            /* HERSTELDE GRID LAYOUT */
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+        .puzzle-clue {
+            background-color: var(--input-bg);  
+            padding: 10px;
+            font-size: 1.1em;   
+            color: var(--light-text-color);
+            border-radius: var(--border-radius-button);
+            min-height: 40px;   
+            
+            border: 2px solid var(--puzzle-color-1);    
+            
+            /* STANDAARD: ONZICHTBAAR ZONDER CLUES-VISIBLE */
+            opacity: 0.05;  
+            background-color: var(--secondary-color);   
+            color: var(--player-bg);
+            
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            transition: opacity 0.3s, background-color 0.3s, color 0.3s;
+        }
+        
+        /* CLUE WEERGAVE LOGICA (Zichtbaar als timer loopt) */
+        #game-board.clues-visible .puzzle-clue {
+            opacity: 1; 
+            background-color: var(--input-bg);  
+            color: var(--light-text-color);
+        }
+        
+        /* 2. CLUES BLIJVEN ZICHTBAAR ALS HET ANTWOORD AL GEVONDEN IS */
+        .puzzle-clue.found {
+            opacity: 1 !important;
+            /* Kleur wordt gezet door de classes hieronder */
+        }
+        
+        /* FIX: Correcte kleuren voor de 3 cluesets */
+        .puzzle-clue.found.color-1 { background-color: var(--puzzle-color-1) !important; color: var(--light-text-color) !important; }
+        .puzzle-clue.found.color-2 { background-color: var(--puzzle-color-2) !important; color: var(--text-color) !important; }
+        .puzzle-clue.found.color-3 { background-color: var(--puzzle-color-3) !important; color: var(--light-text-color) !important; }
+
+        
+        /* --- RONDE 3 TREFWOORDEN LAYOUT HERSTELD --- */
+        #opendeur-keywords-container {
+            /* HERSTELDE BLOCK LAYOUT */
+            display: block; 
+            text-align: center; 
+            gap: 0; 
+            padding: 15px;
+            background-color: var(--secondary-color);   
+            border-radius: var(--border-radius-card);
+        }
+        
+        .opendeur-keyword {
+              display: inline-block;    
+              width: 80%;   
+              padding: 10px 15px;
+              font-size: 1.3em; 
+              font-weight: bold;
+              background-color: var(--input-bg);
+              color: var(--light-text-color);
+              border-radius: var(--border-radius-button);
+              border: 2px solid var(--puzzle-color-1);
+              margin: 4px auto; 
+              transition: background-color 0.3s;
+        }
+        
+        /* VISUELE HIERARCHIE VOOR RONDE 3 - Subject groter */
+        #opendeur-subject {
+            font-size: 3em; /* GROTER GEMAAKT */
+            font-weight: bold;
+            /* FIX: Kleur van het onderwerp naar lichtgrijs (net als de "Wat weet je over...") */
+            color: var(--light-text-color);  
+            margin-top: 10px;
+            filter: blur(10px); /* AANGEPAST: Waas is feller */ 
+            transition: filter 0.3s;
+        }
+        
+        /* WAAS TOEVOEGEN/VERWIJDEREN VIA .clues-visible */
+        #game-board:not(.clues-visible) #opendeur-subject {
+            filter: blur(10px);
+        }
+        
+        /* FIX: VERWIJDER BLUR WANNEER TIMER LOOPT */
+        #game-board.clues-visible #opendeur-subject {
+            filter: none !important;    
+        }
+
+
+        /* --- RONDE 4 STIJLEN VASTE LAYOUT --- */
+        #geheugen-board {
+            list-style-type: none;
+            padding: 10px; /* Geen padding links/rechts van de li's */
+            margin: 10px auto;
+            max-width: 550px; /* Iets breder voor zinnen */
+            text-align: left;
+            background-color: var(--secondary-color);   
+            border-radius: var(--border-radius-card);
+            
+            /* WAAS OP DE HELE LIJST WANNEER DE TIMER NIET LOOPT */
+            filter: blur(0);
+            transition: filter 0.3s;
+        }
+        /* AANGEPAST: Gehele lijst krijgt een blur bij timer stop */
+        #game-board:not(.clues-visible) #geheugen-board {
+             filter: blur(5px); 
+        }
+
+        .geheugen-item {
+            background-color: var(--input-bg);
+            color: var(--light-text-color);
+            padding: 10px 15px; /* Meer padding */
+            border-radius: var(--border-radius-button);
+            margin-bottom: 8px;
+            font-size: 1em; /* Iets kleiner font */
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-left: 5px solid var(--puzzle-color-1);
+        }
+        .geheugen-item strong {
+            color: var(--light-text-color);
+            margin-right: 10px;
+        }
+        .geheugen-item .geheugen-antwoord {
+              font-weight: bold;
+              color: var(--light-text-color);  
+              transition: color 0.3s;
+        }
+        .geheugen-item.found {
+            border-left: 5px solid var(--correct-color);
+            background-color: var(--input-bg);
+        }
+        .geheugen-item.found .geheugen-antwoord {
+              color: var(--correct-color);
+        }
+        
+        /* --- RONDE 5 FINALE CSS FIX: GRID LAYOUT --- */
+        #finale-display-area {
+            text-align: center;
+            padding: 20px;
+            background-color: var(--wrong-color); /* FEL RODE ACHTERGROND */
+            border-radius: var(--border-radius-card);
+            color: var(--light-text-color);
+        }
+
+        #finale-keywords-container {
+              /* GEWIJZIGD: 5 kolommen naast elkaar (of zoveel als er zijn) */
+              display: grid;
+              grid-template-columns: repeat(5, 1fr);    
+              gap: 15px 10px; /* Meer verticale ruimte */
+              margin-top: 30px;
+              max-width: 800px; /* Ruimte voor 5 vakken */
+              margin-left: auto;
+              margin-right: auto;
+        }
+        
+        .finale-keyword {
+              /* Basisstijl van de vakken */
+              background-color: var(--secondary-color);
+              color: transparent; /* Tekst is onzichtbaar */
+              padding: 15px 10px;
+              font-size: 1.1em;
+              font-weight: bold;
+              border-radius: var(--border-radius-button);
+              border: 2px solid var(--light-text-color);
+              
+              /* WAAS AANGEPAST VAN 5PX NAAR 2PX */
+              filter: blur(2px);    
+              transition: filter 0.3s, background-color 0.3s;
+        }
+        
+        .finale-keyword.found {
+            /* WAAS VERWIJDEREN BIJ GEVONDEN */
+            filter: blur(0) opacity(1);
+            background-color: var(--correct-color);
+            color: var(--text-color); /* Donkere tekst op oranje */
+            border: 2px solid var(--primary-color);
+        }
+
+        /* Verwijder de specifieke centrering voor de 4e en 5e box (niet nodig in 5-koloms layout) */
+        .finale-keyword:nth-child(4) {
+            grid-column: auto;  
+        }
+        .finale-keyword:nth-child(5) {
+              grid-column: auto;
+        }
+        
+        /* Subject/Titel */
+        #finale-subject {
+            font-size: 2.5em;
+            color: var(--light-text-color); /* LICHTE KLEUR OP ROOD */
+            margin-bottom: 15px;
+        }
+        
+        
+        /* --- ACTIE KNOP STYLING FIX --- */
+        button {
+            background-color: var(--secondary-color);
+            color: var(--light-text-color); 
+            border: none;
+            padding: 12px 20px;
+            font-size: 1em;
+            font-weight: bold;
+            /* AFGERONDE HOEKEN */
+            border-radius: var(--border-radius-button);
+            cursor: pointer;
+            margin: 5px;
+            transition: transform 0.2s;
+        }
+        
+        #wrong-answer {
+            background-color: var(--wrong-color);
+            color: var(--light-text-color);
+        }
+        
+        .player-timer-btn {
+              font-size: 1.5em; 
+            background-color: var(--secondary-color);
+            color: var(--light-text-color);
+            border: none;
+            border-radius: 50%; 
+            width: 35px;    
+            height: 35px;   
+            cursor: pointer;
+            padding: 0;
+            flex-shrink: 0; 
+            line-height: 35px;  
+        }
+        .player-timer-btn.running {
+            background-color: var(--wrong-color);
+            color: var(--light-text-color);
+        }
+        
+        #btn-toggle-timer { display: none !important; }
+
+
+        #game-over-overlay {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            /* Groene achtergrond */
+            /* GEWIJZIGD: Flashy Achtergrond (fel groen met schaduw effect) */
+            background-color: var(--primary-color);
+            background-image: radial-gradient(circle, var(--player-bg) 10%, var(--primary-color) 70%);
+            animation: flashBackground 2s infinite alternate;
+            
+            display: none;  
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            z-index: 1000;
+            text-align: center;
+            padding: 20px;
+        }
+        
+        /* NIEUWE FLASH ANIMATIE VOOR DE OVERLAY */
+        @keyframes flashBackground {
+            0% { filter: brightness(1); }
+            100% { filter: brightness(1.2); }
+        }
+        
+        /* Winnaar tekst in de overlay (Extra groot en opvallend) */
+        #game-over-text {
+            /* GEWIJZIGD: Kleur voor hoog contrast (Fel Rood) */
+            color: var(--wrong-color);  
+            font-size: 5.5em;   
+            font-weight: bold;
+            text-shadow: 4px 4px 10px var(--text-color); /* Donkere schaduw */
+            margin: 0;
+            line-height: 1.2;
+        }
+        #game-over-subtitle {
+              /* GEWIJZIGD: Kleur voor hoog contrast (Cyaan Blauw) */
+              color: var(--secondary-color);
+              font-size: 1.8em;
+              font-weight: bold;
+              margin-bottom: 20px;
+        }
+    </style>
+
+</head>
+
+<body>
+
+    <div id="game-over-overlay">
+        <h2 id="game-over-subtitle">De slimste mens ter wereld is voor nu:</h2>
+        <h1 id="game-over-text">WINNAAR!</h1>
+    </div>
+
+
+    <h1>Trivial time</h1>
+
+
+    <div id="setup-screen" class="visible">
+
+        <h2>Spelers Instellen</h2>
+
+        
+
+        <div class="setup-input-row" id="theme-selector-container">
+
+            <label for="theme-select" id="theme-selector-label">Kies Thema:</label>
+
+            <select id="theme-select" style="display: none;"></select>
+
+            <p style="grid-column: 2 / span 2; font-weight: bold; color: var(--secondary-color);">STANDAARD Thema (Vaste Selectie)</p>
+
+        </div>
+
+        
+
+        <div class="setup-input-row">
+
+            <label for="num-players">Aantal spelers (1-6):</label>
+
+            <input type="number" id="num-players" min="1" max="6" value="4" onchange="updatePlayerInputs()">
+
+        </div>
+
+        <div id="player-name-inputs">
+
+            </div>
+
+        <button id="start-quiz-btn" onclick="initializeGame(1)">Start Quiz</button>
+
+        <button id="start-round2-test-btn" onclick="initializeGame(2)">Start Ronde 2 Test</button>
+
+        <button id="start-round3-test-btn" onclick="initializeGame(3)">Start Ronde 3 Test</button>
+
+        <button id="start-round4-test-btn" onclick="initializeGame(4)">Start Ronde 4 Test</button>
+
+    </div>
+
+
+    <div id="player-container" style="display: none;">
+
+    </div>
+
+
+    <div id="game-board" style="display: none;">
+
+        <h2 id="round-title"></h2> <p id="question-counter"></p>
+
+        
+
+        <p id="question-id"></p>
+
+        
+
+        <div id="question-area">
+
+            <p id="puzzle-ids"></p> 
+
+            
+            
+            <p id="question-text" style="display: none;">Vraagtekst</p>
+
+            
+            
+            <div id="puzzle-display-area" style="display: none;">
+
+                <div id="puzzle-answers-container"></div>
+
+                <div id="puzzle-clues-container"></div>
+
+            </div>
+
+            
+            
+            <div id="opendeur-display-area" style="display: none;">
+
+                <h3 id="opendeur-subject"></h3>
+
+                <div id="opendeur-keywords-container"></div>
+
+            </div>
+
+            
+            <div id="geheugen-display-area" style="display: none;">
+
+                <ul id="geheugen-board"></ul>
+
+            </div>
+
+            
+            
+
+            <div id="finale-display-area" style="display: none;">
+
+                <h3 id="finale-subject"></h3>
+
+                <div id="finale-keywords-container"></div>
+
+            </div>
+
+            
+            
+
+            <div class="controls-r2-input-group">
+
+                <input type="text" id="answer-input" placeholder="Typ hier het antwoord in..." style="display: none;">
+
+                <button id="check-answer" style="display: none;">Check Antwoord</button>
+
+            </div>
+
+            </div>
+
+
+        <div class="controls">
+
+            <button id="test-ronde-2">Test Ronde 2</button>  
+
+            <button id="test-ronde-3">Test Ronde 3</button>
+
+            <button id="test-ronde-4">Test Ronde 4</button>
+
+            
+            
+            <button id="start-round-1" style="display: none;">START RONDE 1</button>
+
+            <button id="start-round-2" style="display: none;">Start Ronde 2: Puzzel</button>    
+
+            <button id="start-round-3" style="display: none;">Start Ronde 3: Open Deur</button>
+
+            <button id="start-round-4" style="display: none;">Start Ronde 4: Geheugen</button>
+
+            <button id="start-finale" style="display: none;">START DE FINALE</button>
+
+            
+            
+            <button id="next-puzzle" style="display: none;">Volgende Puzzel</button>
+
+            <button id="next-opendeur" style="display: none;">Volgende Vraag</button>
+
+            
+            
+            <button id="next-geheugen-speler" style="display: none;">Volgende Speler</button> 
+
+            
+            
+            
+
+            <button id="show-puzzle-answers" style="display: none;">Toon Puzzel Antwoorden</button>
+
+            <button id="show-opendeur-answers" style="display: none;">Toon Restant</button>
+
+            <button id="show-geheugen-answers" style="display: none;">Toon Alle Antwoorden</button>  
+
+            
+            
+            <button id="btn-finale-show" style="display: none;">Toon Antwoorden</button> 
+
+            <button id="btn-finale-next" style="display: none;">Volgende Vraag</button> 
+
+
+            <button id="btn-pas" style="display: none;">Pas de beurt</button>
+
+        </div>
+
+
+        <hr style="margin-top: 30px; border-color: #555;">
+
+
+        <div class="player-controls">
+
+            <h3>Spelmeester Controles</h3>
+
+            <p>Klik op de **Spelerkaart** om de klok te starten/stoppen (R2-R5).</p>
+
+            <button id="wrong-answer">Fout Antwoord (-20 sec)</button>
+
+            <button id="add-seconds-10">+10 Seconden</button>
+
+            <button id="add-seconds-20">+20 Seconden</button>
+
+        </div>
+
+    </div>
+
+
+    <script>
+
+        // *** GEINTEGREERDE THEMEMANAGER ***
+
+        window.ThemeManager = (function() {
+
+            const THEMES = {};
+
+            
+            
+            function mapData(rawData, name) {
+
+                const mapRound = (pool) => {
+
+                    const poolCopy = JSON.parse(JSON.stringify(pool));
+
+                    return poolCopy.map((item, index) => ({ 
+
+                        ...item, 
+
+                        id: index + 1
+
+                    }));
+
+                };
+
+
+                const mainData = {
+
+                    themeName: name,
+
+                    // Voor Ronde 1 nemen we max 18 (het aantal vragen in R1)
+
+                    ronde1_pool: mapRound(rawData.ronde1_pool),
+
+                    
+                    
+                    // FIX: Clues zijn nu correct gemapped op de antwoorden
+                    ronde2_answer_pool: mapRound(rawData.ronde2_answer_pool),
+
+                    ronde3_openDeur: mapRound(rawData.ronde3_openDeur).map(q => ({
+                        // FIX: Zorgt dat de keywords gemapped zijn voor de check functies
+                        ...q,
+                        keywords: q.keywords.map(word => ({ word: (typeof word === 'string' ? word : word.word), found: false }))
+                    })),
+
+                    ronde4_geheugen: mapRound(rawData.ronde4_geheugen).map(q => ({
+
+                        q1: q.q1,
+
+                        a: q.a,
+
+                        found: false,
+
+                        id: q.id
+
+                    })),
+
+                    ronde5_finale: mapRound(rawData.ronde5_finale).map(q => ({
+
+                        ...q,
+
+                        keywords: q.keywords.map(word => ({ word: (typeof word === 'string' ? word : word.word), found: false }))
+
+                    }))
+
+                };
+
+                
+                
+                // Voor de console moeten de trefwoorden strings blijven
+
+                const consoleData = {
+
+                    themeName: name,
+
+                    ronde1_pool: mapRound(rawData.ronde1_pool),
+
+                    ronde2_answer_pool: mapRound(rawData.ronde2_answer_pool),
+
+                    ronde3_openDeur: rawData.ronde3_openDeur, // Hou de ruwe data hier voor console
+                    ronde4_geheugen: rawData.ronde4_geheugen,
+                    ronde5_finale: rawData.ronde5_finale
+                };
+
+
+                return { main: mainData, console: consoleData };
+
+            }
+
+
+            return {
+
+                THEMES: THEMES, 
+
+                registerTheme: function(name, rawData) {
+
+                    const mapped = mapData(rawData, name);
+
+                    THEMES[name] = mapped;
+
+                },
+
+                getAvailableThemes: function() {
+
+                    return Object.keys(THEMES);
+
+                },
+
+                getActiveTheme: function(name) {
+
+                    // Gebruik STANDAARD als vast thema
+
+                    const mapped = THEMES['STANDAARD'];
+
+                    return mapped.main;
+
+                }
+
+            };
+
+        })();
+
+
+        // De console.html had deze variabele nodig, we houden ze hier om de script-bestanden te laten werken
+
+        var consoleQuizData = {}; 
+
+        var mainQuizData = {}; 
+
+    </script>
+
+    <script src="quizdata.js"></script>  
+    
+    <script>
+
+        // Declaratie van quizData (wordt later de actieve dataset)
+
+        let quizData = {}; 
+
+
+        // ==========================================================
+
+        // CONFIGURATIE & SPEL LOGICA
+
+        // ==========================================================
+        
+        // *** NIEUWE FUNCTIES VOOR FUZZY MATCHING (80%) ***
+
+        const SIMILARITY_THRESHOLD = 0.80; // Drempel is nu 80%
+
+        // Functie om de Levenshtein-afstand te berekenen
+        function levenshteinDistance(s1, s2) {
+            // FIX: Verwijder eerst alle spaties uit beide strings voor een robuuste vergelijking
+            s1 = s1.toLowerCase().trim().replace(/\s/g, ""); 
+            s2 = s2.toLowerCase().trim().replace(/\s/g, "");
+
+            const costs = new Array();
+            for (let i = 0; i <= s1.length; i++) {
+                let lastValue = i;
+                for (let j = 0; j <= s2.length; j++) {
+                    if (i === 0) costs[j] = j;
+                    else if (j > 0) {
+                        let newValue = costs[j - 1];
+                        if (s1.charAt(i - 1) !== s2.charAt(j - 1))
+                            newValue = Math.min(Math.min(newValue, lastValue), costs[j]) + 1;
+                        costs[j - 1] = lastValue;
+                        lastValue = newValue;
+                    }
+                }
+                if (i > 0) costs[s2.length] = lastValue;
+            }
+            return costs[s2.length];
+        }
+
+        // Functie om de gelijkenispercentage (0 tot 1) te berekenen
+        function stringSimilarity(s1, s2) {
+            // Als de strings leeg zijn, zijn ze 100% gelijk
+            if (s1.length === 0 && s2.length === 0) return 1.0;
+            
+            // Vergelijk met de langste string om een zinvolle ratio te krijgen
+            const longer = s1.length > s2.length ? s1 : s2;
+            const shorter = s1.length > s2.length ? s2 : s1;
+            const longerLength = longer.length;
+
+            if (longerLength === 0) return 1.0;
+
+            // (LongerLength - editDistance) / LongerLength
+            return (longerLength - levenshteinDistance(longer, shorter)) / parseFloat(longerLength);
+        }
+
+        // *** EINDE FUZZY MATCHING FUNCTIES ***
+        
+        
+        // ** GEFIXTE FUNCTIE: Toont de winnaar op de overlay **
+        function showFinaleWinner(winnerPlayer) {
+            stopTimer();
+            isGameOver = true;
+            
+            // WINNAAR IS NU EEN SPELER OBJECT
+            document.getElementById('game-over-text').textContent = winnerPlayer.name;
+            document.getElementById('game-over-overlay').style.display = 'flex';
+        }
+
+
+        // ** NIEUWE FUNCTIE: Toont de +20 Bonus op de spelerkaart **
+        function showBonusFeedback(playerIndex, amount) {
+            const playerCard = document.querySelector(`.player-card[data-player-index="${playerIndex}"]`);
+            if (!playerCard) return;
+
+            const feedbackEl = playerCard.querySelector('.bonus-feedback');
+            if (!feedbackEl) return;
+            
+            feedbackEl.textContent = `+${amount}`;
+            
+            // Start animatie: fade in en beweeg omhoog
+            setTimeout(() => {
+                feedbackEl.style.transition = 'transform 1s ease-out, opacity 1s ease-out';
+                feedbackEl.style.opacity = '1';
+                feedbackEl.style.transform = 'translate(-50%, -150%)'; // Beweeg omhoog
+            }, 50);
+
+            // Reset het element na de animatie
+            setTimeout(() => {
+                feedbackEl.style.opacity = '0';
+                feedbackEl.style.transform = 'translate(-50%, -50%)'; // Reset positie voor de volgende keer
+            }, 1000);
+        }
+
+
+        let players = [];
+
+        let sortedPlayersR4 = [];    
+
+        let activePuzzle = [];  
+
+        let activeOpenDeur = null;
+
+        let isGameOver = false; 
+
+        
+        // ** GEWIJZIGDE: Finale stopt niet na 5 vragen, maar bij 0 seconden **
+        let finalists = []; 
+
+        let activeFinalistIndex = 0;    
+
+        let currentFinaleQuestion = null;
+
+        let foundFinaleKeywords = [];
+
+        let finaleQuestionIndex = 0;
+
+        
+        
+        const MEMORY_QUESTIONS_PER_LIST = 6;    
+
+        const FINALE_QUESTIONS = 1000; // GEWIJZIGD: Vragen limiet is effectief verwijderd
+
+        
+        
+        // *** FIX 1: Ronde 1 maximum aantal vragen is nu 15 ***
+
+        const MAX_R1_QUESTIONS = 15;
+
+
+        // ==========================================================
+
+        // SPEL LOGICA
+
+        // ==========================================================
+
+
+        let activePlayerIndex = 0;  
+
+        let currentRound = 0;
+
+        let currentQuestionIndex = 0;
+
+        let timerInterval = null;   
+
+        let isTimerRunning = false;
+
+        let timerPlayerIndex = null;    
+
+        
+        // NIEUWE variabelen voor Ronde 1 beurtwisseling
+
+        let currentQuestionAttempts = [];   
+
+        let nextPlayerAfterFail = -1;   
+
+        
+        // De daadwerkelijke, geshuffelde/geselecteerde vragen voor Ronde 1
+
+        let activeRound1Questions = []; 
+
+        
+        // De actieve puzzel sets voor Ronde 2
+
+        let activeRound2Puzzles = [];
+
+        // De details van de huidige puzzel (de set van 3) in Ronde 2
+
+        let currentPuzzleSet = null;    
+
+        let currentPuzzleSetIndex = 0;  
+
+
+        // De actieve Open Deur vragen voor Ronde 3
+
+        let activeOpenDeurQuestions = [];   
+
+        
+        // De actieve Geheugen vragen voor Ronde 4
+
+        let activeRound4Questions = [];
+
+        let currentMemoryQuestion = null;
+
+        
+        // De volledige geshuffelde pool voor R4 (wordt slechts één keer gevuld)
+
+        let R4_FULL_SHUFFLED_POOL = [];
+
+        let R4_POOL_INDEX = 0; // Wordt verhoogd per vraag die wordt gebruikt (6 per beurt)
+
+
+        // Finale variabelen
+
+        let activeFinaleQuestions = []; // De 5 geselecteerde vragen
+
+        let currentFinaleQuestionIndex = 0;
+
+
+        // HTML Elementen (Opnieuw gedefinieerd voor leesbaarheid)
+
+        const setupScreen = document.getElementById('setup-screen');
+
+        const playerNameInputs = document.getElementById('player-name-inputs');
+
+        const numPlayersInput = document.getElementById('num-players');
+
+        const themeSelect = document.getElementById('theme-select');
+
+        const playerContainer = document.getElementById('player-container');
+
+        const gameBoard = document.getElementById('game-board');
+
+
+        const roundTitle = document.getElementById('round-title');
+
+        const questionText = document.getElementById('question-text');
+
+        const questionCounter = document.getElementById('question-counter');
+
+        const questionIdElement = document.getElementById('question-id');
+
+        const puzzleIdsElement = document.getElementById('puzzle-ids');
+
+        const inputAnswer = document.getElementById('answer-input');
+
+        
+        
+        const btnCheckAnswer = document.getElementById('check-answer');
+
+        
+        
+        const btnTestRound2 = document.getElementById('test-ronde-2');   
+
+        const btnTestRound3 = document.getElementById('test-ronde-3');   
+
+        const btnTestRound4 = document.getElementById('test-ronde-4');
+
+        const btnStartRound1 = document.getElementById('start-round-1'); 
+
+        const btnStartRound2 = document.getElementById('start-round-2');     
+
+        const btnStartRound3 = document.getElementById('start-round-3');
+
+        const btnStartRound4 = document.getElementById('start-round-4');
+
+        const btnStartFinale = document.getElementById('start-finale');
+
+        const btnPas = document.getElementById('btn-pas');   
+
+
+        // R3 HTML Elementen
+
+        const opendeurDisplayArea = document.getElementById('opendeur-display-area');
+
+        const opendeurSubject = document.getElementById('opendeur-subject');
+
+        
+        
+        // R4 HTML Elementen
+
+        const geheugenDisplayArea = document.getElementById('geheugen-display-area');
+
+        const geheugenBoard = document.getElementById('geheugen-board');
+
+        
+        
+        
+
+        const btnNextPuzzle = document.getElementById('next-puzzle');    
+
+        const btnNextOpenDeur = document.getElementById('next-opendeur');
+
+        const btnNextGeheugenSpeler = document.getElementById('next-geheugen-speler');
+
+        
+        
+        const btnShowPuzzleAnswers = document.getElementById('show-puzzle-answers');
+
+        const btnShowOpenDeurAnswers = document.getElementById('show-opendeur-answers');
+
+        const btnShowGeheugenAnswers = document.getElementById('show-geheugen-answers');   
+
+        const btnFinaleShow = document.getElementById('btn-finale-show');    
+
+        const btnFinaleNext = document.getElementById('btn-finale-next');    
+
+
+        const btnWrongAnswer = document.getElementById('wrong-answer');
+
+        const btnAdd10 = document.getElementById('add-seconds-10');
+
+        const btnAdd20 = document.getElementById('add-seconds-20');
+
+        
+        
+        // Functie om ID's te formatteren en een kopieerknop toe te voegen
+
+        function formatAndDisplayIDs(idArray) {
+
+            const idString = idArray.join(',');
+
+            puzzleIdsElement.innerHTML = `
+
+                ID's voor controle: 
+
+                <span id="ids-to-copy">${idString}</span>
+
+                <button class="copy-ids-btn" onclick="copyToClipboard('${idString}')" title="Kopieer ID's">✨</button>
+
+            `;
+
+            // FIX: Zorg dat deze display 'flex' is voor Rondes 2/3/4/5
+
+            puzzleIdsElement.style.display = 'flex'; 
+
+        }
+
+
+        // Functie om de string naar het klembord te kopiëren
+
+        function copyToClipboard(text) {
+
+            navigator.clipboard.writeText(text).then(() => {
+
+                const button = puzzleIdsElement.querySelector('.copy-ids-btn');
+
+                const originalTitle = button.title;
+
+                button.title = "Gekopieerd!";
+
+                setTimeout(() => {
+
+                    button.title = originalTitle;
+
+                }, 1000);
+
+            }).catch(err => {
+
+                console.error('Kopiëren mislukt:', err);
+
+                alert('Kopiëren mislukt. Probeer handmatig te kopiëren.');
+
+            });
+
+        }
+
+        window.copyToClipboard = copyToClipboard; // Maak de functie globaal bereikbaar
+
+
+        // Functies voor visuele feedback (NU 2 SECONDEN)
+        function showFeedback(isCorrect) {
+            const className = isCorrect ? 'correct-feedback' : 'wrong-feedback';
+            
+            // Verwijder oude klassen, voeg de nieuwe toe
+            inputAnswer.classList.remove('correct-feedback', 'wrong-feedback');
+            inputAnswer.classList.add(className);
+            
+            // De feedback-flash duur: 2s voor goed, 1.5s voor fout.
+            const flashDuration = isCorrect ? 2000 : 1500;
+            
+            // Focus onmiddellijk terugzetten (FIX)
+            inputAnswer.focus(); 
+            
+            // Verwijder de feedback klasse na de duur
+            setTimeout(() => {
+                inputAnswer.classList.remove(className);
+                // Herstel de focus (dubbele check)
+                inputAnswer.focus();
+            }, flashDuration); 
+        }
+
+        
+
+        // *** SPELERS SETUP FUNCTIES ***
+
+
+        // Initialiseert de invoervelden op basis van het aantal spelers
+
+        function updatePlayerInputs() {
+
+            let num = parseInt(numPlayersInput.value);
+
+            num = Math.max(1, Math.min(6, num));
+
+            numPlayersInput.value = num;
+
+
+            playerNameInputs.innerHTML = "";
+
+            for (let i = 0; i < num; i++) {
+
+                const row = document.createElement('div');
+
+                row.className = 'setup-input-row';
+
+                const defaultValue = (i < 4) ? `Speler ${i + 1}` : ''; // Standaard 4 namen
+
+                row.innerHTML = `
+
+                    <label>Speler ${i + 1}:</label>
+
+                    <input type="text" id="player-name-${i}" placeholder="Naam speler ${i + 1}" value="${defaultValue}">
+
+                `;
+
+                playerNameInputs.appendChild(row);
+
+            }
+
+        }
+
+
+        // Vult de themaselector bij het opstarten (NU ALLEEN STANDAARD)
+
+        function populateThemeSelector() {
+
+            // We hoeven de selector niet meer te vullen, omdat we 1 thema hebben
+
+        }
+
+
+        // Verzamel namen en start het spel
+
+        function initializeGame(startRound = 1) {
+
+            // 1. SELECTEER THEMA (ALTIJD STANDAARD)
+
+            quizData = window.ThemeManager.getActiveTheme('STANDAARD');
+
+
+            // 2. VERZAMEL SPELERNAMEN
+
+            players = [];
+
+            const numPlayers = parseInt(numPlayersInput.value);
+
+            let allNamesValid = true;
+
+            // FIX: Gebruik querySelectorAll op de parent om de inputs op te halen.
+
+            const inputElements = playerNameInputs.querySelectorAll('input[type="text"]');
+
+
+            for (let i = 0; i < numPlayers; i++) {
+
+                const inputElement = inputElements[i];
+
+                const name = inputElement ? inputElement.value.trim() : '';
+
+                
+                
+                if (i < 2 && !name) { // Speler 1 en 2 zijn verplicht
+
+                    if (inputElement) inputElement.style.borderColor = 'var(--wrong-color)';
+
+                    allNamesValid = false;
+
+                } else if (name) {
+
+                    if (inputElement) inputElement.style.borderColor = 'var(--input-border-color)';
+
+                    players.push({ 
+
+                        name: name, 
+
+                        seconds: 60, 
+
+                        hasStartedR2: false, 
+
+                        hasStartedR3: false, 
+
+                        hasStartedR4: false,
+
+                        // FIX: De originalIndex is de invoervolgorde (0, 1, 2, ...)
+
+                        originalIndex: i 
+
+                    });
+
+                }
+
+            }
+
+
+            if (allNamesValid && players.length >= 2) {
+
+                // *** FIX: De startvolgorde is nu de invoervolgorde (Speler 1, Speler 2, ...)
+
+
+                activePlayerIndex = players[0].originalIndex; // De eerste speler start
+
+                timerPlayerIndex = activePlayerIndex;
+
+                
+                
+                // FIX: Her-mappen van keywords om zeker te zijn dat de structuur klopt voor Ronde 3/5
+                if (quizData.ronde3_openDeur) {
+                    quizData.ronde3_openDeur = quizData.ronde3_openDeur.map(q => ({
+                        ...q,
+                        keywords: q.keywords.map(word => ({ word: (typeof word === 'string' ? word : word.word), found: false }))
+                    }));
+                }
+                if (quizData.ronde5_finale) {
+                    quizData.ronde5_finale = quizData.ronde5_finale.map(q => ({
+                        ...q,
+                        keywords: q.keywords.map(word => ({ word: (typeof word === 'string' ? word : word.word), found: false }))
+                    }));
+                }
+
+
+                setupScreen.style.display = 'none';
+
+                playerContainer.style.display = 'grid';
+
+                gameBoard.style.display = 'block';
+
+                
+                
+                // Activeer het spel
+
+                renderPlayers();
+
+                
+                
+                // Zorg dat de pas-knop zichtbaar is bij game start
+                btnPas.style.display = 'inline-block';
+                
+
+                if (startRound === 2) {
+
+                    setupRound2();
+
+                } else if (startRound === 3) {
+
+                    setupRound3();
+
+                } else if (startRound === 4) {
+
+                    setupRound4();
+
+                } else {
+
+                    startGameR1();
+
+                }
+
+
+            } else if (!allNamesValid || players.length < 2) {
+
+                alert("Je hebt minimaal 2 spelers nodig en hun namen mogen niet leeg zijn.");
+
+                const invalidInput = Array.from(inputElements).find(input => input.style.borderColor === 'var(--wrong-color)');
+
+                if (invalidInput) invalidInput.focus();
+
+                return false; // Geef aan dat initialisatie is mislukt
+
+            }
+
+            return true;
+
+        }
+
+
+        // Zorg ervoor dat de setup direct wordt getoond bij het laden
+
+        window.addEventListener('load', () => {
+
+            populateThemeSelector();
+
+            updatePlayerInputs();
+
+            setupScreen.classList.add('visible');
+        });
+        
+        // *** NIEUWE FEATURE: Toetsenbord Timer Toggle (Toets 'x') ***
+        document.addEventListener('keydown', (event) => {
+            // Controleer of de focus op een invoer- of tekstgebiedelement is
+            if (event.target.tagName === 'INPUT' || event.target.tagName === 'TEXTAREA') {
+                return;
+            }
+
+            // Controleer op de toets 'x' (case-insensitive)
+            if (event.key.toLowerCase() === 'x') {
+                
+                // Controleer of we in een ronde zitten waar de timer van toepassing is (R2 t/m R5)
+                if (currentRound >= 2 && currentRound <= 5) {
+                    // De sneltoets moet de timer bedienen voor de HUIDIGE actieve speler.
+                    if (activePlayerIndex !== null && players.find(p => p.originalIndex === activePlayerIndex)) {
+                         toggleTimer(activePlayerIndex);
+                         event.preventDefault(); // Voorkom default browser acties
+                    }
+                }
+            }
+        });
+        // *** EINDE NIEUWE FEATURE ***
+
+        
+        // Event listener voor de nieuwe test knop (toegevoegd aan het DOM)
+
+        document.getElementById('start-round3-test-btn')?.addEventListener('click', () => {
+
+             // 1. Simuleer game init met start ronde 3
+
+             const initialized = initializeGame(3);
+
+        });
+
+        document.getElementById('start-round4-test-btn')?.addEventListener('click', () => {
+
+             // 1. Simuleer game init met start ronde 4
+
+             const initialized = initializeGame(4);
+
+        });
+
+
+        // Spelersbord tonen (AANGEPAAST voor Verticale Lay-out)
+
+        function renderPlayers() {
+
+            playerContainer.innerHTML = ""; 
+
+            
+            
+            // In de Finale (Ronde 5) tonen we alleen de finalisten
+
+            const playersToShow = (currentRound === 5) ? finalists.map(f => f.player) : players;
+
+            
+            
+            playersToShow.forEach((player, index) => {
+
+                // Gebruik de actuele index van de player object in de players/finalists array
+
+                const playerObj = (currentRound === 5) ? finalists[index].player : player;
+
+                // De index die in de dataset wordt gezet is de index in de "master" players array
+
+                const originalIndex = playerObj.originalIndex !== undefined ? playerObj.originalIndex : index;
+
+                
+                
+                // Pas de grid aan het aantal spelers aan
+
+                playerContainer.style.gridTemplateColumns = `repeat(auto-fit, minmax(120px, 1fr))`;
+
+
+                const card = document.createElement('div');
+
+                card.className = 'player-card';
+
+                card.dataset.playerIndex = originalIndex;      
+
+                
+                
+                // Stijl de actieve kaart
+                if (originalIndex === activePlayerIndex) {   
+                    card.classList.add('active');   
+                    if (currentRound === 5) {
+                        card.classList.add('final-player');
+                    }
+                } else if (currentRound === 5) {
+                     card.classList.add('opponent-player');
+                }
+
+                
+                
+                // Bepaal de symbolen
+                let timerButtonSymbol = '►';
+                if (isTimerRunning && timerPlayerIndex === originalIndex) {
+                    timerButtonSymbol = '❚❚';
+                }
+                
+                // De knop is ALTIJD ZICHTBAAR
+                let timerButtonClass = 'player-timer-btn';
+                if (isTimerRunning && timerPlayerIndex === originalIndex) {
+                    timerButtonClass += ' running';
+                }
+
+
+                let checkmark = '';
+
+                if (currentRound === 2 && playerObj.hasStartedR2) {
+
+                    checkmark = '<span class="puzzle-starter-check">✓</span>';
+
+                } else if (currentRound === 3 && playerObj.hasStartedR3) {
+
+                    checkmark = '<span class="puzzle-starter-check">✓</span>';
+
+                } else if (currentRound === 4 && playerObj.hasStartedR4) {
+
+                    checkmark = '<span class="puzzle-starter-check">✓</span>';
+
+                }
+
+
+                // AANGEPAASTE HTML STRUCTUUR VOOR VERTICALE LAY-OUT
+                // De naam staat in het midden, score eronder. Knop en checkmark absoluut gepositioneerd.
+                card.innerHTML = `
+
+                    <div class="player-name">${player.name}</div>
+
+                    <div class="player-seconds">${player.seconds}</div>
+                    
+                    <button class="${timerButtonClass}" data-player-index="${originalIndex}" style="position: absolute; top: 5px; right: 5px;">${timerButtonSymbol}</button>
+                    
+                    ${checkmark ? `<span class="puzzle-starter-check" style="position: absolute; top: 8px; left: 8px;">${checkmark}</span>` : ''}
+                    
+                    <div class="bonus-feedback"></div>
+
+                `;
+
+                
+                
+                // Zorg ervoor dat de card de basis is voor absolute positioning
+                card.style.position = 'relative';
+
+                playerContainer.appendChild(card);
+
+            });
+
+        }
+
+        
+        
+
+        // Timer functies (AANGEPAAST: voegt .clues-visible toe aan game-board)
+
+        function startTimer(playerIndex) {
+
+            document.body.classList.remove('timer-stopped');
+
+            // De timer stopt automatisch bij 0, dus we starten alleen als er seconden zijn.
+
+            let player = players.find(p => p.originalIndex === playerIndex);
+
+            if (!player || player.seconds <= 0) {
+
+                 return; 
+
+            }
+
+            if (isTimerRunning) return;     
+
+
+            isTimerRunning = true;
+
+            timerPlayerIndex = playerIndex;     
+
+            
+            
+            // *** FIX: Voeg .clues-visible alleen toe in R2, R3, R4, R5 (niet R1) ***
+
+            if (currentRound >= 2 && currentRound <= 5) { // FIX: R5 is toegevoegd aan de check
+                gameBoard.classList.add('clues-visible');
+                // FIX: Toon inputs wanneer timer start in R2-R5 (voor als ze verborgen waren na een puzzel)
+                inputAnswer.style.display = 'inline-block';
+                btnCheckAnswer.style.display = 'inline-block';
+            }
+
+            
+            
+            // ACTIVEER INPUTS in R1, R2, R3, R4, R5
+
+            if (currentRound >= 1 && currentRound <= 5) {
+
+                inputAnswer.disabled = false;
+
+                // btnCheckAnswer blijft altijd klikbaar
+            }
+
+            
+            
+            timerInterval = setInterval(() => {
+
+                let player = players.find(p => p.originalIndex === timerPlayerIndex);
+
+                if (!player) return; // Kan gebeuren in Finale, maar daar wordt de timer handmatig beheerd
+
+
+                player.seconds--;
+
+                if (player.seconds <= 0) {
+
+                    player.seconds = 0;
+
+                    stopTimer();
+                    
+                    // *** GEFIXTE FINALE WINNER LOGICA: HIER MOET DE WINNAAR WORDEN BEPAALD ***
+                    if (currentRound === 5) {
+                        // De speler die op 0 komt is de verliezer. De ander is de winnaar.
+                        const loserPlayer = players.find(p => p.originalIndex === timerPlayerIndex);
+                        const winnerPlayer = finalists.map(f => f.player).find(p => p.originalIndex !== loserPlayer.originalIndex);
+                        
+                        if (winnerPlayer) {
+                            showFinaleWinner(winnerPlayer);
+                            return; // Stop verdere actie
+                        }   
+                    } 
+                    // *** EINDE GEFIXTE FINALE WINNER LOGICA ***
+                    
+                    // Schakel over naar de volgende speler/beurt na 0 seconden
+                    if (currentRound >= 2 && currentRound <= 4) {
+                         pasDeBeurt();
+                    }
+
+
+                }
+
+                renderPlayers();
+
+            }, 1000);
+
+            
+            
+            renderPlayers();
+
+        }
+
+
+        function stopTimer() {
+
+            document.body.classList.add('timer-stopped');
+
+            clearInterval(timerInterval);
+
+            timerInterval = null;
+
+            isTimerRunning = false;
+
+            timerPlayerIndex = null;
+
+            
+            
+            // Zorg ervoor dat de clues onzichtbaar worden
+            gameBoard.classList.remove('clues-visible');
+
+            
+            
+            // DEACTIVEER INPUT in R2, R3, R4, R5 (R1 blijft actief via startGameR1/checkR1Answer)
+            // De check knop blijft ALTIJD klikbaar voor GM-controle.
+            if (currentRound >= 2 && currentRound <= 5) {
+
+                 inputAnswer.disabled = true;
+
+            }
+
+            
+            
+            renderPlayers();
+
+        }
+
+        
+        
+        // AANGEPAAST: setStarterCheck logica voor Ronde 2
+
+        function setStarterCheck(playerIndex) {
+
+            let player = players.find(p => p.originalIndex === playerIndex);
+
+            if (!player) return;
+
+
+            if (currentRound === 2) {
+
+                // Alleen de EERSTE speler die de timer start krijgt het vinkje
+
+                if (!players.some(p => p.hasStartedR2)) {
+
+                    player.hasStartedR2 = true;
+
+                }
+
+            } else if (currentRound === 3 && !player.hasStartedR3) {
+
+                player.hasStartedR3 = true;
+
+            } else if (currentRound === 4 && !player.hasStartedR4) {
+
+                player.hasStartedR4 = true;
+
+            }
+
+        }
+
+        
+        
+        function toggleTimer(clickedIndex) {
+
+            if (isGameOver) return; 
+            
+            // Controleer of de speler nog seconden over heeft
+            let player = players.find(p => p.originalIndex === clickedIndex);
+            if (!player || player.seconds <= 0) {
+                 if (currentRound >= 2) { 
+                     // Dit bericht mag niet getoond worden als de timer van de tegenstander loopt
+                     if (timerPlayerIndex !== clickedIndex) {
+                        alert("Deze speler heeft geen seconden meer over en kan de klok niet starten.");
+                     }
+                 }
+                 return;
+            }
+
+
+            // Update activePlayerIndex naar de GESELECTEERDE speler
+            activePlayerIndex = clickedIndex;     
+            
+            if (currentRound === 5) {
+                activeFinalistIndex = finalists.findIndex(f => f.player.originalIndex === clickedIndex);
+            }
+            
+            if (!isTimerRunning) {
+                setStarterCheck(clickedIndex);
+                startTimer(clickedIndex);
+            } else if (timerPlayerIndex === clickedIndex) {
+                // Stop de timer (Pas/Stop)
+                stopTimer();
+                
+                // Activeer pas-logica (behalve in R1 waar de knop dit niet doet)
+                if (currentRound >= 2) {
+                     pasDeBeurt();
+                }
+
+
+            } else {
+                // Wisselen van timer: Stop huidige, start nieuwe
+                stopTimer();
+                setStarterCheck(clickedIndex);
+                startTimer(clickedIndex);
+            }
+        }
+
+
+        // Seconden aanpassen (GEFIXTE WINNER LOGICA)
+
+        function updateSeconds(playerIndex, amount) {
+
+            if (isGameOver) return;
+
+            
+            
+            let player = players.find(p => p.originalIndex === playerIndex);
+
+            if (!player) return;
+
+            
+            
+            // Als de speler op 0 seconden komt in de finale door deze actie, dan is de tegenstander de winnaar.
+            const newSeconds = player.seconds + amount;
+            
+            if (currentRound === 5 && newSeconds <= 0) {
+                 // De speler die tijd verliest is de verliezer
+                 const loserPlayer = player;
+                 // Zoek de tegenstander/winnaar in de finalisten
+                 const winnerPlayer = finalists.map(f => f.player).find(p => p.originalIndex !== loserPlayer.originalIndex);
+                 
+                 // Alleen winnen als de tegenstander nog tijd heeft, anders is het gelijkspel (wat hier nog niet wordt behandeld)
+                 if (winnerPlayer && winnerPlayer.seconds > 0) {
+                      player.seconds = 0; // Zet de verliezer op 0
+                      renderPlayers(); // Render één keer snel
+                      showFinaleWinner(winnerPlayer); // GEFIXED: Geef het speler object door
+                      return; // Stop de functie hier
+                 }
+            }
+            
+            player.seconds += amount;
+
+            if (player.seconds < 0) {   
+
+                player.seconds = 0;  
+
+            }
+            
+            // Als het R1 is en de bonus wordt toegekend, toon de feedback
+            // De aanroep in checkRound1Answer() is voldoende, deze is voor de GM controls
+            /*
+            if (currentRound === 1 && amount === 20) {
+                showBonusFeedback(playerIndex, 20);
+            }
+            */
+
+
+            renderPlayers();
+
+        }
+
+
+        // Shuffle functie (onveranderd)
+
+        function shuffleArray(array) {
+
+            for (let i = array.length - 1; i > 0; i--) {
+
+                const j = Math.floor(Math.random() * (i + 1));
+
+                [array[i], array[j]] = [array[j], array[i]];     
+
+            }
+
+            return array;
+
+        }
+
+        
+        
+        function hideAllGameAreas() {
+
+            // FIX: Zorg dat vraag-gerelateerde elementen op 'none' staan
+
+            const controlsToHide = [questionCounter, document.getElementById('puzzle-display-area'), document.getElementById('opendeur-display-area'), document.getElementById('geheugen-display-area'), document.getElementById('finale-display-area'), document.getElementById('test-ronde-2'), document.getElementById('test-ronde-3'), document.getElementById('test-ronde-4'), btnStartRound1, btnStartRound2, document.getElementById('start-round-3'), document.getElementById('start-round-4'), document.getElementById('start-finale'), document.getElementById('next-puzzle'), document.getElementById('next-opendeur'), document.getElementById('next-geheugen-speler'), document.getElementById('show-puzzle-answers'), document.getElementById('show-opendeur-answers'), document.getElementById('show-geheugen-answers'), document.getElementById('btn-finale-show'), document.getElementById('btn-finale-next')];
+
+            controlsToHide.forEach(el => el.style.display = 'none');
+
+
+            // Zorg dat vraagtekst en ID-elementen (die nu via CSS worden bestuurd)
+
+            // apart worden beheerd om hun zichtbaarheid te bepalen.
+
+            questionText.style.display = 'none';
+
+            questionIdElement.style.display = 'none';
+
+            puzzleIdsElement.style.display = 'none'; 
+
+            
+            
+            // Pas knop blijft zichtbaar in alle rondes (nieuwe eis)
+            btnPas.style.display = 'inline-block';
+            
+
+            // HERSTELD: Zorg dat input en check knop verstopt zijn, maar hun display style bekend is.
+            inputAnswer.style.display = 'none';
+            btnCheckAnswer.style.display = 'none';
+
+        }
+
+
+        // Spel starten (Ronde 1) - AANGEPAAST VOOR 15 VRAGEN
+        function startGameR1() {
+
+            currentRound = 1;
+
+            currentQuestionIndex = 0;
+
+            // Naamswijziging (NU LEEG)
+            roundTitle.textContent = ""; 
+
+            
+            
+            // 1. Shuffle de volledige pool
+
+            const fullPool = [...quizData.ronde1_pool];
+
+            shuffleArray(fullPool);
+
+            
+            
+            // 2. Selecteer de eerste 15 vragen (of minder als de pool kleiner is)
+
+            activeRound1Questions = fullPool.slice(0, Math.min(fullPool.length, MAX_R1_QUESTIONS));
+
+            
+            
+            hideAllGameAreas();
+
+            // HERSTELD: Maak vraag, teller en ID zichtbaar
+            questionText.style.display = 'block';
+            questionCounter.style.display = 'block';
+            questionIdElement.style.display = 'block'; 
+
+            
+            
+            // Pas knop in Ronde 1 is al zichtbaar via hideAllGameAreas()
+            
+
+            // HERSTELD: Maak de input en check knop zichtbaar
+            inputAnswer.style.display = 'inline-block';  
+            btnCheckAnswer.style.display = 'inline-block';  
+            btnCheckAnswer.textContent = "Controleer Antwoord";    
+
+            
+            
+            // Zorg dat de input NIET geblokkeerd is in R1 
+
+            inputAnswer.disabled = false;
+
+            // De check knop blijft klikbaar
+
+            
+            
+            stopTimer(); 
+
+            displayQuestion();
+
+
+            // Toon ID's van alle 15 geselecteerde vragen
+
+            const allR1IDs = activeRound1Questions.map(q => q.id);
+
+            formatAndDisplayIDs(allR1IDs);
+
+        }
+
+
+        // Vraag tonen (Ronde 1)
+
+        function displayQuestion() {
+
+            const roundData = activeRound1Questions; // Gebruik de GESELECTEERDE vragen
+
+            const totalQuestions = roundData.length;       
+
+
+            if (currentQuestionIndex < totalQuestions) {
+
+                // RESET de pogingen voor de NIEUWE vraag
+
+                currentQuestionAttempts = [];
+
+                
+                
+                const currentQuestion = roundData[currentQuestionIndex];
+
+                const questionNumber = currentQuestionIndex + 1;
+
+                
+                
+                
+                questionText.textContent = currentQuestion.q;
+                questionIdElement.textContent = `Vraag-ID: #${currentQuestion.id}`;
+
+                
+                
+                // FIX: Toon de vaste beloning
+                questionCounter.innerHTML = `Vraag ${questionNumber} / ${totalQuestions} (Beloning: <strong style="font-size: 1.5em; color: var(--correct-color);">+10 SECONDEN</strong> per juist antwoord)`;
+
+                
+                
+                // Zorg ervoor dat de ronde titel LEEG blijft
+                roundTitle.textContent = "";
+
+                inputAnswer.value = ""; 
+
+                inputAnswer.focus();
+
+                
+                
+                // Zorg ervoor dat de timer knop correct is voor de startende speler
+
+                timerPlayerIndex = activePlayerIndex;
+
+                renderPlayers();
+
+            } else {
+
+                hideAllGameAreas();
+
+                questionText.style.display = 'block';
+
+                questionText.textContent = "Einde van Ronde 1.";
+
+                
+                
+                // FIX: Toon de Start Ronde 2 knop
+                btnStartRound2.style.display = 'inline-block';
+
+                puzzleIdsElement.style.display = 'none';
+
+            }
+
+        }
+
+        
+        
+        // Hoofd-check-functie
+        function checkAnswer() {
+
+            // Een GM check wordt gedetecteerd als de input geblokkeerd is EN de timer niet loopt (R2-R5)
+            const isGMCheck = inputAnswer.disabled && !isTimerRunning && currentRound >= 2;
+
+            if (currentRound !== 1 && currentRound !== 5 && !isTimerRunning && !isGMCheck) {
+                 // Als het geen GM check is en de timer niet loopt (R2-R4), negeer de klik
+                 // De feedback flash wordt nu afgehandeld in de specifieke check functies.
+                 return;
+
+            }
+
+            
+            
+            // Log de GM Check (als de invoer geblokkeerd is)
+            if (isGMCheck) {
+                 // De speler kan niet typen, dus dit is een GM die het antwoord in het veld plakt om te checken.
+                 
+                 const userAnswer = inputAnswer.value.toLowerCase().trim();
+                 let isCorrect = false;
+
+                 if (currentRound === 2) {
+                     // R2: Controleer of de invoer dicht genoeg bij een van de antwoorden ligt
+                     isCorrect = currentPuzzleSet.some(p => stringSimilarity(p.answer, userAnswer) >= SIMILARITY_THRESHOLD);
+
+                 } else if (currentRound === 3) {
+                     // R3: Controleer of de invoer dicht genoeg bij een van de trefwoorden ligt
+                     isCorrect = activeOpenDeur.keywords.some(k => stringSimilarity(k.word, userAnswer) >= SIMILARITY_THRESHOLD);
+
+                 } else if (currentRound === 4) {
+                      // R4: Controleer of de invoer dicht genoeg bij een van de antwoorden ligt
+                      isCorrect = activeRound4Questions.some(q => stringSimilarity(q.a, userAnswer) >= SIMILARITY_THRESHOLD);
+
+                 } else if (currentRound === 5) {
+                      // R5: Controleer of de invoer dicht genoeg bij een van de trefwoorden ligt
+                      isCorrect = currentFinaleQuestion.keywords.some(k => stringSimilarity(k.word, userAnswer) >= SIMILARITY_THRESHOLD);
+                 }
+                 
+                 showFeedback(isCorrect);
+                 
+                 // De GM check is puur visueel, dus we stoppen hier
+                 return;
+            }
+
+
+            if (currentRound === 1) {
+
+                checkRound1Answer();
+
+            } else if (currentRound === 2) {
+
+                checkRound2Answer(); 
+
+            } else if (currentRound === 3) {
+
+                checkRound3Answer(); 
+
+            } else if (currentRound === 4) {
+
+                 checkRound4Answer(); 
+
+            } else if (currentRound === 5) {
+
+                checkFinaleAnswer();   
+
+            }
+
+        }
+
+        
+        
+        // Logica voor Ronde 1 (AANGEPAAST: +10s per juist antwoord)
+
+        function checkRound1Answer() {
+
+            const roundData = activeRound1Questions; // Gebruik de GESELECTEERDE vragen
+
+            if (currentQuestionIndex >= roundData.length) return;     
+
+            
+            
+            const currentQuestion = roundData[currentQuestionIndex];
+
+            const userAnswer = inputAnswer.value.toLowerCase().trim();
+
+            const correctAnswer = currentQuestion.a.toLowerCase().trim();
+
+            
+            
+            // *** FUZZY MATCHING R1 ***
+            const similarityScore = stringSimilarity(correctAnswer, userAnswer);
+            const isCorrect = (similarityScore >= SIMILARITY_THRESHOLD);
+            // *** EINDE FUZZY MATCHING R1 ***
+
+
+            if (isCorrect) {
+
+                // *** JUIST: BLIJF AAN DE BEURT, +10 SECONDEN ***
+
+                stopTimer(); // Stop de klok onmiddellijk bij een juist antwoord
+
+                showFeedback(true); // Groene waas op antwoordbalk
+
+                
+                
+                let secondsToAdd = 10; // GEWIJZIGD: Vaste +10 seconden
+                
+                // R1 BONUS/STANDAARD FEEDBACK TOEVOEGEN
+                if (secondsToAdd >= 0) { // Toon de visuele flits bij ELK goed antwoord
+                     showBonusFeedback(activePlayerIndex, 10); // Toon +10
+                } 
+
+                updateSeconds(activePlayerIndex, secondsToAdd);
+
+                
+                
+                // Ga na de groene flash door naar de volgende vraag (activePlayerIndex blijft hetzelfde)
+
+                setTimeout(() => {
+
+                    currentQuestionIndex++;
+
+                    displayQuestion();
+
+                }, 2000);  
+
+                
+                
+
+            } else {
+
+                // FOUT: BEURT DOORSCHUIF LOGICA
+
+                stopTimer(); // Stop de klok
+
+                showFeedback(false);
+
+                
+                
+                // 1. Registreer de poging
+
+                if (!currentQuestionAttempts.includes(activePlayerIndex)) {
+
+                    currentQuestionAttempts.push(activePlayerIndex);
+
+                }
+
+                
+                
+                // 2. Bepaal of iedereen heeft geprobeerd
+
+                const allPlayersTried = currentQuestionAttempts.length === players.length;
+
+
+                // 3. Wacht 1.5 seconden (rode flash)
+
+                setTimeout(() => {  
+
+                    if (allPlayersTried) {
+
+                        // Toon het juiste antwoord en ga door naar de volgende vraag
+
+                        questionText.textContent = `Niemand wist het. Het antwoord was: ${currentQuestion.a}`;
+
+                        
+                        
+                        // Wacht 1.5 seconden voordat de nieuwe vraag komt
+
+                        setTimeout(() => {
+
+                            currentQuestionIndex++;
+
+                            // De volgende speler in volgorde begint de volgende vraag
+
+                            activePlayerIndex = (activePlayerIndex + 1) % players.length; 
+
+                            displayQuestion();
+
+                        }, 1500);    
+
+                        
+                        
+                    } else {
+
+                        // Beurt wisselen
+
+                        let nextPlayerIndex = activePlayerIndex;
+
+                        // Vind de volgende speler die nog niet heeft geprobeerd
+
+                        do {
+
+                            // FIX: Gebruik de index in de 'players' array voor de beurtwissel
+
+                            let currentPlayerArrayIndex = players.findIndex(p => p.originalIndex === activePlayerIndex);
+
+                            let nextPlayerArrayIndex = (currentPlayerArrayIndex + 1) % players.length;
+
+                            nextPlayerIndex = players[nextPlayerArrayIndex].originalIndex;
+
+                        } while (currentQuestionAttempts.includes(nextPlayerIndex));
+
+                        
+                        
+                        nextPlayerAfterFail = nextPlayerIndex; // Update wie mag proberen
+
+                        
+                        
+                        // HIER DE GEWENSTE MINIMALE TEKST
+                        questionText.textContent = `${players.find(p => p.originalIndex === nextPlayerIndex).name} beurt.`; 
+
+                        
+                        
+                        // Wacht 1.5 seconden om de berichtgeving te laten lezen
+
+                        setTimeout(() => {
+
+                            questionText.textContent = currentQuestion.q; // Herstel de vraag
+
+                            activePlayerIndex = nextPlayerIndex; // Wissel van speler
+
+                            renderPlayers();
+
+                            inputAnswer.value = "";
+
+                            inputAnswer.focus();
+
+                        }, 1500);    
+
+                        
+                        
+                    }
+
+                }, 1500);   
+
+            }
+
+        }
+
+        
+        
+        // *** FUNCTIES VOOR RONDE 2 ***
+
+        
+
+        // FIX: Aantal sets is nu gelijk aan het aantal spelers
+
+        function setupRound2() {
+
+            currentRound = 2;
+
+            currentPuzzleSetIndex = 0;
+
+            
+            
+            // RONDE TITEL NU LEEG
+            roundTitle.textContent = "";
+
+            
+            
+            // 1. Shuffle de volledige puzzel pool
+
+            const fullPool = shuffleArray([...quizData.ronde2_answer_pool]);
+
+            
+            
+            // 2. Maak groepen van 3 (een puzzel)
+
+            activeRound2Puzzles = [];
+
+            
+            
+            // FIX: We hebben 3 puzzel items nodig voor ELKE speler
+
+            const totalSetsNeeded = players.length; 
+
+            const requiredItems = totalSetsNeeded * 3;
+
+
+            if (fullPool.length < requiredItems) {
+
+                alert(`Niet genoeg puzzel items beschikbaar in de data (${fullPool.length}). U heeft ${requiredItems} puzzels nodig. Door naar de volgende ronde.`);
+
+                btnStartRound3.style.display = 'inline-block';
+
+                return;
+
+            }
+
+
+            // Selecteer het benodigde aantal items en groepeer ze per 3
+
+            const selectedPuzzles = fullPool.slice(0, requiredItems);
+
+            
+            
+            for (let i = 0; i < totalSetsNeeded; i++) {
+
+                // Slice de items voor deze set van 3
+                // FIX: Voeg color-class toe aan de clues bij het mappen
+                const setOfThree = selectedPuzzles.slice(i * 3, (i + 1) * 3).map((p, j) => ({
+
+                    ...p,
+
+                    found: false,
+
+                    color: `color-${(j % 3) + 1}`, // Binnen de set 3 kleuren
+                    
+                    clues: p.clues.map(c => ({ text: c, color: `color-${(j % 3) + 1}` }))
+
+                }));
+
+                activeRound2Puzzles.push(setOfThree);
+
+            }
+
+            
+            
+            // FIX: Zorg dat de knoppen van de volgende ronde verborgen zijn
+            btnStartRound3.style.display = 'none';
+
+            
+            
+            hideAllGameAreas();
+
+            // FIX: Toon de display area en vraagtekst
+            document.getElementById('puzzle-display-area').style.display = 'flex';
+            questionText.style.display = 'block';
+
+
+            
+            
+            // Zorg dat de knoppen zichtbaar zijn
+            inputAnswer.style.display = 'inline-block';
+            btnCheckAnswer.style.display = 'inline-block';
+            btnPas.style.display = 'inline-block';
+
+            btnNextPuzzle.style.display = 'none'; // Begint verborgen
+            btnShowPuzzleAnswers.style.display = 'inline-block'; // FIX: Moet zichtbaar zijn bij start
+
+            
+            
+            // Initialisatie van de eerste puzzel
+
+            loadNewPuzzle();
+
+        }
+
+        
+        
+        function loadNewPuzzle() {
+
+            // FIX: De puzzelronde eindigt zodra alle sets (aantal spelers) zijn behandeld
+
+            if (currentPuzzleSetIndex >= players.length) {
+
+                hideAllGameAreas();
+
+                questionText.style.display = 'block';
+
+                questionText.textContent = "Einde van Ronde 2.";
+
+                btnStartRound3.style.display = 'inline-block'; // FIX: Toon de volgende ronde knop
+                
+                return;
+
+            }
+
+            
+            
+            // RONDE TITEL NU LEEG
+            roundTitle.textContent = "";
+
+            // De set van 3 puzzels die nu actief is
+
+            currentPuzzleSet = activeRound2Puzzles[currentPuzzleSetIndex];
+
+            
+            
+            // Bepaal de status van de huidige set
+
+            const solvedCount = currentPuzzleSet.filter(p => p.found).length;
+
+            
+            
+            // Teller: Alleen de beurtnummer & Beloning tonen
+            questionCounter.innerHTML = `Puzzel ${currentPuzzleSetIndex + 1} / ${players.length} (Beloning: <strong style="font-size: 1.5em; color: var(--correct-color);">+40 SECONDEN</strong> per juist antwoord)`;
+
+            
+            
+            // Verzamel ALLE 12 clues
+            let allClues = [];
+            let currentPuzzleIDs = [];
+
+            
+            
+            // FIX: Clues worden nu correct uit het gemapte object opgehaald
+            currentPuzzleSet.forEach(p => {
+
+                currentPuzzleIDs.push(p.id);
+
+                p.clues.forEach(clue => {
+
+                    allClues.push({ 
+
+                        text: clue.text, 
+
+                        answer: p.answer.toLowerCase().trim(),
+
+                        color: clue.color, // Gebruik de kleur van de gemapte clue
+                        
+                        isFound: p.found 
+
+                    });
+
+                });
+
+            });
+
+            
+            
+            // Zorg dat de clues geshuffled worden
+            shuffleArray(allClues);
+
+            
+            
+            // Toon ID's van deze 3 puzzels
+
+            formatAndDisplayIDs(currentPuzzleIDs);
+
+            
+            
+            // FIX: De vraagtekst is minimaal
+            questionText.textContent = `Puzzel ${currentPuzzleSetIndex + 1}`; 
+
+
+            const answersContainer = document.getElementById('puzzle-answers-container');
+
+            const cluesContainer = document.getElementById('puzzle-clues-container');
+
+            answersContainer.innerHTML = '';
+
+            cluesContainer.innerHTML = '';
+
+            
+            
+            // Verberg de knop naar de volgende ronde aan het begin van een nieuwe puzzel
+            btnStartRound3.style.display = 'none';
+
+            
+            
+            // Teken de Antwoord Vakken (altijd 3)
+
+            currentPuzzleSet.forEach(p => {
+
+                 const el = document.createElement('div');
+
+                 // FIX: De kleurklasse wordt nu direct van de set-map gehaald
+                 el.className = `puzzle-answer ${p.found ? 'found ' + p.color : ''}`;
+
+                 el.textContent = p.found ? p.answer : '???';
+
+                 el.dataset.answer = p.answer.toLowerCase().trim();
+
+                 answersContainer.appendChild(el);
+
+            });
+
+            
+            
+            
+            // Teken de Clues (Alle 12, geshuffled)
+
+            for (let i = 0; i < 12; i++) {
+
+                 const clueObj = allClues[i];
+
+                 const el = document.createElement('div');
+
+                 
+                 
+                 // Zoek de set die bij de clue hoort om de 'found' status te checken
+                 const set = currentPuzzleSet.find(s => s.answer.toLowerCase().trim() === clueObj.answer);
+
+                 // Gebruik de kleur van de clue zelf
+                 const isFoundClass = (set && set.found) ? 'found ' + clueObj.color : '';
+
+                 
+                 
+                 el.className = `puzzle-clue ${isFoundClass}`;
+                 el.textContent = clueObj.text;
+                 el.dataset.answer = clueObj.answer; 
+                 cluesContainer.appendChild(el);
+            }
+
+            
+            
+            
+            const isCompleted = solvedCount === 3;
+
+            // FIX: Vraag- en Antwoordknoppen
+            btnNextPuzzle.style.display = isCompleted && currentPuzzleSetIndex + 1 < players.length ? 'inline-block' : 'none';
+            btnShowPuzzleAnswers.style.display = isCompleted ? 'none' : 'inline-block';
+            btnCheckAnswer.style.display = isCompleted ? 'none' : 'inline-block'; // Altijd zichtbaar voor GM
+            inputAnswer.style.display = isCompleted ? 'none' : 'inline-block';
+            btnPas.style.display = 'inline-block'; 
+            
+            if (isCompleted && currentPuzzleSetIndex + 1 >= players.length) {
+                  btnStartRound3.style.display = 'inline-block';
+            }
+
+
+            // Zorg dat inputs geblokkeerd zijn bij het laden
+
+            inputAnswer.disabled = true;
+
+            // De check knop blijft klikbaar
+
+            
+            
+            // Start de timer voor de actieve speler
+
+            // De timer wordt niet automatisch gestart door loadNewPuzzle (speler moet dat zelf doen)
+
+            stopTimer(); 
+
+            renderPlayers(); // Render om de actieve speler te tonen
+
+            inputAnswer.value = '';
+
+            inputAnswer.focus();
+
+        }
+
+        
+        
+        function updatePuzzleDisplay() {
+
+            if (!currentPuzzleSet) return;
+
+            // RONDE TITEL NU LEEG
+            roundTitle.textContent = "";
+
+            const solvedCount = currentPuzzleSet.filter(p => p.found).length;
+
+            // Teller: Alleen de beurtnummer
+            questionCounter.innerHTML = `Puzzel ${currentPuzzleSetIndex + 1} / ${players.length} (Beloning: <strong style="font-size: 1.5em; color: var(--correct-color);">+40 SECONDEN</strong> per juist antwoord)`;
+
+            
+            
+            // Herteken alle elementen om de gevonden status te updaten
+            
+            // FIX: Roep loadNewPuzzle op om de DOM te updaten, de logica voor de knoppen volgt hieronder
+            loadNewPuzzle();
+
+
+            // Als alle 3 antwoorden in de set zijn gevonden, toon de 'Volgende Puzzel' knop
+
+            if (solvedCount === 3) {
+
+                 // FIX: Timer stopt hier definitief
+
+                 stopTimer();  
+
+                 questionText.textContent = "Alle 3 antwoorden zijn gevonden! Druk op 'Volgende Puzzel'.";
+
+                 
+                 
+                 // Knoppen uitschakelen/aanzetten
+                 btnShowPuzzleAnswers.style.display = 'none';
+                 btnCheckAnswer.style.display = 'none';
+                 inputAnswer.style.display = 'none';
+                 btnPas.style.display = 'none';
+
+
+                 if (currentPuzzleSetIndex + 1 >= players.length) {
+                     btnNextPuzzle.style.display = 'none';
+                     questionText.textContent = "Antwoorden getoond. Einde van Ronde 2.";
+                     btnStartRound3.style.display = 'inline-block';
+                 } else {
+                     btnNextPuzzle.style.display = 'inline-block';
+                 }
+            }
+
+        }
+
+        
+        
+        // *** GEFIXTE checkRound2Answer FUNCTIE (TIMER STOPT BIJ LAATSTE ANTWOORD) ***
+
+        function checkRound2Answer() {
+
+             // We weten al dat dit GEEN GM check is omdat de timer loopt
+
+             const userAnswer = inputAnswer.value.toLowerCase().trim();
+
+             
+             
+             // *** FUZZY MATCHING R2 ***
+             const foundItem = currentPuzzleSet.find(p => 
+                 !p.found && stringSimilarity(p.answer, userAnswer) >= SIMILARITY_THRESHOLD
+             );
+             // *** EINDE FUZZY MATCHING R2 ***
+             
+             if (foundItem) {
+
+                 // Gevonden: SPELER BLIJFT AAN DE BEURT, TIMER BLIJFT LOPEN
+
+                 showFeedback(true); // Groene waas op antwoordbalk
+
+                 
+
+                 foundItem.found = true;
+
+                 const secondsGained = 40; 
+
+                 updateSeconds(activePlayerIndex, secondsGained); 
+
+                 
+                 
+                 // Roep updatePuzzleDisplay op om de UI bij te werken en de eindstatus te controleren
+                 updatePuzzleDisplay();
+
+                 
+                 
+                 const solvedCount = currentPuzzleSet.filter(p => p.found).length;
+
+                 if (solvedCount < 3) {
+
+                      // Herstart de timer na de visuele flash 
+                      setTimeout(() => {
+
+                          if (!isTimerRunning) startTimer(activePlayerIndex); 
+
+                      }, 50); 
+
+                 }
+
+                 
+             } else {
+
+                 // FOUT: SPELER BLIJFT AAN DE BEURT, GEEN MALUS, TIMER BLIJFT LOPEN
+
+                 showFeedback(false);
+
+                 
+
+                 // Herstart de timer na de visuele flash
+                 setTimeout(() => {
+
+                     if (!isTimerRunning) startTimer(activePlayerIndex); 
+
+                 }, 50);
+
+
+             }
+
+
+             inputAnswer.value = '';
+
+             inputAnswer.focus(); // FIX: Behoud de focus
+
+        }
+
+        
+        
+        function nextPuzzleSet() {
+
+            currentPuzzleSetIndex++;
+
+            
+            
+            // FIX: Beurt wisselen naar de volgende speler in de invoervolgorde
+
+            let currentPlayerArrayIndex = players.findIndex(p => p.originalIndex === activePlayerIndex);
+
+            let nextPlayerArrayIndex = (currentPlayerArrayIndex + 1) % players.length;
+
+            activePlayerIndex = players[nextPlayerArrayIndex].originalIndex;
+
+            
+            
+            // FIX: De knoppen voor show/check/pas moeten nu weer aan gaan
+            btnShowPuzzleAnswers.style.display = 'inline-block';
+            btnCheckAnswer.style.display = 'inline-block';
+            inputAnswer.style.display = 'inline-block';
+            btnPas.style.display = 'inline-block';
+
+
+            loadNewPuzzle();
+
+        }
+
+
+        function showPuzzleAnswers() {
+
+            if (!currentPuzzleSet) return;
+            
+            // FIX: Stop de timer onmiddellijk (ook al zou dit al gebeurd moeten zijn)
+            stopTimer();
+
+            
+            
+            // Markeer alle 3 antwoorden in de huidige set als gevonden
+            currentPuzzleSet.forEach(p => p.found = true);
+
+            // FIX: Update de display met de gevonden antwoorden
+            loadNewPuzzle();
+
+
+            questionText.textContent = "Antwoorden getoond! Druk op 'Volgende Puzzel'.";
+
+            
+            
+            // FIX: Knoppen logica na handmatige onthulling
+            btnShowPuzzleAnswers.style.display = 'none';
+            btnCheckAnswer.style.display = 'none';
+            inputAnswer.style.display = 'none';
+            btnPas.style.display = 'none';
+
+
+            if (currentPuzzleSetIndex + 1 >= players.length) {
+                 // Laatste puzzelset: ga naar Ronde 3
+                 btnNextPuzzle.style.display = 'none';
+                 questionText.textContent = "Antwoorden getoond. Einde van Ronde 2.";
+                 btnStartRound3.style.display = 'inline-block';
+            } else {
+                  // Niet de laatste set: ga naar de volgende puzzelset
+                  btnNextPuzzle.style.display = 'inline-block';
+            }
+        }
+
+        
+        
+        function pasDeBeurt() {
+
+            // Logica voor Ronde 2, 3 en 4 (UNIFORM): Timer stopt, speler blijft aan de beurt
+
+            if (currentRound >= 2 && currentRound <= 4) {
+
+                // Stop de timer (wat ook gebeurt bij manueel klikken op de knop)
+
+                stopTimer();
+
+                
+                
+                // Reset de invoer en focus
+
+                inputAnswer.value = '';
+
+                inputAnswer.focus();
+
+
+                // Toon een bericht dat de beurt is gepauzeerd (maar niet gewisseld)
+
+                let subject = "";
+
+                if (currentRound === 2) {
+
+                      subject = `Puzzel ${currentPuzzleSetIndex + 1}`;
+
+                } else if (currentRound === 3) {
+
+                      subject = activeOpenDeur.subject;
+
+                } else if (currentRound === 4) {
+
+                      subject = `Geheugenronde`; // Teller staat nu in questionCounter
+
+                }
+
+                
+                
+                // FIX: Duidelijke instructie om verder te gaan (met behoud van minimale context)
+                questionText.textContent = `${players.find(p => p.originalIndex === activePlayerIndex).name} gepauzeerd. Druk op de Spelerkaart om verder te gaan.`;
+
+                
+                
+                // RONDE TITEL NU LEEG
+                roundTitle.textContent = "";
+
+                return; // Afgehandeld voor R2, R3, R4
+
+            }
+
+            
+            
+            // *** NIEUWE FINALE PAS LOGICA ***
+
+            if (currentRound === 5) {
+
+                stopTimer();
+
+                
+                
+                // FIX: Verwijder de blur van het subject bij Pas
+                document.getElementById('finale-subject').classList.remove('blurred-subject');
+
+                // Wissel beurt
+
+                activeFinalistIndex = (activeFinalistIndex + 1) % 2;
+
+                activePlayerIndex = finalists[activeFinalistIndex].player.originalIndex;
+
+                
+                
+                // Teller
+                questionCounter.innerHTML = `FINALE Vraag ${currentFinaleQuestionIndex + 1} / Aan de beurt: ${finalists[activeFinalistIndex].player.name} (Pas)`;
+                // Ronde Titel LEEG
+                roundTitle.textContent = "";
+
+                
+                
+                // Zorg ervoor dat de speler opnieuw op Start moet drukken
+
+                inputAnswer.disabled = true;
+
+                // De check knop blijft klikbaar
+
+                
+                
+                renderPlayers();
+
+                return;
+
+            }
+
+
+            // Ronde 1 pas logica
+            if (currentRound === 1) {   
+
+                stopTimer();
+
+                // Beurt wisselen
+                let nextPlayerArrayIndex = players.findIndex(p => p.originalIndex === activePlayerIndex);
+                nextPlayerArrayIndex = (nextPlayerArrayIndex + 1) % players.length;
+                activePlayerIndex = players[nextPlayerArrayIndex].originalIndex;
+
+                // Vraag gaat niet verder na een 'Pas' in R1. De nieuwe speler probeert dezelfde vraag.
+                
+                questionText.textContent = `Pas! ${players.find(p => p.originalIndex === players[nextPlayerArrayIndex].originalIndex).name} beurt.`;
+
+                setTimeout(() => {
+
+                    const currentQuestion = activeRound1Questions[currentQuestionIndex];
+                    if (currentQuestion) {
+                        questionText.textContent = currentQuestion.q;
+                    }
+                    renderPlayers();
+                    inputAnswer.value = "";
+                    inputAnswer.focus();
+                }, 1500);   
+                
+                return;
+            }
+
+        }
+
+        
+        
+        // FIX: Aantal sets is nu gelijk aan het aantal spelers
+
+        function setupRound3() {
+
+            currentRound = 3;
+
+            currentOpenDeurIndex = 0;   
+
+            
+            
+            // FIX: Verberg de volgende ronde knop
+            btnStartRound4.style.display = 'none';
+            
+            
+            // 1. Shuffle de volledige Open Deur pool
+
+            const fullPool = shuffleArray([...quizData.ronde3_openDeur]);
+
+            shuffleArray(fullPool);
+
+            
+            
+            // RONDE TITEL NU LEEG
+            roundTitle.textContent = "";
+            
+            // 2. FIX: Selecteer een aantal Open Deur vragen gelijk aan het aantal spelers
+
+            const totalQuestionsNeeded = players.length;
+
+            activeOpenDeurQuestions = fullPool.slice(0, totalQuestionsNeeded);
+
+            
+            
+            if (activeOpenDeurQuestions.length < totalQuestionsNeeded) {
+
+                 alert(`Niet genoeg Open Deur vragen beschikbaar in de data (${fullPool.length}). Er zijn ${totalQuestionsNeeded} nodig. Door naar de volgende ronde.`);
+
+                 btnStartRound4.style.display = 'inline-block';
+
+                 return;
+
+            }
+
+
+            hideAllGameAreas();
+
+            // FIX: Toon de display area en vraagtekst
+            opendeurDisplayArea.style.display = 'block';
+            questionText.style.display = 'block';
+
+            
+            
+            
+            // Zorg dat de knoppen zichtbaar zijn
+            inputAnswer.style.display = 'inline-block';
+            btnCheckAnswer.style.display = 'inline-block'; // Altijd zichtbaar voor GM
+            btnCheckAnswer.textContent = "Check Trefwoord";
+
+            btnPas.style.display = 'inline-block';
+
+            
+            
+            
+            // Initialisatie van de eerste Open Deur vraag
+
+            loadOpenDeur(); 
+
+        }
+
+
+        function loadOpenDeur() {
+
+            // FIX: Controleer of het aantal sets (aantal spelers) bereikt is
+
+            if (currentOpenDeurIndex >= players.length) {
+
+                hideAllGameAreas();
+
+                questionText.style.display = 'block';
+
+                questionText.textContent = "Einde van Ronde 3.";
+
+                btnStartRound4.style.display = 'inline-block'; // FIX: Toon de volgende ronde knop
+                
+                return;
+
+            }
+
+            
+            
+            // RONDE TITEL NU LEEG
+            roundTitle.textContent = "";
+
+            activeOpenDeur = activeOpenDeurQuestions[currentOpenDeurIndex];
+
+            
+            
+            // Teller: Alleen de beurtnummer & Beloning tonen
+            questionCounter.innerHTML = `Vraag ${currentOpenDeurIndex + 1} / ${players.length} (Beloning: <strong style="font-size: 1.5em; color: var(--correct-color);">+20 SECONDEN</strong> per trefwoord)`;
+
+            
+            
+            // AANGEPAAST VOOR KLEINERE INTRO VRAAG
+            questionText.textContent = "Wat weet je over...";
+
+            
+            
+            // ONDERWERP GROTER
+
+            opendeurSubject.textContent = activeOpenDeur.subject;
+
+            
+            
+            // FIX: Toon de ID van deze vraag
+            // ID van de vraag voor controle
+            const questionIdElement = document.getElementById('question-id');
+            questionIdElement.style.display = 'block';
+
+            // Toon ID van deze vraag
+            formatAndDisplayIDs([activeOpenDeur.id]);
+
+            
+            
+            updateOpenDeurState();
+
+            
+            
+            // FIX: Zorg dat de blur op het subject blijft staan
+            opendeurSubject.classList.add('blurred-subject');
+
+            
+            
+            btnCheckAnswer.textContent = "Check Trefwoord";
+
+            btnNextOpenDeur.style.display = 'none';
+
+            btnShowOpenDeurAnswers.style.display = 'inline-block';
+
+            
+            
+            
+            // Zorg dat de input velden zichtbaar zijn
+
+            inputAnswer.style.display = 'inline-block';
+
+            btnCheckAnswer.style.display = 'inline-block';
+
+            
+            
+            
+            // Zorg dat inputs geblokkeerd zijn bij het laden
+
+            inputAnswer.disabled = true;
+
+            // De check knop blijft klikbaar
+
+            
+            
+            
+            // Beurt naar de volgende speler (volgens invoervolgorde)
+
+            let currentOpenDeurPlayerIndex = currentOpenDeurIndex % players.length;
+
+            activePlayerIndex = players[currentOpenDeurPlayerIndex].originalIndex;
+
+
+            stopTimer();  
+
+            renderPlayers();
+
+            inputAnswer.value = "";
+
+            inputAnswer.focus();
+
+        }
+
+        
+        
+        // *** AANGEPASTE updateOpenDeurState FUNCTIE (lijst) ***
+
+        function updateOpenDeurState(showAll = false) {
+
+            const container = document.getElementById('opendeur-keywords-container');
+
+            
+            
+            
+            // Controleer of er een actieve vraag is (voor het geval de ronde net eindigde)
+
+            if (!activeOpenDeur) return;
+            
+            // RONDE TITEL NU LEEG
+            roundTitle.textContent = "";
+
+            
+            
+            
+            // Gebruik een HTML-string om de lijst te bouwen
+
+            let keywordHTML = '';
+
+            
+            
+            // Herstel van de logica om de trefwoorden correct te lezen
+            const keywordsToProcess = activeOpenDeur.keywords;
+
+            keywordsToProcess.forEach(keywordObj => {
+                // De keyword objecten zijn nu {word: 'trefwoord', found: true/false}
+                const isFound = keywordObj.found || showAll;
+                const displayClass = isFound ? 'found' : '';
+                const displayText = isFound ? keywordObj.word : '???';
+                
+                keywordHTML += `<div class="opendeur-keyword ${displayClass}">${displayText}</div>`;
+            });
+            
+            container.innerHTML = keywordHTML;
+
+            
+            
+            
+            // Controleer voor volledige voltooiing
+
+            if (activeOpenDeur.keywords.every(k => k.found)) {
+
+                questionText.textContent = `OPGELOST!`;
+
+                btnNextOpenDeur.style.display = 'inline-block';
+
+                btnCheckAnswer.style.display = 'none'; // Verbergen wanneer klaar
+                inputAnswer.style.display = 'none';
+                btnPas.style.display = 'none';
+
+                stopTimer();
+                
+                // FIX: Verwijder de blur van het subject
+                opendeurSubject.classList.remove('blurred-subject');
+
+                
+                
+                // Activeer de volgende vraag
+
+                if (currentOpenDeurIndex + 1 >= players.length) { // FIX: Controle op players.length
+
+                     // Einde Ronde 3
+
+                     questionText.textContent = "Einde van Ronde 3.";
+
+                     btnStartRound4.style.display = 'inline-block'; // FIX: Toon de volgende ronde knop
+
+                     btnNextOpenDeur.style.display = 'none';
+
+                }
+
+            }
+
+        }
+
+        // *** EINDE AANGEPASTE updateOpenDeurState FUNCTIE ***
+
+
+        // *** GEFIXTE checkRound3Answer FUNCTIE (TIMER BLIJFT ONONDERBROKEN LOPEN) ***
+
+        function checkRound3Answer() {
+
+            // We weten dat de timer loopt (of een speler probeert te raden)
+
+            const userAnswer = inputAnswer.value.toLowerCase().trim();
+
+            if (!activeOpenDeur || userAnswer === "") return;
+            
+            
+            
+            // *** FUZZY MATCHING R3 ***
+            // Zoeken in de gemappte array op basis van gelijkenisscore
+            const foundKeyword = activeOpenDeur.keywords.find(k => 
+                 stringSimilarity(k.word, userAnswer) >= SIMILARITY_THRESHOLD && !k.found
+            );
+            // *** EINDE FUZZY MATCHING R3 ***
+            
+
+            if (foundKeyword) {
+
+                // Timer wordt NIET gestopt
+
+                showFeedback(true); // Groene waas op antwoordbalk
+
+                foundKeyword.found = true; // MARKEREN ALS GEVONDEN
+
+                updateSeconds(activePlayerIndex, 20); // 20 sec per juist trefwoord
+
+                updateOpenDeurState(); // UI bijwerken
+
+                
+                
+                // FIX: Verwijder de blur zodra het eerste antwoord is gevonden (de vraag is 'geopend')
+                opendeurSubject.classList.remove('blurred-subject');
+
+                
+                
+                // FIX: Herstart de timer na de visuele flash
+
+                  setTimeout(() => {
+
+                      if (!isTimerRunning) startTimer(activePlayerIndex); 
+
+                  }, 50); 
+
+            } else {
+
+                 // Timer wordt NIET gestopt
+
+                 showFeedback(false);
+
+                 
+
+                 // FIX: Herstart de timer na de visuele flash
+
+                 setTimeout(() => {
+
+                     if (!isTimerRunning) startTimer(activePlayerIndex); 
+
+                 }, 50); 
+
+                 
+
+                 // GEEN malus
+
+            }
+
+            inputAnswer.value = "";
+
+            inputAnswer.focus();
+
+        }
+
+        // *** EINDE GEFIXTE checkRound3Answer FUNCTIE ***
+
+
+        function nextOpenDeur() {
+
+             currentOpenDeurIndex++;
+
+             // FIX: Volgende speler wordt automatisch bepaald in loadOpenDeur
+
+             loadOpenDeur();
+
+        }
+
+
+        function showOpenDeurAnswers() {
+
+            if (!activeOpenDeur) return;    
+
+            stopTimer();    
+            
+            // FIX: Markeer de keywords in het actieve object als gevonden
+            activeOpenDeur.keywords.forEach(k => k.found = true);
+
+            updateOpenDeurState(true); // Toon alles
+
+            
+            
+            // FIX: Verwijder de blur van het subject
+            opendeurSubject.classList.remove('blurred-subject');
+
+            
+            
+            questionText.textContent = `Antwoorden getoond.`;
+
+            
+            
+            // Toon de knop naar de volgende ronde als de ronde klaar is
+            if (currentOpenDeurIndex + 1 >= players.length) {
+                btnNextOpenDeur.style.display = 'none';
+                questionText.textContent = "Antwoorden getoond. Einde van Ronde 3.";
+                btnStartRound4.style.display = 'inline-block';
+            } else {
+                 btnNextOpenDeur.style.display = 'inline-block';
+            }
+
+
+            btnShowOpenDeurAnswers.style.display = 'none';
+            btnCheckAnswer.style.display = 'none';
+            inputAnswer.style.display = 'none';
+            btnPas.style.display = 'none';
+        }
+
+
+        // *** RONDE 4 FUNCTIES (Geheugen / Aanvullen) ***
+
+        
+        
+        let currentMemoryList = 0; // De beurt (0-gebaseerd)
+
+
+        function setupRound4() {   
+
+            currentRound = 4; 
+
+            currentMemoryList = 0;
+
+            
+            
+            // FIX: Verberg de start finale knop
+            btnStartFinale.style.display = 'none';
+            
+            // RONDE TITEL NU LEEG
+            roundTitle.textContent = "";
+
+            
+            
+            // 1. Initialiseer de volledige geshuffelde pool voor Ronde 4 (slechts één keer)
+
+            if (R4_FULL_SHUFFLED_POOL.length === 0) {
+
+                 // Kopieer en shuffle de gehele pool
+
+                 R4_FULL_SHUFFLED_POOL = shuffleArray([...quizData.ronde4_geheugen]);
+
+                 R4_POOL_INDEX = 0;
+
+            } else {
+
+                // Reset de index voor een nieuwe ronde (als deze al eerder is gespeeld)
+
+                R4_POOL_INDEX = 0;
+
+            }
+
+            
+            
+            hideAllGameAreas(); 
+
+            // FIX: Toon de display area en vraagtekst
+            geheugenDisplayArea.style.display = 'block';
+            questionText.style.display = 'block';
+
+
+            
+            
+            // Zorg dat de input voor het antwoord weer zichtbaar is (Standaard in loadMemoryQuestion)
+            inputAnswer.style.display = 'inline-block';
+            btnCheckAnswer.style.display = 'inline-block';
+            btnCheckAnswer.textContent = "Check Aanvulling";
+
+            btnPas.style.display = 'inline-block';
+
+            
+            
+            loadMemoryQuestion();
+
+        }
+
+        
+        
+        // *** GEFIXTE loadMemoryQuestion FUNCTIE (Navigatie/Vraag laden) ***
+
+        function loadMemoryQuestion() {
+
+            // FIX 1: Controleer of het aantal beurten het aantal spelers heeft bereikt
+
+            if (currentMemoryList >= players.length) {
+
+                 hideAllGameAreas();
+
+                 questionText.style.display = 'block';
+
+                 questionText.textContent = "Einde van Ronde 4! Druk op 'START DE FINALE'.";
+
+                 btnStartFinale.style.display = 'inline-block'; // FIX: Toon de volgende ronde knop
+                 
+                 puzzleIdsElement.style.display = 'none';
+
+                 return;
+
+            }
+
+            
+            
+            // FIX 2: Bepaal de speler die nu aan de beurt is
+
+            // FIX: De actieve speler is de speler in de invoervolgorde
+
+            activePlayerIndex = players[currentMemoryList % players.length].originalIndex; 
+
+
+            
+            
+            // RONDE TITEL NU LEEG
+            roundTitle.textContent = "";
+            
+            
+            // FIX 3: Laad de volgende set van 6 vragen (startend vanaf R4_POOL_INDEX)
+
+            const fullPoolLength = R4_FULL_SHUFFLED_POOL.length;
+
+            let currentSet = [];
+
+            
+            
+            // Controleer of de pool groot genoeg is voor de vereiste vragen (6 * aantal spelers)
+
+            const requiredQuestionsForRounds = players.length * MEMORY_QUESTIONS_PER_LIST;
+
+            if (R4_FULL_SHUFFLED_POOL.length < requiredQuestionsForRounds) {
+
+                 // In een echte game moet dit worden aangepakt, maar voor nu alleen een waarschuwing/einde
+
+                 if (currentMemoryList === 0) {
+
+                     alert(`Niet genoeg geheugen vragen beschikbaar (${fullPoolLength}). Er zijn ${requiredQuestionsForRounds} nodig. Ronde 4 gestopt.`);
+
+                     hideAllGameAreas();
+
+                     questionText.style.display = 'block';
+
+                     questionText.textContent = "Ronde 4 gestopt wegens te weinig vragen. Druk op 'START DE FINALE'.";
+
+                     btnStartFinale.style.display = 'inline-block'; // FIX: Toon de volgende ronde knop
+
+                     return;
+
+                 }
+
+            }
+
+
+            for (let i = 0; i < MEMORY_QUESTIONS_PER_LIST; i++) {
+
+                // Gebruik R4_POOL_INDEX en modulo om de vragen sequentieel te selecteren
+
+                const poolIndex = R4_POOL_INDEX % fullPoolLength; 
+
+                const q = R4_FULL_SHUFFLED_POOL[poolIndex];
+
+                
+                
+                // Maak een kopie en reset de 'found' status voor de nieuwe beurt
+
+                currentSet.push({ 
+
+                    q1: q.q1,
+
+                    a: q.a,
+
+                    found: false,
+
+                    id: q.id
+
+                });
+
+                R4_POOL_INDEX++; // Verhoog de index voor de volgende keer
+
+            }
+
+            activeRound4Questions = currentSet; // Update de actieve set
+
+            
+            
+            // Teller: Alleen de beurtnummer & Beloning tonen
+            questionCounter.innerHTML = `Beurt ${currentMemoryList + 1} / ${players.length} (Speler: ${players.find(p => p.originalIndex === activePlayerIndex).name}) (Beloning: <strong style="font-size: 1.5em; color: var(--correct-color);">+20 SECONDEN</strong> per juist antwoord)`;
+
+            questionText.textContent = `Vul aan...`; // TEKST AANGEPAST
+
+            
+            
+            updateMemoryDisplay();
+
+            
+            
+            // Toon de ID's van de huidige set voor de spelmeester
+
+            const currentR4IDs = activeRound4Questions.map(q => q.id);
+
+            formatAndDisplayIDs(currentR4IDs);
+
+
+            btnShowGeheugenAnswers.style.display = 'inline-block';
+
+            btnNextGeheugenSpeler.style.display = 'none';
+            
+            // FIX: Verberg de start finale knop
+            btnStartFinale.style.display = 'none';
+
+            
+            
+            // FIX: Maak de input velden zichtbaar voor de nieuwe beurt
+
+            inputAnswer.style.display = 'inline-block';
+
+            btnCheckAnswer.style.display = 'inline-block';
+
+            
+            
+            
+            // Zorg dat inputs geblokkeerd zijn bij het laden
+
+            inputAnswer.disabled = true;
+
+            // De check knop blijft klikbaar
+
+            stopTimer(); 
+
+            renderPlayers();
+
+            inputAnswer.value = "";
+
+            inputAnswer.focus();
+
+        }
+
+        // *** EINDE GEFIXTE loadMemoryQuestion FUNCTIE ***
+
+        
+        
+        function updateMemoryDisplay(showAll = false) {
+
+            const foundCount = activeRound4Questions.filter(q => q.found).length;
+
+            
+            
+            // RONDE TITEL NU LEEG
+            roundTitle.textContent = "";
+
+            // FIX: Update teller om 6 te tonen
+            questionCounter.innerHTML = `Beurt ${currentMemoryList + 1} / ${players.length} (Speler: ${players.find(p => p.originalIndex === activePlayerIndex).name}) (Beloning: <strong style="font-size: 1.5em; color: var(--correct-color);">+20 SECONDEN</strong> per juist antwoord)`;
+            questionIdElement.textContent = `Gevonden: ${foundCount} / ${MEMORY_QUESTIONS_PER_LIST}`;
+
+            questionText.textContent = `Vul aan...`; // TEKST AANGEPAST
+
+            
+            
+            // Toon de stellingen
+
+            geheugenBoard.innerHTML = activeRound4Questions.map((q, index) => {
+
+                 const isFound = q.found || showAll;
+
+                 const displayClass = isFound ? 'found' : '';
+
+                 const answerText = isFound ? q.a : '...?'; // Vragen tonen '...?' als antwoord nog niet gevonden is
+
+                 return `
+
+                     <li class="geheugen-item ${displayClass}">
+
+                         <span>${index + 1}. <strong>${q.q1}</strong>...</span>
+
+                         <span class="geheugen-antwoord">${answerText}</span>
+
+                     </li>
+
+                 `;
+
+            }).join('');
+
+            
+            
+            
+            // Controle op voltooiing
+
+            if (foundCount === MEMORY_QUESTIONS_PER_LIST) {
+
+                stopTimer();
+
+                showFeedback(true); // Zonder bericht (alleen de flash)
+
+                
+                
+                questionText.textContent = "Opgelost!";
+                
+                // Activeer de knop om de volgende beurt/ronde te starten
+
+                btnNextGeheugenSpeler.style.display = 'inline-block';
+
+                btnShowGeheugenAnswers.style.display = 'none';
+
+                btnCheckAnswer.style.display = 'none'; // Verbergen wanneer klaar
+                inputAnswer.style.display = 'none';
+                btnPas.style.display = 'none';
+                
+                // FIX: Toon de Start Finale knop als dit de laatste beurt was
+                if (currentMemoryList + 1 >= players.length) {
+                    btnNextGeheugenSpeler.style.display = 'none';
+                    questionText.textContent = "Einde van Ronde 4!";
+                    btnStartFinale.style.display = 'inline-block';
+                }
+            }
+
+        }
+
+        
+        
+        // *** GEFIXTE checkRound4Answer FUNCTIE (TIMER BLIJFT ONONDERBROKEN LOPEN, +20s per JUIST) ***
+
+        function checkRound4Answer() {
+
+            // We weten dat de timer loopt (of een speler probeert te raden)
+
+            if (!isTimerRunning) {
+                 // Dit zou alleen moeten gebeuren als de GM de knop klikt
+                 return;
+             }
+
+             
+             
+            const userAnswer = inputAnswer.value.toLowerCase().trim();
+
+            
+            
+            // *** FUZZY MATCHING R4 ***
+            // Zoek het antwoord in de actieve lijst dat nog niet gevonden is
+            const foundItem = activeRound4Questions.find(q => 
+                 !q.found && stringSimilarity(q.a, userAnswer) >= SIMILARITY_THRESHOLD
+            );
+            // *** EINDE FUZZY MATCHING R4 ***
+
+            
+            
+            if (foundItem) {
+
+                // JUIST: SPELER BLIJFT AAN DE BEURT, +20s
+
+                showFeedback(true); // Groene waas op antwoordbalk
+
+                foundItem.found = true;
+
+                updateSeconds(activePlayerIndex, 20); // 20 sec per juist antwoord
+
+                
+                
+                updateMemoryDisplay();
+
+
+            } else {
+
+                // FOUT: SPELER BLIJFT AAN DE BEURT, GEEN MALUS
+
+                showFeedback(false);
+
+            }
+
+            
+            
+            
+             // Timer blijft lopen
+
+             setTimeout(() => {
+
+                 if (!isTimerRunning) startTimer(activePlayerIndex); 
+
+             }, 50); 
+
+
+            inputAnswer.value = '';
+
+            inputAnswer.focus();
+
+        }
+
+        // *** EINDE GEFIXTE checkRound4Answer FUNCTIE ***
+
+
+        // *** GEFIXTE showMemoryAnswers FUNCTIE ***
+
+        function showMemoryAnswers() {
+
+            // Toon alle antwoorden
+
+            activeRound4Questions.forEach(q => q.found = true);
+
+            updateMemoryDisplay(true);
+
+            
+            
+            // RONDE TITEL NU LEEG
+            roundTitle.textContent = "";
+
+            stopTimer();
+
+            questionText.textContent = `Antwoorden getoond! Druk op 'Volgende Speler'.`;
+
+            
+            
+            // FIX: Verhoog de beurt-teller NU pas, voor de knop
+            currentMemoryList++; 
+            
+            // Toon de juiste knop
+            if (currentMemoryList >= players.length) {
+                 btnNextGeheugenSpeler.style.display = 'none';
+                 questionText.textContent = "Antwoorden getoond. Einde van Ronde 4!";
+                 btnStartFinale.style.display = 'inline-block';
+            } else {
+                 btnNextGeheugenSpeler.style.display = 'inline-block';
+            }
+
+
+            btnShowGeheugenAnswers.style.display = 'none';
+            btnCheckAnswer.style.display = 'none';
+            inputAnswer.style.display = 'none';
+            btnPas.style.display = 'none';
+
+        }
+
+        // *** EINDE GEFIXTE showMemoryAnswers FUNCTIE ***
+
+        
+        
+        // *** NIEUWE nextGeheugenSpeler FUNCTIE (Verhoogt de beurt) ***
+
+        function nextGeheugenSpeler() {
+
+            // Verhoog de beurt ALTIJD. LoadMemoryQuestion voert de beurtwissel uit.
+
+            // Dit is nu de ENIGE plek waar currentMemoryList omhoog gaat, wat beurt-overslaan voorkomt.
+
+            loadMemoryQuestion();
+
+        }
+
+        // *** EINDE nextGeheugenSpeler FUNCTIE ***
+
+        
+        
+        // *** EINDE RONDE 4 FUNCTIES ***
+
+
+        // ==========================================================
+
+        // RONDE 5 FINALE FUNCTIES
+
+        // ==========================================================
+
+
+        function setupFinale() {   
+
+            currentRound = 5; 
+
+            currentFinaleQuestionIndex = 0;
+
+            
+            
+            // FIX: Verberg de start finale knop
+            btnStartFinale.style.display = 'none';
+            
+            // RONDE TITEL NU LEEG
+            roundTitle.textContent = "";
+
+            
+            
+            // 1. Bepaal de twee finalisten
+
+            // Sorteer spelers op seconden (hoog naar laag)
+
+            const sortedPlayers = [...players].sort((a, b) => b.seconds - a.seconds);
+
+            
+            
+            // De finalisten zijn de top 2, inclusief hun originele index en de player data
+
+            finalists = sortedPlayers.slice(0, 2).map(p => ({
+
+                 player: p,
+
+                 originalIndex: p.originalIndex 
+
+            }));
+
+            
+            
+            
+            if (finalists.length < 2) {
+
+                alert("Niet genoeg spelers voor de finale.");
+
+                return;
+
+            }
+
+
+            // 2. Shuffle en selecteer ALLE Finale Vragen (limiet is nu hoog)
+
+            const fullPool = shuffleArray([...quizData.ronde5_finale]);
+            // GEWIJZIGD: Gebruik de gehele pool of een groot aantal (al ingesteld op 1000)
+            activeFinaleQuestions = fullPool.slice(0, Math.min(fullPool.length, FINALE_QUESTIONS));
+
+            
+            
+            // FIX: Verberg de next/show knoppen aan het begin van de finale
+            btnFinaleShow.style.display = 'inline-block';
+            btnFinaleNext.style.display = 'none';
+            
+            
+            
+
+            // 3. Start met de speler met de LAAGSTE tijd (want die moet beginnen met raden)
+
+            const lowestScorePlayer = finalists.sort((a, b) => a.player.seconds - b.player.seconds)[0];
+
+            activePlayerIndex = lowestScorePlayer.player.originalIndex;
+
+            activeFinalistIndex = finalists.findIndex(f => f.player.originalIndex === activePlayerIndex);
+
+            
+            
+            
+            hideAllGameAreas(); 
+
+            // FIX: Toon de finale display area en vraagtekst
+            document.getElementById('finale-display-area').style.display = 'block';
+            questionText.style.display = 'block';
+
+            
+            
+            
+            inputAnswer.style.display = 'inline-block';
+
+            btnCheckAnswer.style.display = 'inline-block'; // Altijd zichtbaar voor GM
+            btnCheckAnswer.textContent = "Check Antwoord";
+
+            btnFinaleShow.style.display = 'inline-block';
+
+            btnFinaleNext.style.display = 'none';
+
+            btnPas.style.display = 'inline-block'; // Pas is nodig in de Finale
+
+
+            // Zorg dat de input nog geblokkeerd is
+
+            inputAnswer.disabled = true;
+
+            // De check knop blijft klikbaar
+            
+            
+            loadFinaleQuestion();
+
+        }
+
+
+        function loadFinaleQuestion() {
+
+            if (isGameOver) return;
+            
+            // De finale stopt nu alleen als de seconden van een speler op 0 komen.
+            // Als de vragen op zijn, draaien we gewoon de laatste vraag opnieuw, maar we hebben een hoge limiet.
+
+            if (currentFinaleQuestionIndex >= activeFinaleQuestions.length) {
+                
+                 // Dit gedeelte wordt bereikt wanneer seconden 0 zijn (via updateSeconds)
+                 
+                 // Bepaal de winnaar (speler met de meeste seconden)
+                 const winner = finalists.sort((a, b) => b.player.seconds - a.player.seconds)[0];
+                 
+                 // Alleen tonen als de winnaar meer dan 0 seconden heeft (anders is er een fout opgetreden, of gelijkspel 0-0)
+                 if (winner.player.seconds > 0) {
+                      showFinaleWinner(winner.player); // GEFIXED: Geef het speler object door
+                 } else {
+                      questionText.textContent = `Einde van de Finale! Resultaat: Gelijkspel of Onbepaald.`;
+                 }
+                 
+                 isGameOver = true;
+                 return;
+            }
+
+            
+            
+            // RONDE TITEL NU LEEG
+            roundTitle.textContent = "";
+            
+            // Reset keywords. Dit is nodig omdat de data uit de ThemeManager al gemapte objecten zijn.
+
+            currentFinaleQuestion = JSON.parse(JSON.stringify(activeFinaleQuestions[currentFinaleQuestionIndex]));
+
+            
+            
+            // Teller: Alleen de beurtnummer & Beloning tonen
+            questionCounter.innerHTML = `FINALE Vraag ${currentFinaleQuestionIndex + 1} / Aan de beurt: ${finalists[activeFinalistIndex].player.name} (Malus: <strong style="font-size: 1.5em; color: var(--wrong-color);">-20 SECONDEN</strong> voor tegenstander per juist antwoord)`;
+
+
+            questionText.textContent = `FINALE`;
+
+            
+            
+            // Toon alleen het onderwerp
+            const finaleSubjectElement = document.getElementById('finale-subject');
+            finaleSubjectElement.textContent = currentFinaleQuestion.subject;
+            finaleSubjectElement.style.display = 'block';
+            finaleSubjectElement.classList.add('blurred-subject'); // FIX: Voeg de waas toe!
+
+            
+            
+            
+            // Toon de keywords als verborgen/gevonden vakjes
+
+            const keywordsContainer = document.getElementById('finale-keywords-container');
+
+            // Bouw de 5-kolom grid layout op in de JS (aangepaste CSS zorgt voor dit)
+            let keywordHTML = '';
+            currentFinaleQuestion.keywords.forEach((k, idx) => {
+                 const isFound = k.found;
+                 const displayClass = isFound ? 'found' : '';
+                 const displayText = isFound ? k.word : '???';
+                 
+                 // De CSS regelt nu dat deze naast elkaar staan
+                 keywordHTML += `<div class="finale-keyword ${displayClass}" data-word="${k.word}">${displayText}</div>`;
+            });
+            
+            keywordsContainer.innerHTML = keywordHTML;
+            keywordsContainer.style.display = 'grid'; // Verzeker dat de container een grid is
+
+            
+            
+            // Pas de hint/ID aan
+
+            formatAndDisplayIDs([currentFinaleQuestion.id]);
+
+            
+            
+            
+            // Reset input en focus, stop timer
+
+            inputAnswer.value = '';
+
+            inputAnswer.focus();
+
+            stopTimer(); // Timer moet opnieuw gestart worden door de speler
+
+            renderPlayers();
+            
+            // FIX: Zorg dat het inputveld, de check-knop en de pas-knop zichtbaar zijn bij start van de vraag
+            inputAnswer.style.display = 'inline-block';
+            btnCheckAnswer.style.display = 'inline-block';
+            btnPas.style.display = 'inline-block';
+
+        }
+
+
+        function checkFinaleAnswer() {
+
+             // We weten dat de timer loopt (of een speler probeert te raden)
+
+             const userAnswer = inputAnswer.value.toLowerCase().trim();
+
+             const currentKeywords = currentFinaleQuestion.keywords;
+
+             
+             
+             // *** FUZZY MATCHING R5 ***
+             // Zoek het antwoord in de lijst dat nog niet gevonden is
+             const foundKeyword = currentKeywords.find(k => 
+                  stringSimilarity(k.word, userAnswer) >= SIMILARITY_THRESHOLD && !k.found
+             );
+             // *** EINDE FUZZY MATCHING R5 ***
+             
+
+             if (foundKeyword) {
+
+                 // JUIST: KERNWOORD GEVONDEN
+
+                 showFeedback(true); // Groene waas op antwoordbalk
+
+                 foundKeyword.found = true;
+
+                 
+
+                 // FIX: Malus voor de tegenspeler ALLEEN bij een JUIST antwoord
+
+                 const opponent = players.find(p => p.originalIndex !== activePlayerIndex && finalists.some(f => f.player.originalIndex === p.originalIndex));
+
+                 if (opponent) {
+
+                      updateSeconds(opponent.originalIndex, -20); // Malus voor tegenstander
+                      // GEEN WINNER CHECK HIER! gebeurt in updateSeconds()
+                      
+                      questionCounter.innerHTML = `FINALE Vraag ${currentFinaleQuestionIndex + 1} / Aan de beurt: ${finalists[activeFinalistIndex].player.name} (JUIST! <strong style="color: var(--wrong-color);">-20s</strong> tegenstander)`;
+
+                 }
+
+                 
+                 
+                 // FIX: Verwijder de waas van het subject
+                 document.getElementById('finale-subject').classList.remove('blurred-subject');
+
+                 
+                 
+                 // Markeer het vakje als gevonden (update de DOM)
+
+                 const keywordElements = document.getElementById('finale-keywords-container').querySelectorAll('.finale-keyword');
+
+                 // Zoek het element op basis van de opgeslagen data-word
+
+                 const correctElement = Array.from(keywordElements).find(el => el.dataset.word.toLowerCase() === foundKeyword.word.toLowerCase());
+
+
+                 if (correctElement) {
+
+                      correctElement.classList.add('found');
+
+                      correctElement.textContent = foundKeyword.word; // Toon het woord
+
+                 }
+
+
+                 // Als alle keywords gevonden zijn, is de beurt voorbij
+                 // GEWIJZIGD: De finale gaat verder met de volgende vraag
+                 if (currentKeywords.every(k => k.found)) {
+
+                      questionText.textContent = `OPGELOST! Druk op 'Volgende Vraag'.`;
+
+                      btnFinaleNext.style.display = 'inline-block';
+
+                      btnCheckAnswer.style.display = 'none';
+
+                      inputAnswer.style.display = 'none';
+
+                      btnPas.style.display = 'none';
+
+                      btnFinaleShow.style.display = 'none'; // Verberg 'Toon Antwoorden'
+
+                      
+                      
+                      // FIX: Timer stopt bij 100%
+                      stopTimer(); 
+                 }
+                 
+                 // Herstart de timer na de visuele flash
+                 setTimeout(() => {
+                      // Start alleen opnieuw als de vraag nog niet opgelost is EN het spel nog niet voorbij is
+                      if (!currentKeywords.every(k => k.found) && !isTimerRunning && !isGameOver) {
+                           startTimer(activePlayerIndex); 
+                      }
+                 }, 50); 
+
+
+             } else {
+
+                 // FOUT: GEEN MALUS
+
+                 showFeedback(false);
+
+                 
+
+                 // Update speler info op het scherm (alleen tonen dat je nog aan de beurt bent)
+
+                 questionCounter.innerHTML = `FINALE Vraag ${currentFinaleQuestionIndex + 1} / Aan de beurt: ${finalists[activeFinalistIndex].player.name} (Fout. Blijf proberen.) (Malus: <strong style="color: var(--wrong-color);">-20s</strong> tegenstander)`;
+
+
+                 // Timer stopt NIET.
+
+                 // FIX: Herstart de timer na de visuele flash
+
+                 setTimeout(() => {
+
+                     if (!isTimerRunning) startTimer(activePlayerIndex); 
+
+                 }, 50); 
+
+             }
+
+             inputAnswer.value = '';
+
+             inputAnswer.focus();
+
+        }
+
+        
+        
+        function showFinaleAnswers() { 
+
+            stopTimer();
+
+            currentFinaleQuestion.keywords.forEach(k => k.found = true);
+
+            
+            
+            // FIX: Verwijder de blur van het subject
+            document.getElementById('finale-subject').classList.remove('blurred-subject');
+
+            
+            
+            // Toon alle antwoorden
+
+            const keywordElements = document.getElementById('finale-keywords-container').querySelectorAll('.finale-keyword');
+
+            keywordElements.forEach(el => {
+
+                el.classList.add('found');
+
+                el.textContent = el.dataset.word;
+
+            });
+
+            
+            
+            questionText.textContent = `Antwoorden getoond. Druk op 'Volgende Vraag'.`;
+
+            
+            
+            // FIX: Knoppen logica na handmatige onthulling
+            btnFinaleShow.style.display = 'none';
+            btnFinaleNext.style.display = 'inline-block';
+            btnCheckAnswer.style.display = 'none';
+            inputAnswer.style.display = 'none';
+            btnPas.style.display = 'none';
+
+        }
+
+        
+        
+        function nextFinaleQuestion() {
+
+            // 1. Bepaal de speler met de LAAGSTE score om te starten
+            // (Dit verzekert dat de speler met de laagste tijd de volgende vraag moet starten)
+
+            const p1 = finalists[0].player;
+            const p2 = finalists[1].player;
+
+            let lowestScorePlayer;
+            if (p1.seconds < p2.seconds) {
+                lowestScorePlayer = p1;
+            } else if (p2.seconds < p1.seconds) {
+                lowestScorePlayer = p2;
+            } else {
+                // Bij gelijke score, geef beurt aan de andere speler (voor afwisseling)
+                lowestScorePlayer = finalists.find(f => f.player.originalIndex !== activePlayerIndex)?.player || p1;
+            }
+
+            
+            
+            
+            // 2. Update de indexen
+            currentFinaleQuestionIndex++;
+            
+            // Als we aan het einde van de actieve pool zitten, reset de index naar de eerste vraag.
+            if (currentFinaleQuestionIndex >= activeFinaleQuestions.length) {
+                 currentFinaleQuestionIndex = 0;
+            }
+
+
+            activeFinalistIndex = finalists.findIndex(f => f.player.originalIndex === lowestScorePlayer.originalIndex);
+            activePlayerIndex = lowestScorePlayer.originalIndex;
+
+
+            // 3. Laad de nieuwe vraag
+            loadFinaleQuestion();
+        }
+
+
+        // ==========================================================
+
+        // EVENT LISTENERS
+
+        // ==========================================================
+
+        
+
+        // Speler kaart en timer knop
+        // GEWIJZIGDE LOGICA: In R2+ wordt de HELE kaart de timer-toggle knop
+        playerContainer.addEventListener('click', (event) => {
+
+            const card = event.target.closest('.player-card');
+
+            if (!card) return;   
+
+            
+            
+            const clickedIndex = parseInt(card.dataset.playerIndex);
+
+            
+            
+            if (currentRound === 1) {
+                 // R1: Gebruik de knop in de kaart of wissel actieve speler (als op de kaart geklikt is)
+                 if (event.target.classList.contains('player-timer-btn')) {
+                     toggleTimer(clickedIndex);
+                 } else {
+                     activePlayerIndex = clickedIndex;
+                     renderPlayers(); // Render om de actieve speler te markeren
+                 }
+            } else if (currentRound >= 2 && currentRound <= 5) {
+                 // R2-R5: De HELE kaart is de toggle knop
+                 toggleTimer(clickedIndex);
+            } else {
+                 // Default: Alleen actieve speler wisselen
+                 activePlayerIndex = clickedIndex;
+                 renderPlayers();
+            }
+        });
+
+        // Antwoord
+        btnCheckAnswer.addEventListener('click', checkAnswer);
+
+        
+        
+        // FIX VOOR ENTER KNOP
+        inputAnswer.addEventListener('keyup', function(event) {
+            if (event.key === 'Enter') {
+                // Prevent de default submit actie
+                event.preventDefault();  
+                checkAnswer();
+                
+                // Belangrijk: Focus terugzetten na de check
+                setTimeout(() => {
+                    inputAnswer.focus();
+                }, 50);
+            }
+        });
+
+
+        // *** NIEUWE FEATURE: Toetsenbord Timer Toggle (Toets 'x') ***
+        document.addEventListener('keydown', (event) => {
+            // Controleer of de focus op een invoer- of tekstgebiedelement is
+            if (event.target.tagName === 'INPUT' || event.target.tagName === 'TEXTAREA') {
+                return;
+            }
+
+            // Controleer op de toets 'x' (case-insensitive)
+            if (event.key.toLowerCase() === 'x') {
+                
+                // Controleer of we in een ronde zitten waar de timer van toepassing is (R2 t/m R5)
+                if (currentRound >= 2 && currentRound <= 5) {
+                    // De sneltoets moet de timer bedienen voor de HUIDIGE actieve speler.
+                    if (activePlayerIndex !== null && players.find(p => p.originalIndex === activePlayerIndex)) {
+                         toggleTimer(activePlayerIndex);
+                         event.preventDefault(); // Voorkom default browser acties
+                    }
+                }
+            }
+        });
+        // *** EINDE NIEUWE FEATURE ***
+
+
+        // FIX: Event Listeners voor navigatie tussen rondes
+        document.getElementById('start-round-2').addEventListener('click', setupRound2);
+        document.getElementById('start-round-3').addEventListener('click', setupRound3);
+        document.getElementById('start-round-4').addEventListener('click', setupRound4);
+        document.getElementById('start-finale').addEventListener('click', setupFinale);
+        
+        // Knoppen in .controls (de test knoppen waren al gekoppeld)
+        document.getElementById('test-ronde-2').addEventListener('click', setupRound2);   
+        document.getElementById('test-ronde-3').addEventListener('click', setupRound3);
+        document.getElementById('test-ronde-4').addEventListener('click', setupRound4);   
+        document.getElementById('start-round-1').addEventListener('click', startGameR1); 
+        
+        // FIX: Event Listeners voor navigatie binnen de ronde
+        document.getElementById('next-puzzle').addEventListener('click', nextPuzzleSet); 
+        document.getElementById('show-puzzle-answers').addEventListener('click', showPuzzleAnswers);
+        
+        document.getElementById('next-opendeur').addEventListener('click', nextOpenDeur);
+        document.getElementById('show-opendeur-answers').addEventListener('click', showOpenDeurAnswers);
+        
+        document.getElementById('next-geheugen-speler').addEventListener('click', nextGeheugenSpeler);
+        document.getElementById('show-geheugen-answers').addEventListener('click', showMemoryAnswers);  
+
+        document.getElementById('btn-finale-next').addEventListener('click', nextFinaleQuestion);
+        document.getElementById('btn-finale-show').addEventListener('click', showFinaleAnswers);
+        
+        // FIX: Event Listener voor de Pas knop
+        btnPas.addEventListener('click', pasDeBeurt);
+
+        // GM knoppen
+        btnWrongAnswer.addEventListener('click', () => updateSeconds(activePlayerIndex, -20));
+        btnAdd10.addEventListener('click', () => updateSeconds(activePlayerIndex, 10));
+        btnAdd20.addEventListener('click', () => updateSeconds(activePlayerIndex, 20));
+
+
+    </script>
+
+</body>
+
+</html>
