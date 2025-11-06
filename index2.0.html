@@ -15,7 +15,7 @@
 
         :root {
 
-            /* NIEUWE KLEUREN (AANGEPAAST) */
+            /* NIEUWE KLEUREN (AANGEPAST) */
 
             --primary-color: #73937E;   /* Achtergrond (Fel Groen) */
 
@@ -73,7 +73,7 @@
         }
 
 
-        /* --- PLAYER CONTAINER EN KAARTEN (AANGEPAAST VOOR MEEER RUIMTE) --- */
+        /* --- PLAYER CONTAINER EN KAARTEN (AANGEPAST VOOR MEEER RUIMTE) --- */
         #player-container {
             display: grid;
             /* Zorg voor smallere kaarten */
@@ -208,7 +208,7 @@
               color: var(--correct-color); /* FF9914 */
         }
         
-        /* --- EINDE PLAYER CONTAINER --- */
+        /* --- Einde Player Container --- */
 
         
         /* --- START SCHERM STIJLEN --- */
@@ -722,6 +722,168 @@
               font-size: 1.8em;
               font-weight: bold;
               margin-bottom: 20px;
+        }
+
+        /* ========================================================== */
+        /* MEDIA QUERIES VOOR MOBIELE APPARATEN (max-width: 600px)    */
+        /* ========================================================== */
+
+        @media (max-width: 600px) {
+            
+            /* Verminder algemene padding */
+            body {
+                padding: 10px;
+            }
+
+            /* Verklein de tekst op het spelbord */
+            #question-text {
+                font-size: 1.1em;
+                margin: 15px 0;
+            }
+            
+            /* Pas de grootte van de knoppen aan */
+            button {
+                padding: 10px 15px;
+                font-size: 0.9em;
+            }
+
+            /* Maak de GM-controles flexibel op mobiel */
+            .player-controls {
+                display: flex;
+                flex-wrap: wrap; /* Zorgt voor het omwikkelen van knoppen */
+                justify-content: center;
+                gap: 5px;
+                margin-top: 10px;
+            }
+            .player-controls button {
+                /* Zorg dat de knoppen iets breder zijn op kleine schermen */
+                width: 48%; 
+                box-sizing: border-box;
+            }
+
+            /* Spelerskaarten */
+            #player-container {
+                grid-template-columns: repeat(2, 1fr); 
+                gap: 8px;
+                margin-bottom: 10px;
+            }
+            
+            /* Verklein de elementen op de kaart */
+            .player-card {
+                padding: 3px 5px;
+                min-height: 60px;
+            }
+            .player-name {
+                font-size: 0.8em;
+            }
+            .player-seconds {
+                font-size: 1.5em; /* Iets kleiner */
+            }
+            .player-timer-btn {
+                width: 30px;
+                height: 30px;
+                line-height: 30px;
+                font-size: 1.3em;
+                top: 3px !important; /* Pas absolute positie aan */
+                right: 3px !important; /* Pas absolute positie aan */
+            }
+            .player-card .bonus-feedback {
+                font-size: 2em; /* Iets kleiner dan desktop */
+            }
+
+            /* Input en Check knop */
+            .controls-r2-input-group {
+                flex-direction: column; /* Stapel input en knop op */
+            }
+            #answer-input {
+                width: 100%; /* Maak input volledig breed */
+                max-width: none;
+                margin-bottom: 10px;
+            }
+            #check-answer {
+                width: 100%;
+                margin-left: 0 !important;
+            }
+            
+            /* Ronde 2: Puzzel antwoorden en clues */
+            #puzzle-answers-container,
+            #puzzle-clues-container {
+                /* Stapel de antwoorden/clues op of verminder kolommen */
+                grid-template-columns: repeat(2, 1fr); /* 2 kolommen i.p.v. 3/4 */
+                gap: 6px;
+            }
+            .puzzle-answer, .puzzle-clue {
+                font-size: 0.9em;
+                padding: 10px;
+            }
+            
+            /* Ronde 3: Open Deur */
+            #opendeur-subject {
+                font-size: 2em; /* Maak het onderwerp kleiner */
+            }
+            .opendeur-keyword {
+                font-size: 1em;
+                width: 95%; /* Iets meer marge */
+            }
+
+            /* Ronde 4: Geheugen */
+            .geheugen-item {
+                padding: 8px 10px;
+                font-size: 0.9em;
+            }
+
+            /* Ronde 5: Finale */
+            #finale-subject {
+                font-size: 1.8em;
+            }
+            #finale-keywords-container {
+                grid-template-columns: repeat(3, 1fr); /* Stapel naar 3 kolommen */
+                gap: 8px 5px;
+            }
+            .finale-keyword {
+                padding: 10px 5px;
+                font-size: 0.9em;
+            }
+            
+            /* Footer controls (Start/Next knoppen) */
+            .controls {
+                display: flex;
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 5px;
+            }
+            .controls button {
+                width: 48%; /* 2 knoppen per rij */
+                box-sizing: border-box;
+            }
+
+            /* Setup Scherm */
+            #setup-screen {
+                padding: 20px;
+            }
+            .setup-input-row {
+                /* Stapel de labels en inputs op elkaar */
+                grid-template-columns: 1fr;
+                gap: 5px;
+            }
+            .setup-input-row label, #theme-selector-label {
+                text-align: left;
+            }
+            .setup-input-row input[type="number"] {
+                width: 100%; /* Maak de nummer-input breder */
+                text-align: left;
+            }
+            .setup-input-row input {
+                margin-bottom: 10px;
+            }
+
+             /* Game Over Overlay */
+            #game-over-text {
+                font-size: 3.5em;
+            }
+            #game-over-subtitle {
+                font-size: 1.5em;
+            }
         }
     </style>
 
@@ -2102,7 +2264,7 @@
         }
 
 
-        // Spel starten (Ronde 1) - AANGEPAAST VOOR 15 VRAGEN
+        // Spel starten (Ronde 1) - AANGEPAST VOOR 15 VRAGEN
         function startGameR1() {
 
             currentRound = 1;
