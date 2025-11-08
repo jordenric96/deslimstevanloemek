@@ -647,6 +647,163 @@
             font-weight: bold;
             margin-bottom: 20px;
         }
+
+
+        /* ========================================================== */
+        /* 📱 RESPONSIVE STYLES (Mobile First Overrides) */
+        /* ========================================================== */
+
+        /* Algemene lay-out voor smalle schermen */
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+
+            #setup-screen {
+                padding: 20px;
+            }
+
+            /* Pas de indeling van de spelersinvoer aan */
+            .setup-input-row {
+                grid-template-columns: 1fr 1fr; /* 2 kolommen in plaats van 3 */
+                gap: 5px;
+            }
+            .setup-input-row label {
+                grid-column: 1 / span 2; /* Label neemt volledige breedte in */
+                text-align: left;
+                margin-top: 10px;
+            }
+            .setup-input-row input:not([type="number"]), 
+            .setup-input-row select {
+                grid-column: 1 / span 2; /* Input neemt volledige breedte in */
+            }
+            .setup-input-row input[type="number"] {
+                width: 100%;
+                text-align: left;
+                grid-column: 1 / span 2;
+                margin-top: 5px;
+            }
+            #num-players {
+                width: 100%;
+                grid-column: 2;
+                text-align: center;
+            }
+            .setup-input-row label[for="num-players"] {
+                grid-column: 1;
+                text-align: left;
+            }
+
+            /* Buttons op de setup-pagina (volledige breedte) */
+            #start-quiz-btn, 
+            #start-round2-test-btn, 
+            #start-round3-test-btn,
+            #start-round4-test-btn {
+                margin-top: 15px;
+            }
+
+            /* Spelerkaarten: Blijven flexibel, maar zorgen voor betere lezing */
+            .player-card {
+                min-height: 70px;
+                padding: 10px 5px;
+            }
+            .player-name {
+                font-size: 0.8em;
+                line-height: 1;
+            }
+            .player-seconds {
+                font-size: 1.5em;
+            }
+            .player-timer-btn {
+                width: 30px;
+                height: 30px;
+                line-height: 30px;
+                font-size: 1.2em;
+            }
+            .puzzle-starter-check {
+                font-size: 1em;
+            }
+
+
+            /* Game Board */
+            #game-board {
+                padding: 15px;
+            }
+            #question-text {
+                font-size: 1.1em;
+                min-height: 40px;
+            }
+            #question-counter {
+                font-size: 0.9em;
+            }
+            #answer-input {
+                font-size: 1em;
+                width: 90%;
+            }
+            .controls-r2-input-group {
+                flex-direction: column;
+                gap: 10px;
+            }
+            .controls-r2-input-group button {
+                width: 100%;
+            }
+            
+            /* Puzzel Ronde */
+            #puzzle-answers-container {
+                grid-template-columns: 1fr; /* 1 antwoord per rij */
+            }
+            .puzzle-answer {
+                padding: 15px;
+                font-size: 1em;
+            }
+            #puzzle-clues-container {
+                grid-template-columns: repeat(2, 1fr); /* 2 kolommen in plaats van 4 */
+                gap: 5px;
+            }
+
+            /* Open Deur Ronde */
+            #opendeur-subject {
+                font-size: 2em;
+            }
+            .opendeur-keyword {
+                width: 95%;
+                font-size: 1.1em;
+                padding: 8px 10px;
+            }
+            
+            /* Geheugen Ronde */
+            .geheugen-item {
+                font-size: 0.9em;
+                padding: 8px 10px;
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .geheugen-item span {
+                text-align: left;
+            }
+            .geheugen-item .geheugen-antwoord {
+                margin-top: 5px;
+            }
+
+
+            /* Finale Ronde */
+            #finale-keywords-container {
+                grid-template-columns: repeat(3, 1fr); /* 3 kolommen in plaats van 5 */
+                gap: 8px;
+            }
+            .finale-keyword {
+                font-size: 0.9em;
+                padding: 10px 5px;
+            }
+            #finale-subject {
+                font-size: 1.8em;
+            }
+            
+            /* Controles onderaan */
+            .player-controls button {
+                width: 100%;
+                margin: 5px 0;
+            }
+        }
     </style>
 
 </head>
@@ -747,12 +904,14 @@
             </div>
 
             
+            
             <div id="geheugen-display-area" style="display: none;">
 
                 <ul id="geheugen-board"></ul>
 
             </div>
 
+            
             
             
             
@@ -791,7 +950,7 @@
             
             <button id="start-round-1" style="display: none;">START RONDE 1</button>
 
-            <button id="start-round-2" style="display: none;">Start Ronde 2: Puzzel</button>     
+            <button id="start-round-2" style="display: none;">Start Ronde 2: Puzzel</button>    
 
             <button id="start-round-3" style="display: none;">Start Ronde 3: Open Deur</button>
 
@@ -809,6 +968,7 @@
             
             <button id="next-geheugen-speler" style="display: none;">Volgende Speler</button> 
 
+            
             
             
             
@@ -1066,9 +1226,9 @@
 
         let players = [];
 
-        let sortedPlayersR4 = [];     
+        let sortedPlayersR4 = [];      
 
-        let activePuzzle = [];   
+        let activePuzzle = [];     
 
         let activeOpenDeur = null;
 
@@ -1077,7 +1237,7 @@
         
         let finalists = []; 
 
-        let activeFinalistIndex = 0;     
+        let activeFinalistIndex = 0;      
 
         let currentFinaleQuestion = null;
 
@@ -1087,7 +1247,7 @@
 
         
         
-        const MEMORY_QUESTIONS_PER_LIST = 6;     
+        const MEMORY_QUESTIONS_PER_LIST = 6;      
 
         const FINALE_QUESTIONS = 1000;
 
@@ -1101,22 +1261,22 @@
         // ==========================================================
 
 
-        let activePlayerIndex = 0;   
+        let activePlayerIndex = 0;     
 
         let currentRound = 0;
 
         let currentQuestionIndex = 0;
 
-        let timerInterval = null;    
+        let timerInterval = null;      
 
         let isTimerRunning = false;
 
-        let timerPlayerIndex = null;     
+        let timerPlayerIndex = null;      
 
         
-        let currentQuestionAttempts = [];    
+        let currentQuestionAttempts = [];      
 
-        let nextPlayerAfterFail = -1;    
+        let nextPlayerAfterFail = -1;      
 
         
         let activeRound1Questions = []; 
@@ -1124,12 +1284,12 @@
         
         let activeRound2Puzzles = [];
 
-        let currentPuzzleSet = null;     
+        let currentPuzzleSet = null;      
 
-        let currentPuzzleSetIndex = 0;   
+        let currentPuzzleSetIndex = 0;      
 
 
-        let activeOpenDeurQuestions = [];    
+        let activeOpenDeurQuestions = [];      
 
         
         let activeRound4Questions = [];
@@ -1178,15 +1338,15 @@
 
         
         
-        const btnTestRound2 = document.getElementById('test-ronde-2');    
+        const btnTestRound2 = document.getElementById('test-ronde-2');      
 
-        const btnTestRound3 = document.getElementById('test-ronde-3');    
+        const btnTestRound3 = document.getElementById('test-ronde-3');      
 
         const btnTestRound4 = document.getElementById('test-ronde-4');
 
         const btnStartRound1 = document.getElementById('start-round-1'); 
 
-        const btnStartRound2 = document.getElementById('start-round-2');      
+        const btnStartRound2 = document.getElementById('start-round-2');        
 
         const btnStartRound3 = document.getElementById('start-round-3');
 
@@ -1194,7 +1354,7 @@
 
         const btnStartFinale = document.getElementById('start-finale');
 
-        const btnPas = document.getElementById('btn-pas');    
+        const btnPas = document.getElementById('btn-pas');      
 
 
         const opendeurDisplayArea = document.getElementById('opendeur-display-area');
@@ -1210,8 +1370,9 @@
         
         
         
+        
 
-        const btnNextPuzzle = document.getElementById('next-puzzle');     
+        const btnNextPuzzle = document.getElementById('next-puzzle');      
 
         const btnNextOpenDeur = document.getElementById('next-opendeur');
 
@@ -1223,11 +1384,11 @@
 
         const btnShowOpenDeurAnswers = document.getElementById('show-opendeur-answers');
 
-        const btnShowGeheugenAnswers = document.getElementById('show-geheugen-answers');     
+        const btnShowGeheugenAnswers = document.getElementById('show-geheugen-answers');      
 
-        const btnFinaleShow = document.getElementById('btn-finale-show');     
+        const btnFinaleShow = document.getElementById('btn-finale-show');      
 
-        const btnFinaleNext = document.getElementById('btn-finale-next');     
+        const btnFinaleNext = document.getElementById('btn-finale-next');      
 
 
         const btnWrongAnswer = document.getElementById('wrong-answer');
@@ -1425,6 +1586,7 @@
                 
                 if (quizData.ronde3_openDeur) {
                     quizData.ronde3_openDeur = quizData.ronde3_openDeur.map(q => ({
+                        
                         ...q,
                         keywords: q.keywords.map(word => ({ word: (typeof word === 'string' ? word : word.word), found: false }))
                     }));
@@ -1547,12 +1709,12 @@
 
                 card.className = 'player-card';
 
-                card.dataset.playerIndex = originalIndex;      
+                card.dataset.playerIndex = originalIndex;         
 
                 
                 
-                if (originalIndex === activePlayerIndex) {    
-                    card.classList.add('active');    
+                if (originalIndex === activePlayerIndex) {      
+                    card.classList.add('active');      
                     if (currentRound === 5) {
                         card.classList.add('final-player');
                     }
@@ -1643,7 +1805,7 @@
             }
             
 
-            if (isTimerRunning) return;     
+            if (isTimerRunning) return;      
 
 
             isTimerRunning = true;
@@ -1690,7 +1852,7 @@
                         if (winnerPlayer) {
                             showFinaleWinner(winnerPlayer);
                             return;
-                        }    
+                        }      
                     } 
                     
                     if (currentRound >= 2 && currentRound <= 4) {
@@ -1746,7 +1908,6 @@
         }
 
         
-        
         function setStarterCheck(playerIndex) {
 
             let player = players.find(p => p.originalIndex === playerIndex);
@@ -1778,7 +1939,7 @@
                 return;
             }
             
-            activePlayerIndex = clickedIndex;      
+            activePlayerIndex = clickedIndex;        
             
             if (currentRound === 5) {
                 activeFinalistIndex = finalists.findIndex(f => f.player.originalIndex === clickedIndex);
@@ -1831,9 +1992,9 @@
             
             player.seconds += amount;
 
-            if (player.seconds < 0) {    
+            if (player.seconds < 0) {      
 
-                player.seconds = 0;   
+                player.seconds = 0;    
 
             }
             
@@ -1853,7 +2014,7 @@
 
                 const j = Math.floor(Math.random() * (i + 1));
 
-                [array[i], array[j]] = [array[j], array[i]];      
+                [array[i], array[j]] = [array[j], array[i]];        
 
             }
 
@@ -1917,9 +2078,9 @@
             
 
             
-            inputAnswer.style.display = 'inline-block';  
-            btnCheckAnswer.style.display = 'inline-block';  
-            btnCheckAnswer.textContent = "Controleer Antwoord";     
+            inputAnswer.style.display = 'inline-block'; 
+            btnCheckAnswer.style.display = 'inline-block'; 
+            btnCheckAnswer.textContent = "Controleer Antwoord";      
 
             
             
@@ -1944,7 +2105,7 @@
 
             const roundData = activeRound1Questions;
 
-            const totalQuestions = roundData.length;        
+            const totalQuestions = roundData.length;          
 
 
             if (currentQuestionIndex < totalQuestions) {
@@ -1963,6 +2124,7 @@
                 questionText.textContent = currentQuestion.q;
                 questionIdElement.textContent = `Vraag-ID: #${currentQuestion.id}`;
 
+                
                 
                 
                 questionCounter.innerHTML = `Vraag ${questionNumber} / ${totalQuestions} (Beloning: <strong style="font-size: 1.5em; color: var(--correct-color);">+10 SECONDEN</strong> per juist antwoord)`;
@@ -2007,6 +2169,9 @@
             btnCheckAnswer.style.display = 'none'; // Verberg de knop
             btnPas.style.display = 'none'; // Verberg de pas knop
 
+            const isLastQuestion = (currentQuestionIndex + 1) >= activeRound1Questions.length;
+            const timeoutDuration = isLastQuestion ? 100 : 3000; // Sneller doorgaan als het de laatste is
+
             // 2. Wacht 3 seconden (lang genoeg om het antwoord te zien)
             setTimeout(() => {
                 // Ga naar de volgende vraag
@@ -2024,12 +2189,12 @@
                 
                 // Zorg dat de knoppen terugkomen voor de nieuwe vraag/beurt
                 if (currentQuestionIndex < activeRound1Questions.length) {
-                     inputAnswer.style.display = 'inline-block';
-                     btnCheckAnswer.style.display = 'inline-block';
-                     btnPas.style.display = 'inline-block';
+                    inputAnswer.style.display = 'inline-block';
+                    btnCheckAnswer.style.display = 'inline-block';
+                    btnPas.style.display = 'inline-block';
                 }
 
-            }, 3000); // Wacht 3 seconden
+            }, timeoutDuration); // Wacht 3 seconden
 
         }
         // *** EINDE NIEUWE FUNCTIE ***
@@ -2088,7 +2253,7 @@
 
             } else if (currentRound === 5) {
 
-                checkFinaleAnswer();     
+                checkFinaleAnswer();       
 
             }
 
@@ -2100,7 +2265,7 @@
 
             const roundData = activeRound1Questions;
 
-            if (currentQuestionIndex >= roundData.length) return;     
+            if (currentQuestionIndex >= roundData.length) return;      
 
             
             
@@ -2144,7 +2309,7 @@
 
                     displayQuestion();
 
-                }, 2000);   
+                }, 2000);    
 
                 
                 
@@ -2216,13 +2381,13 @@
 
                             inputAnswer.focus();
 
-                        }, 1500);     
+                        }, 1500);      
 
                         
                         
                     }
 
-                }, 1500);    
+                }, 1500);      
 
             }
 
@@ -2236,7 +2401,6 @@
 
             currentPuzzleSetIndex = 0;
 
-            
             
             activePlayerIndex = getNextStartingPlayerIndex(2);
 
@@ -2269,6 +2433,9 @@
                 return;
 
             }
+
+            // FIX: Bepaal de te gebruiken puzzels
+            const selectedPuzzles = fullPool.slice(0, requiredItems);
 
 
             for (let i = 0; i < totalSetsNeeded; i++) {
@@ -2390,10 +2557,6 @@
             shuffleArray(allClues);
 
             
-            
-            formatAndDisplayIDs(currentPuzzleIDs);
-
-            
             questionText.textContent = `Puzzel ${currentPuzzleSetIndex + 1}`; 
 
 
@@ -2463,6 +2626,7 @@
             
             if (isCompleted) {
                 if (players.every(p => p.hasStartedR2)) {
+                    btnNextPuzzle.style.display = 'none';
                     btnStartRound3.style.display = 'inline-block';
                 } else {
                     btnNextPuzzle.style.display = 'inline-block';
@@ -2520,7 +2684,7 @@
             if (solvedCount === 3) {
 
                 
-                stopTimer();  
+                stopTimer(); 
 
                 questionText.textContent = "Alle 3 antwoorden zijn gevonden! Druk op 'Volgende Puzzel'.";
 
@@ -2599,6 +2763,7 @@
                     
                 }
 
+                
                 
             } else {
 
@@ -2751,7 +2916,7 @@
             }
 
 
-            if (currentRound === 1) {    
+            if (currentRound === 1) {      
 
                 stopTimer();
 
@@ -2790,7 +2955,7 @@
                     renderPlayers();
                     inputAnswer.value = "";
                     inputAnswer.focus();
-                }, 1500);    
+                }, 1500);      
                 
                 return;
             }
@@ -2803,7 +2968,7 @@
 
             currentRound = 3;
 
-            currentOpenDeurIndex = 0;    
+            currentOpenDeurIndex = 0;      
             
             activePlayerIndex = getNextStartingPlayerIndex(3);
 
@@ -2812,13 +2977,15 @@
             btnStartRound4.style.display = 'none';
             
             
+            roundTitle.textContent = "";
+
+            
+            
             const fullPool = shuffleArray([...quizData.ronde3_openDeur]);
 
             shuffleArray(fullPool);
 
             
-            
-            roundTitle.textContent = "";
             
             const totalQuestionsNeeded = players.length;
 
@@ -2854,7 +3021,26 @@
             
             
             
-            loadOpenDeur();    
+            loadOpenDeur();      
+
+            
+            
+            
+            inputAnswer.disabled = true;
+
+            
+
+            
+            timerPlayerIndex = activePlayerIndex;
+
+
+            stopTimer(); 
+
+            renderPlayers();
+
+            inputAnswer.value = "";
+
+            inputAnswer.focus();
 
         }
 
@@ -3097,9 +3283,9 @@
 
         function showOpenDeurAnswers() {
 
-            if (!activeOpenDeur) return;     
+            if (!activeOpenDeur) return;      
 
-            stopTimer();     
+            stopTimer();      
             
             activeOpenDeur.keywords.forEach(k => k.found = true);
 
@@ -3138,7 +3324,7 @@
         let currentMemoryList = 0;
 
 
-        function setupRound4() {    
+        function setupRound4() {      
 
             currentRound = 4; 
 
@@ -3186,6 +3372,7 @@
 
             btnPas.style.display = 'inline-block';
 
+            
             
             
             loadMemoryQuestion();
@@ -3271,6 +3458,7 @@
 
             questionText.textContent = `Vul aan...`; 
 
+            
             
             
             updateMemoryDisplay();
@@ -3513,7 +3701,7 @@
         // ==========================================================
 
 
-        function setupFinale() {    
+        function setupFinale() {      
 
             currentRound = 5; 
 
@@ -3558,6 +3746,7 @@
             
             btnFinaleShow.style.display = 'inline-block';
             btnFinaleNext.style.display = 'none';
+            
             
             
             
@@ -3685,7 +3874,7 @@
                 setTimeout(() => {
                     
                     if (!currentKeywords.every(k => k.found) && !isTimerRunning && !isGameOver) {
-                        startTimer(activePlayerIndex);  
+                        startTimer(activePlayerIndex); 
                     }
                 }, 50); 
 
@@ -3798,7 +3987,7 @@
 
             const card = event.target.closest('.player-card');
 
-            if (!card) return;    
+            if (!card) return;        
 
             
             
@@ -3832,7 +4021,7 @@
         
         inputAnswer.addEventListener('keyup', function(event) {
             if (event.key === 'Enter') {
-                event.preventDefault();  
+                event.preventDefault(); 
                 checkAnswer();
                 
                 setTimeout(() => {
@@ -3868,9 +4057,9 @@
         document.getElementById('start-round-4').addEventListener('click', setupRound4);
         document.getElementById('start-finale').addEventListener('click', setupFinale);
         
-        document.getElementById('test-ronde-2').addEventListener('click', setupRound2);    
-        document.getElementById('test-ronde-3').addEventListener('click', setupRound3);
-        document.getElementById('test-ronde-4').addEventListener('click', setupRound4);    
+        document.getElementById('test-ronde-2').addEventListener('click', () => initializeGame(2)); // Gebruik initializeGame voor de testknoppen
+        document.getElementById('test-ronde-3').addEventListener('click', () => initializeGame(3));
+        document.getElementById('test-ronde-4').addEventListener('click', () => initializeGame(4));
         document.getElementById('start-round-1').addEventListener('click', startGameR1); 
         
         document.getElementById('next-puzzle').addEventListener('click', nextPuzzleSet); 
@@ -3880,7 +4069,7 @@
         document.getElementById('show-opendeur-answers').addEventListener('click', showOpenDeurAnswers);
         
         document.getElementById('next-geheugen-speler').addEventListener('click', nextGeheugenSpeler);
-        document.getElementById('show-geheugen-answers').addEventListener('click', showMemoryAnswers);  
+        document.getElementById('show-geheugen-answers').addEventListener('click', showMemoryAnswers); 
 
         document.getElementById('btn-finale-next').addEventListener('click', nextFinaleQuestion);
         document.getElementById('btn-finale-show').addEventListener('click', showFinaleAnswers);
