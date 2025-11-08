@@ -2420,8 +2420,7 @@
             
             
             const totalSetsNeeded = players.length; 
-
-            const requiredItems = totalSetsNeeded * 3;
+            const requiredItems = totalSetsNeeded * 3; 
 
 
             if (fullPool.length < requiredItems) {
@@ -2434,7 +2433,7 @@
 
             }
 
-            // FIX: Bepaal de te gebruiken puzzels
+            // FIX: Zorg ervoor dat we exact de benodigde puzzels selecteren om een set per speler te garanderen
             const selectedPuzzles = fullPool.slice(0, requiredItems);
 
 
@@ -3139,8 +3138,7 @@
 
         }
 
-        
-        
+
         function updateOpenDeurState(showAll = false) {
 
             const container = document.getElementById('opendeur-keywords-container');
