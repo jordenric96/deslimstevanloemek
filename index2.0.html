@@ -1992,8 +1992,12 @@
             // Zorg ervoor dat de clues onzichtbaar worden
             gameBoard.classList.remove('clues-visible');
             
-            // *** GEFIXED: Zorg dat de answers-shown klasse van R4 weg is als we de timer stoppen (voor de volgende beurt) ***
-            geheugenBoard.classList.remove('answers-shown');
+            // *** GEFIXED: Zorg dat de answers-shown klasse van R4 weg is bij de start van een NIEUWE beurt ***
+            // DEZE ZIJN NU NAAR loadMemoryQuestion() VERPLAATST
+            if (currentRound === 4 && !geheugenBoard.classList.contains('answers-shown')) {
+                 // ** FIX: ALLEEN DEZE CLASS TOEVOEGEN/VERWIJDEREN IN stopTimer IS VAAK NIET GENOEG **
+                 // De filter style die inline werd gezet is verwijderd
+            }
 
             
             
@@ -3765,6 +3769,11 @@
             activeRound4Questions = currentSet; // Update de actieve set
 
             
+            // ** FIX: Verwijder de answers-shown klasse bij het laden van een nieuwe beurt **
+            geheugenBoard.classList.remove('answers-shown');
+            geheugenBoard.style.removeProperty('filter'); // Zeker zijn dat de inline filter weg is
+
+            
             
             // Teller: Alleen de beurtnummer & Beloning tonen
             questionCounter.innerHTML = `Beurt ${currentMemoryList + 1} / ${players.length} (Speler: ${players.find(p => p.originalIndex === activePlayerIndex).name}) (Beloning: <strong style="font-size: 1.5em; color: var(--correct-color);">+20 SECONDEN</strong> per juist antwoord)`;
@@ -3980,8 +3989,10 @@
 
             activeRound4Questions.forEach(q => q.found = true);
             
-            // *** GEFIXED: VERWIJDER DE WAAS (BLUR) DOOR DE KLASSE TOE TE VOEGEN ***
+            // *** GEFIXED: VERWIJDER DE WAAS (BLUR) DOOR DE KLASSE EN INLINE STIJL TOE TE VOEGEN ***
             geheugenBoard.classList.add('answers-shown');
+            // FIX: Zorg dat elke mogelijke inline filter wordt verwijderd
+            geheugenBoard.style.removeProperty('filter'); 
 
             updateMemoryDisplay(true);
 
