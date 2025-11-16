@@ -1,0 +1,825 @@
+:root {
+    --primary-color: #73937E;
+    --secondary-color: #5B2E48;
+    --text-color: #471323;
+    --light-text-color: #CEB992;
+    --player-bg: #5B2E48;
+    --correct-color: #00CC66;
+    --wrong-color: #F21B3F;
+    --border-radius-card: 12px;
+    --border-radius-input: 8px;
+    --border-radius-button: 8px;
+    --puzzle-color-1: #FF9914;
+    --puzzle-color-2: #00CC66;
+    --puzzle-color-3: #2196F3;
+    --input-bg: #444444;
+    --input-border-color: #5B2E48;
+}
+
+body {
+    /* AANGEPAST: Basisfonte naar Open Sans voor leesbaarheid */
+    font-family: 'Open Sans', 'Verdana', 'Arial', sans-serif;
+    background-color: var(--primary-color);
+    color: var(--text-color);
+    margin: 0;
+    padding: 20px;
+    text-align: center;
+}
+
+/* NIEUW: Titels en belangrijke elementen worden Chakra Petch */
+h1, h2, h3, #game-over-text, #game-over-subtitle, .player-seconds {
+    font-family: 'Chakra Petch', sans-serif;
+}
+
+h1 {
+    display: none;
+}
+
+#player-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 10px;
+    margin-bottom: 15px;
+    background-color: var(--primary-color);
+}
+
+.player-card {
+    background-color: var(--player-bg);
+    color: var(--light-text-color);
+    padding: 5px 8px;
+    border-radius: var(--border-radius-card);
+    border: 2px solid var(--primary-color);
+    cursor: pointer;
+    opacity: 0.9;
+    transition: border-color 0.3s, opacity 0.3s, transform 0.3s, box-shadow 0.3s, background-color 0.3s;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 80px;
+    position: relative;
+}
+
+.player-card.time-gain-flash {
+    background-color: var(--correct-color) !important;
+    box-shadow: 0 0 15px 5px var(--correct-color), 0 0 25px 8px var(--correct-color);
+    color: var(--text-color) !important;
+}
+.player-card.time-gain-flash .player-seconds {
+    color: var(--text-color) !important;
+}
+
+.player-card .bonus-feedback {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 2.5em;
+    color: var(--correct-color);
+    font-weight: bold;
+    opacity: 0;
+    transition: all 0.5s ease-out;
+    pointer-events: none;
+    text-shadow: 2px 2px 5px rgba(0,0,0,0.8);
+    z-index: 5;
+}
+
+.player-card.active {
+    background-color: var(--wrong-color);
+    color: var(--light-text-color);
+    border-color: var(--secondary-color);
+    border-width: 5px;
+    opacity: 1;
+    transform: scale(1.05);
+    box-shadow: 0 0 15px var(--secondary-color), 0 0 25px var(--secondary-color);
+}
+
+.player-card.disabled {
+    background-color: #333333;
+    color: #666666;
+    border-color: #555555;
+    cursor: not-allowed;
+    opacity: 0.6;
+    transform: none;
+    box-shadow: none;
+}
+.player-card.disabled .player-seconds {
+    color: #888888 !important;
+}
+.player-card.disabled:hover, .player-card.disabled.active {
+    background-color: #333333 !important;
+    color: #666666 !important;
+    border-color: #555555 !important;
+    transform: none !important;
+    box-shadow: none !important;
+}
+
+
+.player-card.active.final-player {
+    border-color: var(--correct-color);
+    box-shadow: 0 0 15px var(--correct-color), 0 0 25px var(--correct-color);
+}
+.player-card.active.opponent-player {
+    border-color: var(--wrong-color);
+    box-shadow: 0 0 15px var(--wrong-color), 0 0 25px var(--wrong-color);
+}
+
+
+.player-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    margin-bottom: 0px;
+    min-height: 20px;
+}
+
+.player-name {
+    font-size: 0.9em;
+    font-weight: bold;
+    overflow-wrap: break-word;
+    text-align: center;
+    flex-grow: 1;
+    order: 1;
+    line-height: 1.1;
+}
+
+.player-timer-btn {
+    margin: 0;
+    width: 35px;
+    height: 35px;
+    line-height: 35px;
+    border-radius: 50%;
+    background-color: var(--secondary-color);
+    color: var(--light-text-color);
+}
+.player-timer-btn.running {
+    background-color: var(--wrong-color);
+    color: var(--light-text-color);
+}
+
+.puzzle-starter-check {
+    font-size: 1.2em;
+    font-weight: bold;
+    color: var(--light-text-color);
+    opacity: 0.8;
+    text-shadow: 1px 1px 2px var(--text-color);
+}
+.player-card.active .puzzle-starter-check {
+    color: var(--light-text-color);
+}
+
+.player-card.disabled .puzzle-starter-check {
+    color: #666666;
+}
+
+
+.player-seconds {
+    /* AANGEPAST: Speelser font toegepast */
+    font-size: 1.8em;
+    font-weight: 700;
+    font-family: 'Chakra Petch', sans-serif;
+    color: var(--light-text-color);
+    text-align: center;
+    width: 100%;
+    line-height: 1.1;
+    margin-top: 2px;
+    transition: color 0.3s;
+}
+
+.player-card.active .player-seconds {
+    color: var(--light-text-color);
+}
+
+.player-card.time-gain-flash .player-seconds {
+    color: var(--text-color) !important;
+}
+
+#setup-screen {
+    background-color: var(--player-bg);
+    padding: 40px;
+    border-radius: var(--border-radius-card);
+    max-width: 600px;
+    margin: 0 auto;
+    text-align: left;
+    display: none;
+}
+#setup-screen.visible {
+    display: block;
+}
+.setup-input-row {
+    display: grid;
+    grid-template-columns: 140px 1fr 100px;
+    gap: 10px;
+    align-items: center;
+}
+.setup-input-row label, #theme-selector-label {
+    font-weight: bold;
+    color: var(--secondary-color);
+}
+.setup-input-row input, #theme-select {
+    padding: 8px;
+    border: 1px solid var(--input-border-color);
+    border-radius: var(--border-radius-input);
+    background-color: var(--input-bg);
+    color: var(--light-text-color);
+    font-size: 1em;
+    box-sizing: border-box;
+}
+
+#theme-selector-container { display: none; }
+.setup-input-row input[type="number"] {
+    text-align: center;
+    width: 80px;
+}
+#start-quiz-btn {
+    width: 100%;
+    margin-top: 20px;
+}
+
+/* START AANGEPASTE STIJL VOOR VOLGENDE RONDE KNOPPEN */
+#start-round-2,
+#start-round-3,
+#start-round-4,
+#start-finale {
+    font-size: 1.5em; /* Grote tekst */
+    padding: 20px; /* Grote knop */
+    background-color: var(--correct-color) !important; /* Opvallende kleur */
+    color: var(--text-color) !important;
+    font-weight: bold;
+    border: 3px solid var(--secondary-color);
+    width: 100%;
+    margin-top: 30px;
+}
+/* EINDE AANGEPASTE STIJL */
+
+#start-round2-test-btn, #start-round3-test-btn {
+    background-color: var(--puzzle-color-1);
+    color: var(--secondary-color);
+    width: 100%;
+    border-radius: var(--border-radius-button);
+    margin-top: 10px;
+}
+
+#start-round3-test-btn {
+    background-color: var(--wrong-color);
+    color: var(--light-text-color);
+}
+#start-round4-test-btn {
+    background-color: var(--wrong-color);
+    color: var(--light-text-color);
+}
+
+#start-finale-test-btn {
+    background-color: var(--secondary-color);
+    color: var(--light-text-color);
+}
+
+
+#game-board {
+    background-color: var(--player-bg);
+    padding: 25px;
+    border-radius: var(--border-radius-card);
+}
+
+#question-text {
+    font-size: 1.3em;
+    font-weight: bold;
+    color: var(--light-text-color);
+    margin: 20px 0;
+    min-height: 50px;
+}
+
+#question-id {
+    font-size: 0.7em;
+    color: #666;
+    font-style: italic;
+    margin-top: -10px;
+    margin-bottom: 15px;
+    min-height: 1em;
+    display: block !important;
+}
+
+/* AANGEPAST: Stijl voor R1 beloning minder opvallend gemaakt */
+#question-counter strong {
+    font-size: 1.1em; /* Kleiner lettertype */
+    color: var(--light-text-color); /* Minder felle kleur, bijpassend bij de achtergrond */
+}
+
+
+#answer-input {
+    font-size: 1.2em;
+    padding: 10px;
+    border: 2px solid var(--secondary-color);
+    background-color: var(--input-bg);
+    color: var(--light-text-color);
+    border-radius: var(--border-radius-input);
+    transition: border-color 0.1s ease-in-out, box-shadow 0.1s ease-in-out;
+    width: 80%;
+    max-width: 400px;
+}
+
+.controls-r2-input-group {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    margin-top: 15px;
+    margin-bottom: 20px;
+    display: flex;
+}
+.controls-r2-input-group #check-answer {
+    margin: 0;
+    border-radius: var(--border-radius-button);
+}
+
+#answer-input:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+}
+
+#answer-input.correct-feedback {
+    border-color: var(--correct-color) !important;
+    box-shadow: 0 0 10px 5px var(--correct-color);
+}
+#answer-input.wrong-feedback {
+    border-color: var(--wrong-color) !important;
+    box-shadow: 0 0 15px var(--wrong-color);
+}
+
+#puzzle-ids {
+    font-size: 0.8em;
+    color: #666;
+    opacity: 0.8;
+    font-style: italic;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    margin-bottom: 15px;
+    overflow-x: auto;
+    max-width: 100%;
+}
+
+#puzzle-ids .copy-ids-btn {
+    padding: 2px 6px;
+    font-size: 0.8em;
+    background-color: var(--input-bg);
+    color: var(--light-text-color);
+    opacity: 1;
+    border-radius: var(--border-radius-button);
+}
+
+
+#puzzle-display-area {
+    margin-top: 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+#puzzle-answers-container {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-bottom: 10px;
+}
+.puzzle-answer {
+    background-color: var(--secondary-color);
+    /* AANGEPAST: Trefwoorden groter */
+    padding: 15px;
+    font-size: 1.8em; /* Veel groter lettertype */
+    color: var(--light-text-color);
+    border-radius: 10px;
+    font-weight: bold;
+    min-height: 1.5em;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid var(--puzzle-color-1);
+    word-break: break-word; /* Zorg dat lange woorden passen */
+    line-height: 1.2;
+}
+
+.puzzle-answer.found {
+    color: var(--text-color) !important;
+    border: 3px solid var(--correct-color);
+    box-shadow: 0 0 8px var(--correct-color);
+}
+
+.puzzle-answer.found.color-1 { background-color: var(--puzzle-color-1) !important; color: var(--text-color) !important; }
+.puzzle-answer.found.color-2 { background-color: var(--puzzle-color-2) !important; color: var(--text-color) !important; }
+.puzzle-answer.found.color-3 { background-color: var(--puzzle-color-3) !important; color: var(--light-text-color) !important; }
+
+.puzzle-clue, .opendeur-keyword, .geheugen-item, .finale-keyword {
+    border-radius: var(--border-radius-button);
+}
+
+#puzzle-clues-container {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+    margin-bottom: 20px;
+}
+.puzzle-clue {
+    background-color: var(--secondary-color);
+    padding: 10px;
+    font-size: 2em;
+    color: var(--light-text-color);
+    border-radius: var(--border-radius-button);
+    min-height: 40px;
+    border: 2px solid var(--puzzle-color-1);
+    opacity: 0.05;
+    color: var(--player-bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    transition: opacity 0.3s, background-color 0.3s, color 0.3s;
+}
+
+#game-board.clues-visible .puzzle-clue {
+    opacity: 1;
+    background-color: var(--input-bg);
+    color: var(--light-text-color);
+}
+
+.puzzle-clue.found {
+    opacity: 1 !important;
+}
+
+.puzzle-clue.found.color-1 { background-color: var(--puzzle-color-1) !important; color: var(--text-color) !important; }
+.puzzle-clue.found.color-2 { background-color: var(--puzzle-color-2) !important; color: var(--text-color) !important; }
+.puzzle-clue.found.color-3 { background-color: var(--puzzle-color-3) !important; color: var(--light-text-color) !important; }
+
+
+#opendeur-keywords-container {
+    display: block;
+    text-align: center;
+    gap: 0;
+    padding: 15px;
+    background-color: var(--secondary-color);
+    border-radius: var(--border-radius-card);
+}
+
+.opendeur-keyword {
+    display: inline-block;
+    width: 80%;
+    padding: 10px 15px;
+    font-size: 1.3em;
+    font-weight: bold;
+    background-color: var(--input-bg);
+    color: var(--light-text-color);
+    border-radius: var(--border-radius-button);
+    border: 2px solid var(--puzzle-color-1);
+    margin: 4px auto;
+    transition: background-color 0.3s;
+}
+
+#opendeur-subject {
+    font-size: 3em;
+    font-weight: bold;
+    color: var(--light-text-color);
+    margin-top: 10px;
+    filter: blur(10px);
+    transition: filter 0.3s;
+}
+
+#game-board:not(.clues-visible) #opendeur-subject {
+    filter: blur(10px);
+}
+
+#game-board.clues-visible #opendeur-subject {
+    filter: none !important;
+}
+
+
+#geheugen-board {
+    list-style-type: none;
+    padding: 10px;
+    margin: 10px auto;
+    max-width: 550px;
+    text-align: left;
+    background-color: var(--secondary-color);
+    border-radius: var(--border-radius-card);
+    filter: blur(0);
+    transition: filter 0.3s;
+}
+
+#game-board:not(.clues-visible) #geheugen-board {
+    filter: blur(5px);
+}
+
+#geheugen-board.answers-shown {
+    filter: none !important;
+}
+
+.geheugen-item {
+    background-color: var(--input-bg);
+    color: var(--light-text-color);
+    padding: 10px 15px;
+    border-radius: var(--border-radius-button);
+    margin-bottom: 8px;
+    font-size: 1em;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-left: 5px solid var(--puzzle-color-1);
+}
+.geheugen-item strong {
+    color: var(--light-text-color);
+    margin-right: 10px;
+}
+.geheugen-item .geheugen-antwoord {
+    font-weight: bold;
+    color: var(--light-text-color);
+    transition: color 0.3s;
+}
+.geheugen-item.found {
+    border-left: 5px solid var(--correct-color);
+    background-color: var(--input-bg);
+}
+.geheugen-item.found .geheugen-antwoord {
+    color: var(--correct-color);
+}
+
+#finale-display-area {
+    text-align: center;
+    padding: 20px;
+    background-color: var(--wrong-color);
+    border-radius: var(--border-radius-card);
+    color: var(--light-text-color);
+}
+
+#finale-keywords-container {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 15px 10px;
+    margin-top: 30px;
+    max-width: 800px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.finale-keyword {
+    background-color: var(--secondary-color);
+    color: transparent;
+    padding: 15px 10px;
+    font-size: 1.1em;
+    font-weight: bold;
+    border-radius: var(--border-radius-button);
+    border: 2px solid var(--light-text-color);
+    filter: blur(2px);
+    transition: filter 0.3s, background-color 0.3s, color 0.3s;
+}
+
+.finale-keyword.found {
+    filter: blur(0) opacity(1);
+    background-color: var(--correct-color);
+    color: var(--text-color);
+    border: 2px solid var(--primary-color);
+}
+
+.finale-keyword:nth-child(4) {
+    grid-column: auto;
+}
+.finale-keyword:nth-child(5) {
+    grid-column: auto;
+}
+
+#finale-subject {
+    font-size: 2.5em;
+    color: var(--light-text-color);
+    margin-bottom: 15px;
+}
+
+
+button {
+    background-color: var(--secondary-color);
+    color: var(--light-text-color);
+    border: none;
+    padding: 12px 20px;
+    font-size: 1em;
+    font-weight: bold;
+    border-radius: var(--border-radius-button);
+    cursor: pointer;
+    margin: 5px;
+    transition: transform 0.2s;
+}
+
+#wrong-answer {
+    background-color: var(--wrong-color);
+    color: var(--light-text-color);
+}
+
+.player-timer-btn {
+    font-size: 1.5em;
+    background-color: var(--secondary-color);
+    color: var(--light-text-color);
+    border: none;
+    border-radius: 50%;
+    width: 35px;
+    height: 35px;
+    cursor: pointer;
+    padding: 0;
+    flex-shrink: 0;
+    line-height: 35px;
+}
+.player-timer-btn.running {
+    background-color: var(--wrong-color);
+    color: var(--light-text-color);
+}
+
+#btn-toggle-timer { display: none !important; }
+
+
+#game-over-overlay {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background-color: var(--primary-color);
+    background-image: radial-gradient(circle, var(--player-bg) 10%, var(--primary-color) 70%);
+    animation: flashBackground 2s infinite alternate;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    z-index: 1000;
+    text-align: center;
+    padding: 20px;
+}
+
+@keyframes flashBackground {
+    0% { filter: brightness(1); }
+    100% { filter: brightness(1.2); }
+}
+
+#game-over-text {
+    color: var(--wrong-color);
+    font-size: 5.5em;
+    font-weight: bold;
+    text-shadow: 4px 4px 10px var(--text-color);
+    margin: 0;
+    line-height: 1.2;
+}
+#game-over-subtitle {
+    color: var(--secondary-color);
+    font-size: 1.8em;
+    font-weight: bold;
+    margin-bottom: 20px;
+}
+
+
+/* ========================================================== */
+/* 📱 RESPONSIVE STYLES (Mobile First Overrides) */
+/* ========================================================== */
+
+/* Algemene lay-out voor smalle schermen */
+@media (max-width: 768px) {
+    body {
+        padding: 10px;
+    }
+
+    #setup-screen {
+        padding: 20px;
+    }
+
+    /* Pas de indeling van de spelersinvoer aan */
+    .setup-input-row {
+        grid-template-columns: 1fr 1fr; /* 2 kolommen in plaats van 3 */
+        gap: 5px;
+    }
+    .setup-input-row label {
+        grid-column: 1 / span 2; /* Label neemt volledige breedte in */
+        text-align: left;
+        margin-top: 10px;
+    }
+    .setup-input-row input:not([type="number"]),
+    .setup-input-row select {
+        grid-column: 1 / span 2; /* Input neemt volledige breedte in */
+    }
+    .setup-input-row input[type="number"] {
+        width: 100%;
+        text-align: left;
+        grid-column: 1 / span 2;
+        margin-top: 5px;
+    }
+    #num-players {
+        width: 100%;
+        grid-column: 2;
+        text-align: center;
+    }
+    .setup-input-row label[for="num-players"] {
+        grid-column: 1;
+        text-align: left;
+    }
+
+    /* Buttons op de setup-pagina (volledige breedte) */
+    #start-quiz-btn,
+    #start-round2-test-btn,
+    #start-round3-test-btn,
+    #start-round4-test-btn {
+        margin-top: 15px;
+    }
+
+    /* Spelerkaarten: Blijven flexibel, maar zorgen voor betere lezing */
+    .player-card {
+        min-height: 70px;
+        padding: 10px 5px;
+    }
+    .player-name {
+        font-size: 0.8em;
+        line-height: 1;
+    }
+    .player-seconds {
+        font-size: 1.5em;
+    }
+    .player-timer-btn {
+        width: 30px;
+        height: 30px;
+        line-height: 30px;
+        font-size: 1.2em;
+    }
+    .puzzle-starter-check {
+        font-size: 1em;
+    }
+
+
+    /* Game Board */
+    #game-board {
+        padding: 15px;
+    }
+    #question-text {
+        font-size: 1.1em;
+        min-height: 40px;
+    }
+    #question-counter {
+        font-size: 0.9em;
+    }
+    #answer-input {
+        font-size: 1em;
+        width: 90%;
+    }
+    .controls-r2-input-group {
+        flex-direction: column;
+        gap: 10px;
+    }
+    .controls-r2-input-group button {
+        width: 100%;
+    }
+
+    /* Puzzel Ronde */
+    #puzzle-answers-container {
+        grid-template-columns: 1fr; /* 1 antwoord per rij */
+    }
+    .puzzle-answer {
+        padding: 15px;
+        font-size: 1em;
+    }
+    #puzzle-clues-container {
+        grid-template-columns: repeat(2, 1fr); /* 2 kolommen in plaats van 4 */
+        gap: 5px;
+    }
+
+    /* Open Deur Ronde */
+    #opendeur-subject {
+        font-size: 2em;
+    }
+    .opendeur-keyword {
+        width: 95%;
+        font-size: 1.1em;
+        padding: 8px 10px;
+    }
+
+    /* Geheugen Ronde */
+    .geheugen-item {
+        font-size: 0.9em;
+        padding: 8px 10px;
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    .geheugen-item span {
+        text-align: left;
+    }
+    .geheugen-item .geheugen-antwoord {
+        margin-top: 5px;
+    }
+
+
+    /* Finale Ronde */
+    #finale-keywords-container {
+        grid-template-columns: repeat(3, 1fr); /* 3 kolommen in plaats van 5 */
+        gap: 8px;
+    }
+    .finale-keyword {
+        font-size: 0.9em;
+        padding: 10px 5px;
+    }
+    #finale-subject {
+        font-size: 1.8em;
+    }
+
+    /* Controles onderaan */
+    .player-controls button {
+        width: 100%;
+        margin: 5px 0;
+    }
+}
