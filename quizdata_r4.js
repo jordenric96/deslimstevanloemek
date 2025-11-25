@@ -226,7 +226,7 @@ var STANDAARD_R4_POOL = [
     { q1: "Nijntje", a: "Pluis" },
     { q1: "Bob", a: "de Bouwer" },
     { q1: "Kunnen wij het maken?", a: "Nou en of!" },
-    { q1: "Rupsje", a: "Nooitgenoeg" }
+    { q1: "Rupsje", a: "Nooitgenoeg" },
 // ---------------------------------------------------------
     // DEEL 9: RECLAMES & SLOGANS (Het collectieve geheugen)
     // ---------------------------------------------------------
