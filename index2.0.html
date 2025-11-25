@@ -1,3 +1,7 @@
+{
+type: uploaded file
+fileName: index2.0.html
+fullContent:
 <!DOCTYPE html>
 <html lang="nl">
 <head>
@@ -572,7 +576,7 @@
             card.innerHTML = `
                 <div class="player-name">${player.name}</div>
                 <div class="player-seconds">${player.seconds}</div>
-                <button class="${timerButtonClass}" data-player-index="${originalIndex}" style="position: absolute; top: 5px; right: 5px;" onclick="toggleTimer(${originalIndex})">${timerButtonSymbol}</button>
+                <button class="${timerButtonClass}" data-player-index="${originalIndex}" style="position: absolute; top: 5px; right: 5px;">${timerButtonSymbol}</button>
                 ${checkmark ? `<span class="puzzle-starter-check" style="position: absolute; top: 8px; left: 8px;">${checkmark}</span>` : ''}
                 <div class="bonus-feedback"></div>
             `;
