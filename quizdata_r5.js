@@ -1,4 +1,4 @@
-const STANDAARD_R5_POOL = [
+var STANDAARD_R5_POOL = [
     // --- Deel 1: Aardrijkskunde & Geschiedenis (1-50) ---
     { subject: "Noem de 5 grootste landen ter wereld (op oppervlakte, incl. water)", keywords: ["Rusland", "Canada", "China", "Verenigde Staten", "Brazilië"] },
     { subject: "Noem de 5 langste rivieren ter wereld", keywords: ["Nijl", "Amazone", "Yangtze", "Mississippi-Missouri", "Jenisej-Angara-Selenga"] },

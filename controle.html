@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GM Dashboard - Trivial Time</title>
+    <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;600;700&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="stijl.css">
+    
+    <style>
+        /* --- DASHBOARD SPECIFIEKE OVERRIDES --- */
+        :root {
+            --panel-bg: rgba(15, 23, 42, 0.95);
+            --border-col: rgba(255, 255, 255, 0.15);
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden; 
+            display: flex;
+            flex-direction: column;
+            background: var(--bg-dark);
+            font-family: 'Open Sans', sans-serif;
+            font-size: 14px; 
+        }
+
+        #dashboard-header {
+            height: 60px;
+            background: var(--bg-card);
+            border-bottom: 1px solid var(--border-col);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            flex-shrink: 0;
+            z-index: 10;
+        }
+
+        h1 {
+            display: block !important;
+            margin: 0;
+            font-size: 1.5em;
+            text-align: left;
+            width: auto;
+        }
+
+        .round-controls {
+            display: flex;
+            gap: 5px;
+        }
+
+        .round-controls button {
+            margin: 0;
+            padding: 5px 15px;
+            font-size: 0.85em;
+            height: 36px;
+        }
+
+        .round-controls button.active-round {
+            background: var(--primary-accent);
+            color: #000;
+            box-shadow: 0 0 10px var(--primary-accent);
+            border: 1px solid #fff;
+        }
+
+        /* Globale Actie Knoppen (zoals PAS) */
+        .global-actions {
+            margin-left: 20px;
+        }
+        
+        .btn-fail {
+            background: linear-gradient(135deg, #ef4444, #991b1b) !important;
+            color: white !important;
+            border: 1px solid #ffaaaa !important;
+            font-weight: bold;
+            box-shadow: 0 0 10px rgba(239, 68, 68, 0.5);
+        }
+
+        #dashboard-main {
+            flex: 1;
+            display: grid;
+            grid-template-columns: 400px 1fr; /* Iets breder gemaakt voor de knoppen */
+            gap: 0;
+            overflow: hidden;
+        }
+
+        .panel {
+            padding: 15px;
+            overflow-y: auto; 
+            display: flex;
+            flex-direction: column;
+        }
+
+        .panel-left {
+            background: rgba(0, 0, 0, 0.2);
+            border-right: 1px solid var(--border-col);
+        }
+
+        .panel-right {
+            background: transparent;
+            padding: 0; 
+            display: flex;
+            flex-direction: column;
+        }
+
+        h2 {
+            font-size: 1.1em;
+            margin-bottom: 10px;
+            border-bottom: 1px solid var(--border-col);
+            padding-bottom: 5px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+        }
+
+        #player-config-bar {
+            display: flex;
+            gap: 5px;
+            margin-bottom: 10px;
+        }
+        
+        #player-names-container {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 5px;
+            margin-bottom: 10px;
+        }
+
+        #player-names-container input {
+            padding: 6px 10px;
+            font-size: 0.9em;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid var(--border-col);
+            margin-top: 0;
+        }
+
+        #save-players-button {
+            width: 100%;
+            padding: 8px;
+            margin-top: 0;
+            font-size: 0.9em;
+        }
+
+        /* TRACKER TABEL & CONTROLS */
+        #round-tracker-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9em;
+            margin-top: 10px;
+        }
+        
+        #round-tracker-table th {
+            text-align: left;
+            padding: 5px;
+            color: var(--primary-accent);
+            font-size: 0.8em;
+            text-transform: uppercase;
+        }
+        
+        #round-tracker-table td {
+            padding: 8px 5px;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            vertical-align: middle;
+        }
+
+        /* Speler actie knoppen in tabel */
+        .player-action-btn {
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            color: #ccc;
+            padding: 4px 8px;
+            font-size: 0.8em;
+            cursor: pointer;
+            margin: 0 2px;
+            border-radius: 4px;
+            min-width: 30px;
+        }
+        .player-action-btn:hover { background: rgba(255,255,255,0.2); color: #fff; }
+        
+        .btn-select-player { color: var(--primary-accent); border-color: var(--primary-accent); }
+        .btn-toggle-timer { color: var(--gold-color); border-color: var(--gold-color); }
+
+        .search-strip {
+            padding: 15px;
+            background: rgba(255,255,255,0.02);
+            border-bottom: 1px solid var(--border-col);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            flex-shrink: 0;
+        }
+
+        .search-strip input {
+            margin: 0;
+            width: 300px;
+            padding: 8px 12px;
+            font-size: 1em;
+        }
+        
+        .search-strip button {
+            margin: 0;
+            height: 42px;
+            padding: 0 25px;
+        }
+
+        #result-area {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            background: rgba(0,0,0,0.1);
+        }
+
+        .list-item {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid var(--border-col);
+            margin-bottom: 8px;
+            padding: 10px 15px;
+            border-radius: 4px;
+            line-height: 1.5;
+        }
+
+        .list-item strong {
+            color: var(--secondary-accent);
+        }
+
+        .answer-box {
+            display: inline-block;
+            background: rgba(34, 197, 94, 0.1);
+            color: var(--correct-color);
+            padding: 2px 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            border: 1px solid rgba(34, 197, 94, 0.3);
+            margin: 0 2px;
+            font-weight: 600;
+        }
+
+        .answer-box:hover {
+            background: var(--correct-color);
+            color: #000;
+        }
+
+        .clickable-keyword {
+            display: inline-block;
+            margin: 2px 5px 2px 0;
+            padding: 2px 6px;
+            border: 1px dashed var(--text-muted);
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 0.9em;
+        }
+        
+        .clickable-keyword:hover {
+            border-color: var(--correct-color);
+            color: var(--correct-color);
+        }
+
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); }
+        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
+
+    </style>
+</head>
+<body>
+    
+    <script src="quizdata_r1.js"></script>
+    <script src="quizdata_r2.js"></script>
+    <script src="quizdata_r3.js"></script>
+    <script src="quizdata_r4.js"></script>
+    <script src="quizdata_r5.js"></script>
+
+    <div id="dashboard-header">
+        <div style="display:flex; align-items:center;">
+            <h1>GM Console</h1>
+            <div class="global-actions">
+                <button id="btn-trigger-fail" class="btn-fail" title="Druk op Pas/Fout">❌ FOUT / PAS</button>
+            </div>
+        </div>
+
+        <div class="round-controls controls">
+            <button id="btn-round-1" data-round="1" class="active-round">R1</button>
+            <button id="btn-round-2" data-round="2">R2</button>
+            <button id="btn-round-3" data-round="3">R3</button>
+            <button id="btn-round-4" data-round="4">R4</button>
+            <button id="btn-round-5" data-round="5">R5</button>
+        </div>
+    </div>
+    
+    <div id="dashboard-main">
+        
+        <div class="panel panel-left">
+            <h2>👥 Speler Controls</h2>
+            <div id="player-config">
+                <div id="player-config-bar">
+                    <input type="number" id="num-players-input" value="4" min="2" max="6" style="width: 60px; text-align: center; margin:0;">
+                    <button id="generate-inputs-button" style="margin:0; padding: 5px 10px;">Set</button>
+                    <button id="save-players-button" style="background: var(--correct-color); margin:0; flex:1;">💾 Opslaan</button>
+                </div>
+                <div id="player-names-container"></div>
+            </div>
+
+            <h2 style="margin-top: 20px;">🎮 Live Control (R<span id="current-round-number">1</span>)</h2>
+            <table id="round-tracker-table" style="display: none;">
+                <thead>
+                    <tr>
+                        <th style="width: 40%">Speler</th>
+                        <th style="width: 40%">Controls</th>
+                        <th style="text-align: center;">Gedaan?</th>
+                    </tr>
+                </thead>
+                <tbody id="tracker-tbody"></tbody>
+            </table>
+        </div>
+
+        <div class="panel panel-right">
+            
+            <div class="search-strip">
+                <h3 id="input-label" style="margin:0; min-width: 100px; color: var(--primary-accent);">Zoek ID's:</h3>
+                <input type="text" id="question-id-input" placeholder="Bijv. 1, 2, 3" autocomplete="off">
+                <button id="lookup-button" style="background: var(--primary-accent); color: #000;">ZOEK & TOON</button>
+            </div>
+
+            <div id="result-area">
+                <div style="text-align: center; color: var(--text-muted); margin-top: 50px;">
+                    <p style="font-size: 1.2em;">Selecteer een ronde in de bovenbalk.</p>
+                    <p>Voer vraag ID's in en druk op ENTER.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        const channel = new BroadcastChannel('trivial_time_channel');
+
+        function sendAnswer(text) {
+            channel.postMessage({ type: 'FILL_ANSWER', answer: text });
+            showToast(`Gestuurd: "${text}"`);
+        }
+
+        function triggerFail() {
+            channel.postMessage({ type: 'TRIGGER_FAIL' });
+            showToast("❌ FOUT/PAS Signaal Verstuurd");
+        }
+
+        function selectPlayer(index) {
+            channel.postMessage({ type: 'SELECT_PLAYER', playerIndex: index });
+            showToast(`Speler ${index+1} Geselecteerd`);
+        }
+
+        function toggleTimer(index) {
+            channel.postMessage({ type: 'TOGGLE_TIMER', playerIndex: index });
+            showToast(`Timer Toggle Speler ${index+1}`);
+        }
+
+        function showToast(msg) {
+            const feedback = document.createElement('div');
+            feedback.textContent = msg;
+            feedback.style.position = 'fixed';
+            feedback.style.bottom = '20px';
+            feedback.style.right = '20px';
+            feedback.style.background = 'var(--primary-accent)';
+            feedback.style.color = '#000';
+            feedback.style.padding = '8px 15px';
+            feedback.style.borderRadius = '4px';
+            feedback.style.zIndex = '2000';
+            feedback.style.fontWeight = 'bold';
+            feedback.style.boxShadow = '0 4px 10px rgba(0,0,0,0.3)';
+            document.body.appendChild(feedback);
+            setTimeout(() => feedback.remove(), 1500);
+        }
+
+        document.getElementById('btn-trigger-fail').addEventListener('click', triggerFail);
+
+        const resultArea = document.getElementById('result-area');
+        const inputField = document.getElementById('question-id-input');
+        const lookupButton = document.getElementById('lookup-button');
+        const buttons = document.querySelectorAll('.round-controls button');
+        const inputLabel = document.getElementById('input-label');
+        
+        const numPlayersInput = document.getElementById('num-players-input');
+        const generateInputsButton = document.getElementById('generate-inputs-button');
+        const playerNamesContainer = document.getElementById('player-names-container');
+        const savePlayersButton = document.getElementById('save-players-button');
+        const roundTrackerTable = document.getElementById('round-tracker-table');
+        const trackerTbody = document.getElementById('tracker-tbody');
+        const currentRoundNumber = document.getElementById('current-round-number');
+
+        let activeRound = 1;
+        const STORAGE_PLAYERS_KEY = 'trivialTime_playerNames';
+        const STORAGE_TRACKER_KEY = 'trivialTime_roundTracker';
+        
+        let playerNames = []; 
+        let roundTracker = {}; 
+
+        window.addEventListener('load', () => {
+            loadPlayerNames();
+            loadRoundTracker();
+            setActiveRound(1);
+        });
+        
+        buttons.forEach(button => {
+            button.addEventListener('click', () => {
+                setActiveRound(button.dataset.round);
+            });
+        });
+
+        lookupButton.addEventListener('click', lookupAnswers);
+        inputField.addEventListener('keypress', (e) => { if (e.key === 'Enter') lookupAnswers(); });
+        
+        generateInputsButton.addEventListener('click', () => {
+             const num = parseInt(numPlayersInput.value);
+             generatePlayerNameInputs(num);
+        });
+        savePlayersButton.addEventListener('click', savePlayerNames);
+
+        function setActiveRound(round) {
+            buttons.forEach(btn => btn.classList.remove('active-round'));
+            document.getElementById(`btn-round-${round}`).classList.add('active-round');
+            activeRound = parseInt(round);
+            inputField.value = "";
+            resultArea.innerHTML = `<p style="color: var(--text-muted); opacity: 0.7;">Zoeken in Ronde ${activeRound}...</p>`;
+            currentRoundNumber.textContent = activeRound;
+            updateRoundTrackerTable();
+            
+            const hints = {
+                1: "Vraag ID's (bijv. 1,2,3)",
+                2: "Puzzel Set ID's (bijv. 1,2)",
+                3: "Vraag ID's (bijv. 5,6)",
+                4: "Zin ID's (bijv. 10,11,12)",
+                5: "Finale Vraag ID's (bijv. 1)"
+            };
+            inputField.placeholder = hints[activeRound] || "ID's...";
+            inputField.focus();
+        }
+
+        function loadPlayerNames() {
+            const stored = localStorage.getItem(STORAGE_PLAYERS_KEY);
+            if (stored) {
+                playerNames = JSON.parse(stored);
+                generatePlayerNameInputs(playerNames.length, playerNames);
+                numPlayersInput.value = playerNames.length;
+                updateRoundTrackerTable();
+            }
+        }
+        
+        function loadRoundTracker() {
+             const stored = localStorage.getItem(STORAGE_TRACKER_KEY);
+            if (stored) roundTracker = JSON.parse(stored);
+        }
+
+        function generatePlayerNameInputs(num, initialNames = []) {
+            playerNamesContainer.innerHTML = '';
+            for (let i = 0; i < num; i++) {
+                const name = initialNames[i] || `Speler ${i + 1}`;
+                const input = document.createElement('input');
+                input.type = 'text';
+                input.value = name;
+                input.placeholder = `Naam ${i+1}`;
+                playerNamesContainer.appendChild(input);
+            }
+        }
+        
+        function savePlayerNames() {
+            const inputs = playerNamesContainer.querySelectorAll('input');
+            playerNames = Array.from(inputs).map(i => i.value.trim()).filter(n => n);
+            localStorage.setItem(STORAGE_PLAYERS_KEY, JSON.stringify(playerNames));
+            updateRoundTrackerTable();
+            
+            const originalText = savePlayersButton.textContent;
+            savePlayersButton.textContent = "✅ Opgeslagen";
+            setTimeout(() => savePlayersButton.textContent = originalText, 1500);
+        }
+        
+        function updateRoundTrackerTable() {
+            trackerTbody.innerHTML = '';
+            if (playerNames.length === 0) {
+                roundTrackerTable.style.display = 'none';
+                return;
+            }
+            roundTrackerTable.style.display = 'table';
+            
+            const roundKey = `ronde_${activeRound}`;
+            if (!roundTracker[roundKey]) roundTracker[roundKey] = {};
+
+            playerNames.forEach((name, index) => {
+                if (!(name in roundTracker[roundKey])) roundTracker[roundKey][name] = false;
+                
+                const row = document.createElement('tr');
+                const isChecked = roundTracker[roundKey][name];
+                row.innerHTML = `
+                    <td>${name}</td>
+                    <td>
+                        <button class="player-action-btn btn-select-player" onclick="selectPlayer(${index})" title="Selecteer Speler">👆</button>
+                        <button class="player-action-btn btn-toggle-timer" onclick="toggleTimer(${index})" title="Start/Stop Timer">⏱️</button>
+                    </td>
+                    <td style="text-align: center;">
+                        <input type="checkbox" 
+                            style="transform: scale(1.2); accent-color: var(--primary-accent);"
+                            data-player="${name}" 
+                            ${isChecked ? 'checked' : ''}
+                            onchange="toggleTracker('${roundKey}', '${name}', this.checked)">
+                    </td>
+                `;
+                trackerTbody.appendChild(row);
+            });
+        }
+
+        window.toggleTracker = function(roundKey, player, isChecked) {
+            roundTracker[roundKey][player] = isChecked;
+            localStorage.setItem(STORAGE_TRACKER_KEY, JSON.stringify(roundTracker));
+        };
+
+        function escapeAnswer(str) {
+            if (!str) return '';
+            return str.replace(/'/g, "\\'");
+        }
+
+        function lookupAnswers() {
+            const ids = inputField.value.split(',').map(s => parseInt(s.trim())).filter(n => !isNaN(n));
+            if (ids.length === 0) return;
+
+            const dataVar = 'STANDAARD_R' + activeRound + '_POOL';
+            const pool = window[dataVar]; 
+            
+            if (!pool) {
+                resultArea.innerHTML = `<p style="color: var(--wrong-color)">Data niet gevonden (${dataVar}).</p>`;
+                return;
+            }
+
+            let html = `<ul style="list-style: none; padding: 0;">`;
+            ids.forEach(id => {
+                const q = pool[id - 1];
+                if (q) {
+                    html += `<li class="list-item"><strong style="color: var(--primary-accent); margin-right: 10px;">#${id}</strong> `;
+                    
+                    if (activeRound === 1) {
+                        const safeAnswer = escapeAnswer(q.a);
+                        html += `${q.q} <br><span style="color:#aaa;">→</span> <span class="answer-box" onclick="sendAnswer('${safeAnswer}')" title="Klik om in te vullen">${q.a}</span>`;
+                    }
+                    else if (activeRound === 2) {
+                        const safeAnswer = escapeAnswer(q.answer);
+                        html += `<strong style="color:#fff;">${q.answer}</strong> <span class="answer-box" onclick="sendAnswer('${safeAnswer}')">📋</span><br><span style="font-size:0.9em; color:#aaa;">Hints: ${q.clues.join(' - ')}</span>`;
+                    }
+                    else if (activeRound === 3) {
+                        const keywordsHtml = q.keywords.map(k => {
+                            const safeK = escapeAnswer(k);
+                            return `<span class="clickable-keyword" onclick="sendAnswer('${safeK}')">${k}</span>`;
+                        }).join(' ');
+                        html += `<strong>${q.subject}</strong><br><div style="margin-top:5px;">${keywordsHtml}</div>`;
+                    }
+                    else if (activeRound === 4) {
+                        const safeAnswer = escapeAnswer(q.a);
+                        html += `${q.q1} ... <span class="answer-box" onclick="sendAnswer('${safeAnswer}')">${q.a}</span>`;
+                    }
+                    else if (activeRound === 5) {
+                        const keywordsHtml = q.keywords.map(k => {
+                            const safeK = escapeAnswer(k);
+                            return `<span class="clickable-keyword" onclick="sendAnswer('${safeK}')">${k}</span>`;
+                        }).join(' ');
+                        html += `<strong>${q.subject}</strong><br><div style="margin-top:5px;">${keywordsHtml}</div>`;
+                    }
+                    html += `</li>`;
+                }
+            });
+            html += `</ul>`;
+            resultArea.innerHTML = html;
+        }
+    </script>
+</body>
+</html>

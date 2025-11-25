@@ -1,825 +1,465 @@
+/* ==========================================================================
+   TRIVIAL TIME - TV SHOW THEME (Dashboard / Full Screen Mode) - SPACIOUS
+   ========================================================================== */
+
 :root {
-    --primary-color: #73937E;
-    --secondary-color: #5B2E48;
-    --text-color: #471323;
-    --light-text-color: #CEB992;
-    --player-bg: #5B2E48;
-    --correct-color: #00CC66;
-    --wrong-color: #F21B3F;
-    --border-radius-card: 12px;
-    --border-radius-input: 8px;
-    --border-radius-button: 8px;
-    --puzzle-color-1: #FF9914;
-    --puzzle-color-2: #00CC66;
-    --puzzle-color-3: #2196F3;
-    --input-bg: #444444;
-    --input-border-color: #5B2E48;
+    /* KLEURENPALET */
+    --bg-dark: #0f172a;          
+    --bg-card: rgba(30, 41, 59, 0.85); 
+    --bg-panel: rgba(15, 23, 42, 0.95);
+    
+    --primary-accent: #0ea5e9;   
+    --secondary-accent: #8b5cf6; 
+    
+    --text-main: #f1f5f9;        
+    --text-muted: #94a3b8;       
+    
+    --correct-color: #22c55e;    
+    --wrong-color: #ef4444;      
+    --gold-color: #eab308;       
+
+    /* UI VARIABELEN */
+    --glass-border: 1px solid rgba(255, 255, 255, 0.1);
+    --radius-lg: 16px;
+    --radius-md: 8px;
 }
 
+/* --- BASIS & LAYOUT --- */
 body {
-    /* AANGEPAST: Basisfonte naar Open Sans voor leesbaarheid */
-    font-family: 'Open Sans', 'Verdana', 'Arial', sans-serif;
-    background-color: var(--primary-color);
-    color: var(--text-color);
+    font-family: 'Open Sans', sans-serif;
+    background-color: var(--bg-dark);
+    background-image: 
+        radial-gradient(circle at 15% 50%, rgba(139, 92, 246, 0.15), transparent 25%), 
+        radial-gradient(circle at 85% 30%, rgba(14, 165, 233, 0.15), transparent 25%);
+    color: var(--text-main);
     margin: 0;
-    padding: 20px;
-    text-align: center;
+    padding: 15px;
+    height: 100vh;       
+    width: 100vw;        
+    overflow: hidden;    
+    box-sizing: border-box;
+    display: flex;       
+    flex-direction: column; 
+    justify-content: flex-start;
 }
 
-/* NIEUW: Titels en belangrijke elementen worden Chakra Petch */
-h1, h2, h3, #game-over-text, #game-over-subtitle, .player-seconds {
+/* TITELS & FONTS */
+h1, h2, h3, .player-seconds, #question-counter, .puzzle-answer, #game-over-text {
     font-family: 'Chakra Petch', sans-serif;
+    text-transform: uppercase;
+    letter-spacing: 1px;
 }
 
-h1 {
-    display: none;
+/* Verbergt de algemene H1 titel, MAAR NIET de winnaar tekst */
+h1 { display: none; } 
+
+h2 {
+    color: var(--primary-accent);
+    text-shadow: 0 0 10px rgba(14, 165, 233, 0.5);
+    margin-bottom: 15px; 
+    margin-top: 0;
+    font-size: 1.6em;
 }
 
+/* --- CONTAINERS --- */
+#game-board, #setup-screen, .section-container {
+    background: var(--bg-card);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: var(--glass-border);
+    border-radius: var(--radius-lg);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    padding: 30px; 
+    margin: 0 auto;
+    max-width: 95%;
+    width: 1200px;
+    flex: 1;  
+    display: flex;
+    flex-direction: column;
+    justify-content: center; 
+    position: relative;
+    overflow: hidden;
+}
+
+/* --- SPELER KAARTEN --- */
 #player-container {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-    gap: 10px;
-    margin-bottom: 15px;
-    background-color: var(--primary-color);
+    grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+    gap: 15px;
+    margin-bottom: 30px; 
+    padding: 5px;
+    flex-shrink: 0; 
+    max-height: 20vh; 
 }
 
 .player-card {
-    background-color: var(--player-bg);
-    color: var(--light-text-color);
-    padding: 5px 8px;
-    border-radius: var(--border-radius-card);
-    border: 2px solid var(--primary-color);
-    cursor: pointer;
-    opacity: 0.9;
-    transition: border-color 0.3s, opacity 0.3s, transform 0.3s, box-shadow 0.3s, background-color 0.3s;
+    background: linear-gradient(145deg, rgba(30, 41, 59, 1), rgba(15, 23, 42, 1));
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: var(--radius-md);
+    padding: 10px;
     display: flex;
     flex-direction: column;
     align-items: center;
-    min-height: 80px;
+    justify-content: center;
     position: relative;
-}
-
-.player-card.time-gain-flash {
-    background-color: var(--correct-color) !important;
-    box-shadow: 0 0 15px 5px var(--correct-color), 0 0 25px 8px var(--correct-color);
-    color: var(--text-color) !important;
-}
-.player-card.time-gain-flash .player-seconds {
-    color: var(--text-color) !important;
-}
-
-.player-card .bonus-feedback {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    font-size: 2.5em;
-    color: var(--correct-color);
-    font-weight: bold;
-    opacity: 0;
-    transition: all 0.5s ease-out;
-    pointer-events: none;
-    text-shadow: 2px 2px 5px rgba(0,0,0,0.8);
-    z-index: 5;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+    height: 100%;
 }
 
 .player-card.active {
-    background-color: var(--wrong-color);
-    color: var(--light-text-color);
-    border-color: var(--secondary-color);
-    border-width: 5px;
-    opacity: 1;
-    transform: scale(1.05);
-    box-shadow: 0 0 15px var(--secondary-color), 0 0 25px var(--secondary-color);
+    border-color: var(--primary-accent);
+    box-shadow: 0 0 20px rgba(14, 165, 233, 0.4);
+    transform: translateY(-2px) scale(1.02);
+    z-index: 10;
 }
 
-.player-card.disabled {
-    background-color: #333333;
-    color: #666666;
-    border-color: #555555;
-    cursor: not-allowed;
-    opacity: 0.6;
-    transform: none;
-    box-shadow: none;
-}
-.player-card.disabled .player-seconds {
-    color: #888888 !important;
-}
-.player-card.disabled:hover, .player-card.disabled.active {
-    background-color: #333333 !important;
-    color: #666666 !important;
-    border-color: #555555 !important;
-    transform: none !important;
-    box-shadow: none !important;
+.player-card.active::after {
+    content: 'ON AIR';
+    position: absolute;
+    bottom: -8px;
+    background: var(--primary-accent);
+    color: #000;
+    font-size: 0.6em;
+    font-weight: bold;
+    padding: 2px 8px;
+    border-radius: 10px;
+    letter-spacing: 1px;
 }
 
-
-.player-card.active.final-player {
-    border-color: var(--correct-color);
-    box-shadow: 0 0 15px var(--correct-color), 0 0 25px var(--correct-color);
-}
-.player-card.active.opponent-player {
-    border-color: var(--wrong-color);
-    box-shadow: 0 0 15px var(--wrong-color), 0 0 25px var(--wrong-color);
-}
-
-
-.player-card-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    width: 100%;
-    margin-bottom: 0px;
-    min-height: 20px;
-}
+.player-card.active.final-player { border-color: var(--gold-color); box-shadow: 0 0 25px rgba(234, 179, 8, 0.5); }
+.player-card.active.final-player::after { background: var(--gold-color); content: 'LEADER'; }
+.player-card.active.opponent-player { border-color: var(--wrong-color); box-shadow: 0 0 20px rgba(239, 68, 68, 0.4); }
+.player-card.disabled { opacity: 0.4; filter: grayscale(100%); }
 
 .player-name {
-    font-size: 0.9em;
-    font-weight: bold;
-    overflow-wrap: break-word;
-    text-align: center;
-    flex-grow: 1;
-    order: 1;
-    line-height: 1.1;
-}
-
-.player-timer-btn {
-    margin: 0;
-    width: 35px;
-    height: 35px;
-    line-height: 35px;
-    border-radius: 50%;
-    background-color: var(--secondary-color);
-    color: var(--light-text-color);
-}
-.player-timer-btn.running {
-    background-color: var(--wrong-color);
-    color: var(--light-text-color);
-}
-
-.puzzle-starter-check {
-    font-size: 1.2em;
-    font-weight: bold;
-    color: var(--light-text-color);
-    opacity: 0.8;
-    text-shadow: 1px 1px 2px var(--text-color);
-}
-.player-card.active .puzzle-starter-check {
-    color: var(--light-text-color);
-}
-
-.player-card.disabled .puzzle-starter-check {
-    color: #666666;
-}
-
-
-.player-seconds {
-    /* AANGEPAST: Speelser font toegepast */
-    font-size: 1.8em;
-    font-weight: 700;
-    font-family: 'Chakra Petch', sans-serif;
-    color: var(--light-text-color);
-    text-align: center;
-    width: 100%;
-    line-height: 1.1;
-    margin-top: 2px;
-    transition: color 0.3s;
-}
-
-.player-card.active .player-seconds {
-    color: var(--light-text-color);
-}
-
-.player-card.time-gain-flash .player-seconds {
-    color: var(--text-color) !important;
-}
-
-#setup-screen {
-    background-color: var(--player-bg);
-    padding: 40px;
-    border-radius: var(--border-radius-card);
-    max-width: 600px;
-    margin: 0 auto;
-    text-align: left;
-    display: none;
-}
-#setup-screen.visible {
-    display: block;
-}
-.setup-input-row {
-    display: grid;
-    grid-template-columns: 140px 1fr 100px;
-    gap: 10px;
-    align-items: center;
-}
-.setup-input-row label, #theme-selector-label {
-    font-weight: bold;
-    color: var(--secondary-color);
-}
-.setup-input-row input, #theme-select {
-    padding: 8px;
-    border: 1px solid var(--input-border-color);
-    border-radius: var(--border-radius-input);
-    background-color: var(--input-bg);
-    color: var(--light-text-color);
     font-size: 1em;
-    box-sizing: border-box;
-}
-
-#theme-selector-container { display: none; }
-.setup-input-row input[type="number"] {
-    text-align: center;
-    width: 80px;
-}
-#start-quiz-btn {
-    width: 100%;
-    margin-top: 20px;
-}
-
-/* START AANGEPASTE STIJL VOOR VOLGENDE RONDE KNOPPEN */
-#start-round-2,
-#start-round-3,
-#start-round-4,
-#start-finale {
-    font-size: 1.5em; /* Grote tekst */
-    padding: 20px; /* Grote knop */
-    background-color: var(--correct-color) !important; /* Opvallende kleur */
-    color: var(--text-color) !important;
-    font-weight: bold;
-    border: 3px solid var(--secondary-color);
-    width: 100%;
-    margin-top: 30px;
-}
-/* EINDE AANGEPASTE STIJL */
-
-#start-round2-test-btn, #start-round3-test-btn {
-    background-color: var(--puzzle-color-1);
-    color: var(--secondary-color);
-    width: 100%;
-    border-radius: var(--border-radius-button);
-    margin-top: 10px;
-}
-
-#start-round3-test-btn {
-    background-color: var(--wrong-color);
-    color: var(--light-text-color);
-}
-#start-round4-test-btn {
-    background-color: var(--wrong-color);
-    color: var(--light-text-color);
-}
-
-#start-finale-test-btn {
-    background-color: var(--secondary-color);
-    color: var(--light-text-color);
-}
-
-
-#game-board {
-    background-color: var(--player-bg);
-    padding: 25px;
-    border-radius: var(--border-radius-card);
-}
-
-#question-text {
-    font-size: 1.3em;
-    font-weight: bold;
-    color: var(--light-text-color);
-    margin: 20px 0;
-    min-height: 50px;
-}
-
-#question-id {
-    font-size: 0.7em;
-    color: #666;
-    font-style: italic;
-    margin-top: -10px;
-    margin-bottom: 15px;
-    min-height: 1em;
-    display: block !important;
-}
-
-/* AANGEPAST: Stijl voor R1 beloning minder opvallend gemaakt */
-#question-counter strong {
-    font-size: 1.1em; /* Kleiner lettertype */
-    color: var(--light-text-color); /* Minder felle kleur, bijpassend bij de achtergrond */
-}
-
-
-#answer-input {
-    font-size: 1.2em;
-    padding: 10px;
-    border: 2px solid var(--secondary-color);
-    background-color: var(--input-bg);
-    color: var(--light-text-color);
-    border-radius: var(--border-radius-input);
-    transition: border-color 0.1s ease-in-out, box-shadow 0.1s ease-in-out;
-    width: 80%;
-    max-width: 400px;
-}
-
-.controls-r2-input-group {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 10px;
-    margin-top: 15px;
-    margin-bottom: 20px;
-    display: flex;
-}
-.controls-r2-input-group #check-answer {
-    margin: 0;
-    border-radius: var(--border-radius-button);
-}
-
-#answer-input:disabled {
-    cursor: not-allowed;
-    opacity: 0.5;
-}
-
-#answer-input.correct-feedback {
-    border-color: var(--correct-color) !important;
-    box-shadow: 0 0 10px 5px var(--correct-color);
-}
-#answer-input.wrong-feedback {
-    border-color: var(--wrong-color) !important;
-    box-shadow: 0 0 15px var(--wrong-color);
-}
-
-#puzzle-ids {
-    font-size: 0.8em;
-    color: #666;
-    opacity: 0.8;
-    font-style: italic;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 5px;
-    margin-bottom: 15px;
-    overflow-x: auto;
+    font-weight: 600;
+    color: var(--text-muted);
+    margin-bottom: 5px;
+    text-transform: uppercase;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
     max-width: 100%;
 }
 
-#puzzle-ids .copy-ids-btn {
-    padding: 2px 6px;
-    font-size: 0.8em;
-    background-color: var(--input-bg);
-    color: var(--light-text-color);
-    opacity: 1;
-    border-radius: var(--border-radius-button);
+.player-card.active .player-name { color: #fff; }
+
+.player-seconds {
+    font-size: 2.2em;
+    font-weight: 700;
+    color: #fff;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+    line-height: 1;
 }
 
+.player-timer-btn {
+    position: absolute;
+    top: 5px; right: 5px;
+    background: rgba(255,255,255,0.1);
+    color: #fff;
+    border: none;
+    width: 24px; height: 24px;
+    border-radius: 50%;
+    font-size: 0.8em;
+    display: flex; align-items: center; justify-content: center;
+    transition: 0.2s;
+    cursor: pointer;
+}
+.player-timer-btn:hover { background: var(--primary-accent); color: #000; }
+.player-timer-btn.running { background: var(--wrong-color); color: #fff; animation: pulse 1s infinite; }
 
+.bonus-feedback {
+    position: absolute;
+    font-family: 'Chakra Petch', sans-serif;
+    font-size: 2.5em;
+    font-weight: 900;
+    text-shadow: 0 0 10px rgba(0,0,0,0.8);
+    pointer-events: none;
+    z-index: 100;
+    opacity: 0;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+/* --- SPELBORD ELEMENTEN --- */
+#question-text {
+    font-size: 1.6em;
+    text-align: center;
+    color: #fff;
+    margin: 20px 0; 
+    line-height: 1.4;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+}
+
+#question-counter {
+    color: var(--primary-accent);
+    font-size: 1.1em;
+    margin-bottom: 5px;
+}
+
+#question-id, #puzzle-ids {
+    color: rgba(255,255,255, 0.7); 
+    font-size: 0.9em;             
+    font-family: monospace;
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    align-items: center;
+    margin: 5px 0;
+}
+
+input[type="text"], input[type="number"], select {
+    background: rgba(0, 0, 0, 0.3);
+    border: 2px solid var(--secondary-accent);
+    color: #fff;
+    padding: 12px 15px;
+    font-size: 1.1em;
+    border-radius: var(--radius-md);
+    outline: none;
+    transition: 0.3s;
+    font-family: 'Chakra Petch', sans-serif;
+    width: 100%;
+    box-sizing: border-box;
+    margin-top: 10px;
+}
+
+input:focus { border-color: var(--primary-accent); box-shadow: 0 0 15px rgba(14, 165, 233, 0.3); }
+#answer-input.correct-feedback { border-color: var(--correct-color) !important; background-color: rgba(34, 197, 94, 0.1); box-shadow: 0 0 20px var(--correct-color); }
+#answer-input.wrong-feedback { border-color: var(--wrong-color) !important; background-color: rgba(239, 68, 68, 0.1); box-shadow: 0 0 20px var(--wrong-color); animation: shake 0.4s ease-in-out; }
+
+/* Knoppen */
+button {
+    background: linear-gradient(135deg, var(--secondary-accent), #6d28d9);
+    color: #fff;
+    border: none;
+    padding: 12px 25px;
+    font-size: 1em;
+    font-family: 'Chakra Petch', sans-serif;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+    margin-top: 10px;
+}
+button:hover { transform: translateY(-2px); box-shadow: 0 6px 12px rgba(139, 92, 246, 0.4); filter: brightness(1.1); }
+button:active { transform: translateY(1px); }
+
+#start-round-1, #start-round-2, #start-round-3, #start-round-4, #start-finale {
+    background: linear-gradient(135deg, var(--correct-color), #15803d);
+    font-size: 1.4em;
+    padding: 20px;
+    width: 100%;
+    margin-top: 20px;
+    box-shadow: 0 0 20px rgba(34, 197, 94, 0.4);
+    border: 1px solid rgba(255,255,255,0.2);
+}
+
+#wrong-answer { background: linear-gradient(135deg, var(--wrong-color), #991b1b); }
+#add-seconds-10, #add-seconds-20 { background: linear-gradient(135deg, var(--primary-accent), #0284c7); }
+.copy-ids-btn { background: transparent !important; border: 1px solid rgba(255,255,255,0.3) !important; padding: 2px 8px !important; font-size: 0.8em !important; box-shadow: none !important; margin-top: 0; }
+
+/* =========================================
+   RONDE 2: DE PUZZEL
+   ========================================= */
 #puzzle-display-area {
-    margin-top: 15px;
     display: flex;
     flex-direction: column;
-    gap: 15px;
+    align-items: center;
+    width: 100%;
+    margin-top: 15px;
+    flex: 1;
+    justify-content: center;
 }
+
 #puzzle-answers-container {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 10px;
-    margin-bottom: 10px;
+    gap: 15px;
+    width: 100%;
+    max-width: 95%;
+    margin-bottom: 20px;
 }
+
 .puzzle-answer {
-    background-color: var(--secondary-color);
-    /* AANGEPAST: Trefwoorden groter */
-    padding: 15px;
-    font-size: 1.8em; /* Veel groter lettertype */
-    color: var(--light-text-color);
-    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: var(--text-muted);
+    padding: 15px 10px;
+    font-size: 1.3em;
     font-weight: bold;
-    min-height: 1.5em;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border: 2px solid var(--puzzle-color-1);
-    word-break: break-word; /* Zorg dat lange woorden passen */
-    line-height: 1.2;
+    border-radius: var(--radius-md);
+    display: flex; align-items: center; justify-content: center;
+    text-align: center;
+    min-height: 60px;
+    box-shadow: inset 0 0 20px rgba(0,0,0,0.5);
 }
 
 .puzzle-answer.found {
-    color: var(--text-color) !important;
-    border: 3px solid var(--correct-color);
-    box-shadow: 0 0 8px var(--correct-color);
-}
-
-.puzzle-answer.found.color-1 { background-color: var(--puzzle-color-1) !important; color: var(--text-color) !important; }
-.puzzle-answer.found.color-2 { background-color: var(--puzzle-color-2) !important; color: var(--text-color) !important; }
-.puzzle-answer.found.color-3 { background-color: var(--puzzle-color-3) !important; color: var(--light-text-color) !important; }
-
-.puzzle-clue, .opendeur-keyword, .geheugen-item, .finale-keyword {
-    border-radius: var(--border-radius-button);
+    background: var(--bg-dark);
+    color: #fff !important;
+    border-width: 2px;
+    box-shadow: 0 0 20px inset, 0 0 15px rgba(255,255,255,0.2);
+    text-shadow: 0 0 10px currentColor;
+    animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    z-index: 2;
 }
 
 #puzzle-clues-container {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    gap: 8px;
-    margin-bottom: 20px;
+    gap: 10px;
+    width: 100%;
+    max-width: 95%;
 }
+
 .puzzle-clue {
-    background-color: var(--secondary-color);
-    padding: 10px;
-    font-size: 2em;
-    color: var(--light-text-color);
-    border-radius: var(--border-radius-button);
-    min-height: 40px;
-    border: 2px solid var(--puzzle-color-1);
-    opacity: 0.05;
-    color: var(--player-bg);
+    background: rgba(15, 23, 42, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: var(--text-main);
+    padding: 12px 5px;
+    font-size: 1.1em;
+    font-weight: 600;
+    border-radius: var(--radius-md);
+    display: flex; align-items: center; justify-content: center;
+    text-align: center;
+    min-height: 50px;
+    word-break: break-word;
+    opacity: 0; visibility: hidden; transform: scale(0.9);
+    transition: all 0.4s ease-out;
+}
+
+#game-board.clues-visible .puzzle-clue, .puzzle-clue.found { opacity: 1; visibility: visible; transform: scale(1); }
+.puzzle-clue.found { background: var(--bg-dark); border-width: 2px; font-weight: 800; box-shadow: inset 0 0 10px rgba(0,0,0,0.8); }
+
+.puzzle-answer.found.color-1, .puzzle-clue.found.color-1 { border-color: #facc15; color: #facc15 !important; box-shadow: 0 0 15px rgba(250, 204, 21, 0.2) inset; }
+.puzzle-answer.found.color-2, .puzzle-clue.found.color-2 { border-color: #0ea5e9; color: #0ea5e9 !important; box-shadow: 0 0 15px rgba(14, 165, 233, 0.2) inset; }
+.puzzle-answer.found.color-3, .puzzle-clue.found.color-3 { border-color: #f43f5e; color: #f43f5e !important; box-shadow: 0 0 15px rgba(244, 63, 94, 0.2) inset; }
+
+/* --- RONDE 3 & 5: TREFWOORDEN --- */
+#opendeur-subject, #finale-subject {
+    font-size: 2.5em;
+    color: #fff;
+    text-align: center;
+    margin: 20px 0;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}
+
+.blurred-subject { filter: blur(12px); transition: filter 0.5s ease; user-select: none; }
+
+#opendeur-keywords-container, #finale-keywords-container {
     display: flex;
-    align-items: center;
+    flex-wrap: wrap;
     justify-content: center;
-    text-align: center;
-    transition: opacity 0.3s, background-color 0.3s, color 0.3s;
+    gap: 15px;
+    margin-top: 20px;
 }
 
-#game-board.clues-visible .puzzle-clue {
-    opacity: 1;
-    background-color: var(--input-bg);
-    color: var(--light-text-color);
-}
-
-.puzzle-clue.found {
-    opacity: 1 !important;
-}
-
-.puzzle-clue.found.color-1 { background-color: var(--puzzle-color-1) !important; color: var(--text-color) !important; }
-.puzzle-clue.found.color-2 { background-color: var(--puzzle-color-2) !important; color: var(--text-color) !important; }
-.puzzle-clue.found.color-3 { background-color: var(--puzzle-color-3) !important; color: var(--light-text-color) !important; }
-
-
-#opendeur-keywords-container {
-    display: block;
-    text-align: center;
-    gap: 0;
-    padding: 15px;
-    background-color: var(--secondary-color);
-    border-radius: var(--border-radius-card);
-}
-
-.opendeur-keyword {
-    display: inline-block;
-    width: 80%;
-    padding: 10px 15px;
-    font-size: 1.3em;
+.opendeur-keyword, .finale-keyword {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    color: transparent;
+    padding: 15px 25px;
+    font-size: 1.2em;
     font-weight: bold;
-    background-color: var(--input-bg);
-    color: var(--light-text-color);
-    border-radius: var(--border-radius-button);
-    border: 2px solid var(--puzzle-color-1);
-    margin: 4px auto;
-    transition: background-color 0.3s;
+    border-radius: var(--radius-md);
+    min-width: 120px;
+    text-align: center;
+    transition: all 0.4s;
+    position: relative;
+    overflow: hidden;
 }
 
-#opendeur-subject {
-    font-size: 3em;
-    font-weight: bold;
-    color: var(--light-text-color);
-    margin-top: 10px;
-    filter: blur(10px);
-    transition: filter 0.3s;
+.opendeur-keyword.found, .finale-keyword.found {
+    background: var(--primary-accent);
+    color: #000;
+    border-color: var(--primary-accent);
+    box-shadow: 0 0 20px rgba(14, 165, 233, 0.5);
+    transform: scale(1.05);
+    animation: flipIn 0.5s;
 }
 
-#game-board:not(.clues-visible) #opendeur-subject {
-    filter: blur(10px);
-}
+@keyframes flipIn { 0% { transform: rotateX(90deg); } 100% { transform: rotateX(0); } }
 
-#game-board.clues-visible #opendeur-subject {
-    filter: none !important;
-}
-
-
+/* --- RONDE 4: GEHEUGEN --- */
 #geheugen-board {
-    list-style-type: none;
-    padding: 10px;
-    margin: 10px auto;
-    max-width: 550px;
-    text-align: left;
-    background-color: var(--secondary-color);
-    border-radius: var(--border-radius-card);
-    filter: blur(0);
-    transition: filter 0.3s;
+    list-style: none;
+    padding: 0;
+    max-width: 700px;
+    margin: 0 auto;
+    width: 100%;
+    transition: filter 0.3s ease;
 }
 
-#game-board:not(.clues-visible) #geheugen-board {
-    filter: blur(5px);
-}
-
-#geheugen-board.answers-shown {
-    filter: none !important;
+.blurred-board {
+    filter: blur(15px);
+    pointer-events: none;
+    user-select: none;
 }
 
 .geheugen-item {
-    background-color: var(--input-bg);
-    color: var(--light-text-color);
-    padding: 10px 15px;
-    border-radius: var(--border-radius-button);
-    margin-bottom: 8px;
-    font-size: 1em;
+    background: rgba(255,255,255,0.05);
+    margin-bottom: 10px;
+    padding: 15px 20px;
+    border-radius: var(--radius-md);
     display: flex;
     justify-content: space-between;
-    align-items: center;
-    border-left: 5px solid var(--puzzle-color-1);
-}
-.geheugen-item strong {
-    color: var(--light-text-color);
-    margin-right: 10px;
-}
-.geheugen-item .geheugen-antwoord {
-    font-weight: bold;
-    color: var(--light-text-color);
-    transition: color 0.3s;
-}
-.geheugen-item.found {
-    border-left: 5px solid var(--correct-color);
-    background-color: var(--input-bg);
-}
-.geheugen-item.found .geheugen-antwoord {
-    color: var(--correct-color);
+    border-left: 4px solid rgba(255,255,255,0.2);
+    font-size: 1.2em;
 }
 
-#finale-display-area {
-    text-align: center;
-    padding: 20px;
-    background-color: var(--wrong-color);
-    border-radius: var(--border-radius-card);
-    color: var(--light-text-color);
-}
+.geheugen-item.found { background: rgba(34, 197, 94, 0.1); border-left-color: var(--correct-color); }
+.geheugen-antwoord { font-weight: bold; color: var(--correct-color); opacity: 0; transform: translateX(20px); transition: all 0.3s; }
+.geheugen-item.found .geheugen-antwoord, #geheugen-board.answers-shown .geheugen-antwoord { opacity: 1; transform: translateX(0); }
 
-#finale-keywords-container {
-    display: grid;
-    grid-template-columns: repeat(5, 1fr);
-    gap: 15px 10px;
-    margin-top: 30px;
-    max-width: 800px;
-    margin-left: auto;
-    margin-right: auto;
-}
-
-.finale-keyword {
-    background-color: var(--secondary-color);
-    color: transparent;
-    padding: 15px 10px;
-    font-size: 1.1em;
-    font-weight: bold;
-    border-radius: var(--border-radius-button);
-    border: 2px solid var(--light-text-color);
-    filter: blur(2px);
-    transition: filter 0.3s, background-color 0.3s, color 0.3s;
-}
-
-.finale-keyword.found {
-    filter: blur(0) opacity(1);
-    background-color: var(--correct-color);
-    color: var(--text-color);
-    border: 2px solid var(--primary-color);
-}
-
-.finale-keyword:nth-child(4) {
-    grid-column: auto;
-}
-.finale-keyword:nth-child(5) {
-    grid-column: auto;
-}
-
-#finale-subject {
-    font-size: 2.5em;
-    color: var(--light-text-color);
-    margin-bottom: 15px;
-}
-
-
-button {
-    background-color: var(--secondary-color);
-    color: var(--light-text-color);
-    border: none;
-    padding: 12px 20px;
-    font-size: 1em;
-    font-weight: bold;
-    border-radius: var(--border-radius-button);
-    cursor: pointer;
-    margin: 5px;
-    transition: transform 0.2s;
-}
-
-#wrong-answer {
-    background-color: var(--wrong-color);
-    color: var(--light-text-color);
-}
-
-.player-timer-btn {
-    font-size: 1.5em;
-    background-color: var(--secondary-color);
-    color: var(--light-text-color);
-    border: none;
-    border-radius: 50%;
-    width: 35px;
-    height: 35px;
-    cursor: pointer;
-    padding: 0;
-    flex-shrink: 0;
-    line-height: 35px;
-}
-.player-timer-btn.running {
-    background-color: var(--wrong-color);
-    color: var(--light-text-color);
-}
-
-#btn-toggle-timer { display: none !important; }
-
-
+/* --- GAME OVER OVERLAY --- */
 #game-over-overlay {
     position: fixed;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    background-color: var(--primary-color);
-    background-image: radial-gradient(circle, var(--player-bg) 10%, var(--primary-color) 70%);
-    animation: flashBackground 2s infinite alternate;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(15, 23, 42, 0.95);
+    backdrop-filter: blur(20px);
+    z-index: 1000;
     display: none;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
-    flex-direction: column;
-    z-index: 1000;
-    text-align: center;
-    padding: 20px;
+    animation: fadeIn 1s;
 }
 
-@keyframes flashBackground {
-    0% { filter: brightness(1); }
-    100% { filter: brightness(1.2); }
+/* BELANGRIJK: Zorg dat de winnaar tekst ZICHTBAAR is (override de algemene h1 hide) */
+#game-over-text { 
+    display: block !important;
+    font-size: 6em; 
+    color: var(--gold-color); 
+    text-shadow: 0 0 50px rgba(234, 179, 8, 0.5); 
+    margin: 0; 
+    animation: pulse 2s infinite; 
 }
+#game-over-subtitle { color: #fff; font-size: 2em; margin-bottom: 20px; opacity: 0.8; }
 
-#game-over-text {
-    color: var(--wrong-color);
-    font-size: 5.5em;
-    font-weight: bold;
-    text-shadow: 4px 4px 10px var(--text-color);
-    margin: 0;
-    line-height: 1.2;
-}
-#game-over-subtitle {
-    color: var(--secondary-color);
-    font-size: 1.8em;
-    font-weight: bold;
-    margin-bottom: 20px;
-}
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes pulse { 0% { transform: scale(1); } 70% { transform: scale(1.1); } 100% { transform: scale(1); } }
+@keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-10px); } 75% { transform: translateX(10px); } }
 
-
-/* ========================================================== */
-/* 📱 RESPONSIVE STYLES (Mobile First Overrides) */
-/* ========================================================== */
-
-/* Algemene lay-out voor smalle schermen */
-@media (max-width: 768px) {
-    body {
-        padding: 10px;
-    }
-
-    #setup-screen {
-        padding: 20px;
-    }
-
-    /* Pas de indeling van de spelersinvoer aan */
-    .setup-input-row {
-        grid-template-columns: 1fr 1fr; /* 2 kolommen in plaats van 3 */
-        gap: 5px;
-    }
-    .setup-input-row label {
-        grid-column: 1 / span 2; /* Label neemt volledige breedte in */
-        text-align: left;
-        margin-top: 10px;
-    }
-    .setup-input-row input:not([type="number"]),
-    .setup-input-row select {
-        grid-column: 1 / span 2; /* Input neemt volledige breedte in */
-    }
-    .setup-input-row input[type="number"] {
-        width: 100%;
-        text-align: left;
-        grid-column: 1 / span 2;
-        margin-top: 5px;
-    }
-    #num-players {
-        width: 100%;
-        grid-column: 2;
-        text-align: center;
-    }
-    .setup-input-row label[for="num-players"] {
-        grid-column: 1;
-        text-align: left;
-    }
-
-    /* Buttons op de setup-pagina (volledige breedte) */
-    #start-quiz-btn,
-    #start-round2-test-btn,
-    #start-round3-test-btn,
-    #start-round4-test-btn {
-        margin-top: 15px;
-    }
-
-    /* Spelerkaarten: Blijven flexibel, maar zorgen voor betere lezing */
-    .player-card {
-        min-height: 70px;
-        padding: 10px 5px;
-    }
-    .player-name {
-        font-size: 0.8em;
-        line-height: 1;
-    }
-    .player-seconds {
-        font-size: 1.5em;
-    }
-    .player-timer-btn {
-        width: 30px;
-        height: 30px;
-        line-height: 30px;
-        font-size: 1.2em;
-    }
-    .puzzle-starter-check {
-        font-size: 1em;
-    }
-
-
-    /* Game Board */
-    #game-board {
-        padding: 15px;
-    }
-    #question-text {
-        font-size: 1.1em;
-        min-height: 40px;
-    }
-    #question-counter {
-        font-size: 0.9em;
-    }
-    #answer-input {
-        font-size: 1em;
-        width: 90%;
-    }
-    .controls-r2-input-group {
-        flex-direction: column;
-        gap: 10px;
-    }
-    .controls-r2-input-group button {
-        width: 100%;
-    }
-
-    /* Puzzel Ronde */
-    #puzzle-answers-container {
-        grid-template-columns: 1fr; /* 1 antwoord per rij */
-    }
-    .puzzle-answer {
-        padding: 15px;
-        font-size: 1em;
-    }
-    #puzzle-clues-container {
-        grid-template-columns: repeat(2, 1fr); /* 2 kolommen in plaats van 4 */
-        gap: 5px;
-    }
-
-    /* Open Deur Ronde */
-    #opendeur-subject {
-        font-size: 2em;
-    }
-    .opendeur-keyword {
-        width: 95%;
-        font-size: 1.1em;
-        padding: 8px 10px;
-    }
-
-    /* Geheugen Ronde */
-    .geheugen-item {
-        font-size: 0.9em;
-        padding: 8px 10px;
-        flex-direction: column;
-        align-items: flex-start;
-    }
-    .geheugen-item span {
-        text-align: left;
-    }
-    .geheugen-item .geheugen-antwoord {
-        margin-top: 5px;
-    }
-
-
-    /* Finale Ronde */
-    #finale-keywords-container {
-        grid-template-columns: repeat(3, 1fr); /* 3 kolommen in plaats van 5 */
-        gap: 8px;
-    }
-    .finale-keyword {
-        font-size: 0.9em;
-        padding: 10px 5px;
-    }
-    #finale-subject {
-        font-size: 1.8em;
-    }
-
-    /* Controles onderaan */
-    .player-controls button {
-        width: 100%;
-        margin: 5px 0;
-    }
+/* --- RESPONSIVE --- */
+@media (max-height: 800px) {
+    body { padding: 5px; font-size: 14px; }
+    #player-container { gap: 10px; margin-bottom: 15px; } 
+    .player-card { padding: 5px; }
+    .player-seconds { font-size: 1.8em; }
+    #game-board { padding: 15px; }
+    h2 { font-size: 1.4em; margin-bottom: 10px; }
+    #question-text { font-size: 1.3em; margin: 10px 0; }
+    .puzzle-answer { min-height: 45px; font-size: 1.1em; padding: 8px; }
+    .puzzle-clue { min-height: 40px; font-size: 1em; padding: 8px; }
+    #opendeur-subject, #finale-subject { font-size: 2em; margin: 10px 0; }
+    .opendeur-keyword, .finale-keyword { padding: 10px 15px; font-size: 1em; }
+    .geheugen-item { padding: 10px 15px; margin-bottom: 5px; font-size: 1.1em; }
+    button { padding: 10px 20px; font-size: 0.9em; margin-top: 5px; }
+    input[type="text"] { padding: 8px; font-size: 1em; margin-top: 5px; }
 }

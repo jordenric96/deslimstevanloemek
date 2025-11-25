@@ -1,14 +1,14 @@
-// quizdata_r2.js - Complete data voor Ronde 2 (Puzzel)
+// quizdata_r2.js - Complete data voor Ronde 2 (Puzzel) - 500 Items
 
-const STANDAARD_R2_POOL = [
-    // --- Oorspronkelijke 20 Items ---
+var STANDAARD_R2_POOL = [
+    // --- Oorspronkelijke Pool (Opgekuist) ---
     { answer: "Voetbal", clues: ["Bal", "Met 11", "Rode kaart", "Stadion"] },
     { answer: "Tennis", clues: ["Racket", "Net", "Set", "Gravel"] },
     { answer: "Wielrennen", clues: ["Fiets", "Peloton", "Gele trui", "Kasseien"] },
     { answer: "Harry Potter", clues: ["Zweinstein", "Uil", "Dreuzels", "Onzichtbaarheidsmantel"] },
     { answer: "James Bond", clues: ["007", "Martini", "MI6", "Aston Martin"] },
     { answer: "Star Wars", clues: ["Lightsaber", "The Force", "Darth Vader", "Jedi"] },
-    { answer: "Appel", clues: ["Fruit", "Boom", "Rood/Groen", "Computer"] },
+    { answer: "Appel", clues: ["Fruit", "Boom", "Rood/Groen", "Sneeuwwitje"] },
     { answer: "Banaan", clues: ["Geel", "Krom", "Aap", "Smoothie"] },
     { answer: "Peer", clues: ["Fruit", "Lamp", "Vorm", "Stoof"] },
     { answer: "Brussel", clues: ["Hoofdstad", "België", "Manneken Pis", "Atomium"] },
@@ -23,7 +23,7 @@ const STANDAARD_R2_POOL = [
     { answer: "Gitaar", clues: ["Snaren", "Muziek", "Rock", "Plectrum"] },
     { answer: "Piano", clues: ["Toetsen", "Zwart-wit", "Vleugel", "Klassiek"] },
 
-    // --- 🌍 Geografie (10x) ---
+    // --- 🌍 Geografie ---
     { answer: "Parijs", clues: ["Frankrijk", "Eiffeltoren", "Liefde", "Seine"] },
     { answer: "Rome", clues: ["Italië", "Colosseum", "Vaticaanstad", "Gladiatoren"] },
     { answer: "Amsterdam", clues: ["Grachten", "Nederland", "Fietsen", "Rijksmuseum"] },
@@ -35,19 +35,19 @@ const STANDAARD_R2_POOL = [
     { answer: "Spanje", clues: ["Madrid", "Tapas", "Stierenvechten", "Iberisch Schiereiland"] },
     { answer: "Australië", clues: ["Kangoeroe", "Sydney", "Down Under", "Groot Barrièrerif"] },
 
-    // --- 🎵 Muziek & Instrumenten (10x) ---
-    { answer: "Drums", clues: ["Ritme", "Stokken", "Bekken", "Percussie"] },
+    // --- 🎵 Muziek & Instrumenten ---
+    { answer: "Drumstel", clues: ["Ritme", "Stokken", "Bekken", "Percussie"] },
     { answer: "Madonna", clues: ["Queen of Pop", "Material Girl", "Blond", "Verenigde Staten"] },
     { answer: "The Beatles", clues: ["Liverpool", "Vier", "Yellow Submarine", "Lennon"] },
     { answer: "Saxofoon", clues: ["Blaasinstrument", "Jazz", "Koper", "Riet"] },
     { answer: "Queen", clues: ["Bohemian Rhapsody", "Freddie Mercury", "Rock", "Gitaar"] },
-    { answer: "Violen", clues: ["Strijkinstrument", "Klassiek", "Hout", "Vier snaren"] },
-    { answer: "Drumstel", clues: ["Ritme", "Stokken", "Bekken", "Percussie"] },
+    { answer: "Viool", clues: ["Strijkinstrument", "Klassiek", "Hout", "Vier snaren"] },
     { answer: "Adele", clues: ["Zangeres", "Hello", "21", "Groot-Brittannië"] },
     { answer: "Trompet", clues: ["Koper", "Blaasinstrument", "Jazz", "Klep"] },
     { answer: "Elvis Presley", clues: ["King", "Rock 'n Roll", "Memphis", "Witte pak"] },
+    { answer: "Michael Jackson", clues: ["King of Pop", "Thriller", "Moonwalk", "Handschoen"] },
 
-    // --- 🍽️ Eten & Drinken (10x) ---
+    // --- 🍽️ Eten & Drinken ---
     { answer: "Pizza", clues: ["Italië", "Kaas", "Oven", "Rond"] },
     { answer: "Koffie", clues: ["Boontje", "Cafeïne", "Ochtend", "Zwart/Melk"] },
     { answer: "Chocolade", clues: ["Cacao", "Bruin", "Zwitserland/België", "Zoet"] },
@@ -59,7 +59,7 @@ const STANDAARD_R2_POOL = [
     { answer: "Bier", clues: ["Alcohol", "Gerst", "Schuim", "Koud"] },
     { answer: "Wafel", clues: ["België", "Stroop", "Suiker", "Oven"] },
 
-    // --- 💡 Tech & Wetenschap (10x) ---
+    // --- 💡 Tech & Wetenschap ---
     { answer: "Zwaartekracht", clues: ["Newton", "Valt", "Aarde", "Massa"] },
     { answer: "Internet", clues: ["WWW", "Browser", "Connectie", "Wereldwijd"] },
     { answer: "Telescoop", clues: ["Sterren", "Verre", "Galaxie", "Kijken"] },
@@ -71,7 +71,7 @@ const STANDAARD_R2_POOL = [
     { answer: "Mars", clues: ["Rode planeet", "Aarde", "Rover", "God van de Oorlog"] },
     { answer: "Fotosynthese", clues: ["Planten", "Zonlicht", "Groen", "Energie"] },
 
-    // --- 🎬 Film & TV (10x) ---
+    // --- 🎬 Film & TV ---
     { answer: "Titanic", clues: ["Schip", "Zinken", "DiCaprio", "IJsberg"] },
     { answer: "Lord of the Rings", clues: ["Tolkien", "Midden-Aarde", "Ring", "Hobbit"] },
     { answer: "Friends", clues: ["Central Perk", "New York", "Zes", "Sitcom"] },
@@ -83,7 +83,7 @@ const STANDAARD_R2_POOL = [
     { answer: "The Crown", clues: ["Koningshuis", "Elizabeth", "Netflix", "Engeland"] },
     { answer: "Frozen", clues: ["Disney", "IJs", "Elsa", "Laat Los"] },
 
-    // --- 🦁 Dieren (10x) ---
+    // --- 🦁 Dieren ---
     { answer: "Pinguïn", clues: ["Zuidpool", "Vogel", "Zwemmen", "Zwart-wit"] },
     { answer: "Vleermuis", clues: ["Vliegt", "Nacht", "Zoogdier", "Echo"] },
     { answer: "Dolfijn", clues: ["Zee", "Intelligent", "Springen", "Zoogdier"] },
@@ -94,8 +94,8 @@ const STANDAARD_R2_POOL = [
     { answer: "Kat", clues: ["Miauwen", "Negen levens", "Spinnen", "Jagen"] },
     { answer: "Papegaai", clues: ["Praten", "Kleurrijk", "Tropisch", "Kromme snavel"] },
     { answer: "Haai", clues: ["Tanden", "Oceaan", "Groot", "Roofvis"] },
-    
-    // --- 🏰 Historische Figuren (20x) ---
+
+    // --- 🏰 Historische Figuren ---
     { answer: "Napoleon", clues: ["Frankrijk", "Keizer", "Waterloo", "Klein"] },
     { answer: "Albert Einstein", clues: ["E=mc²", "Duitsland", "Relativiteit", "Natuurkundige"] },
     { answer: "Leonardo da Vinci", clues: ["Mona Lisa", "Uitvinder", "Italiaans", "Renaissance"] },
@@ -117,7 +117,7 @@ const STANDAARD_R2_POOL = [
     { answer: "Martin Luther King Jr.", clues: ["Amerika", "Rechten", "I Have a Dream", "Burgerrechten"] },
     { answer: "Tutenchamun", clues: ["Farao", "Graf", "Egypte", "Jong"] },
 
-    // --- ⚽ Sporten & Termen (20x) ---
+    // --- ⚽ Sporten & Termen ---
     { answer: "Basketbal", clues: ["Net", "Dribbelen", "Vijf", "NBA"] },
     { answer: "Zwemmen", clues: ["Water", "Slag", "Badpak", "Olympisch"] },
     { answer: "Golf", clues: ["Club", "Hole", "Tee", "Balletje"] },
@@ -139,7 +139,7 @@ const STANDAARD_R2_POOL = [
     { answer: "Handbal", clues: ["Zeven", "Doel", "Gooien", "Veld"] },
     { answer: "Gymnastiek", clues: ["Balk", "Vloer", "Ringen", "Turnen"] },
 
-    // --- 🤖 Tech & Gadgets (20x) ---
+    // --- 🤖 Tech & Gadgets ---
     { answer: "Smartphone", clues: ["Bellen", "Internet", "Camera", "App"] },
     { answer: "Drone", clues: ["Vliegen", "Afstand", "Vier propellers", "Camera"] },
     { answer: "VR Bril", clues: ["Virtueel", "Hoofd", "Spel", "3D"] },
@@ -161,7 +161,7 @@ const STANDAARD_R2_POOL = [
     { answer: "E-reader", clues: ["Boek", "Digitaal", "Inkt", "Lezen"] },
     { answer: "Cloud", clues: ["Opslag", "Internet", "Bestanden", "Hemel"] },
 
-    // --- 🍎 Fruit & Groenten (20x) ---
+    // --- 🍎 Fruit & Groenten ---
     { answer: "Rijst", clues: ["Azië", "Korrel", "Water", "Sushi"] },
     { answer: "Wortel", clues: ["Oranje", "Onder de grond", "Konijn", "A-vitamine"] },
     { answer: "Aardbei", clues: ["Rood", "Zomer", "Zoet", "Jam"] },
@@ -183,7 +183,7 @@ const STANDAARD_R2_POOL = [
     { answer: "Avocado", clues: ["Groen", "Grote pit", "Guacamole", "Vrucht"] },
     { answer: "Peper", clues: ["Pittig", "Groen/Rood", "Chili", "Hete"] },
 
-    // --- 🎶 Muziekstijlen (20x) ---
+    // --- 🎶 Muziekstijlen ---
     { answer: "Jazz", clues: ["New Orleans", "Improvisatie", "Saxofoon", "Blues"] },
     { answer: "Rock", clues: ["Gitaar", "Drums", "Luid", "Jaren '50"] },
     { answer: "Popmuziek", clues: ["Populair", "Top 40", "Commercieel", "Mainstream"] },
@@ -205,7 +205,7 @@ const STANDAARD_R2_POOL = [
     { answer: "Salsa", clues: ["Cuba", "Dans", "Latijns-Amerika", "Ritme"] },
     { answer: "K-Pop", clues: ["Zuid-Korea", "Boyband", "Idool", "Gekleurd haar"] },
 
-    // --- 🎨 Kunst & Cultuur (20x) ---
+    // --- 🎨 Kunst & Cultuur ---
     { answer: "Mona Lisa", clues: ["Da Vinci", "Lachen", "Parijs", "Portret"] },
     { answer: "De Nachtwacht", clues: ["Rembrandt", "Rijksmuseum", "Amsterdam", "Groot"] },
     { answer: "Beeldhouwwerk", clues: ["Steen", "Vorm", "3D", "Michelangelo"] },
@@ -227,7 +227,7 @@ const STANDAARD_R2_POOL = [
     { answer: "Stripboek", clues: ["Tekeningen", "Ballon", "Verhaal", "Omslag"] },
     { answer: "Keramiek", clues: ["Klei", "Bakken", "Potten", "Vaas"] },
 
-    // --- 🦁 Dieren (Aanvullend 20x) ---
+    // --- 🦁 Dieren (Extra) ---
     { answer: "Krokodil", clues: ["Reptiel", "Tanden", "Lange bek", "Nijl"] },
     { answer: "Varken", clues: ["Stal", "Roze", "Knorren", "Modder"] },
     { answer: "Vos", clues: ["Slim", "Rood", "Staart", "Bos"] },
@@ -249,7 +249,7 @@ const STANDAARD_R2_POOL = [
     { answer: "Inktvis", clues: ["Acht armen", "Inkt", "Zee", "Weekdier"] },
     { answer: "Zalm", clues: ["Vis", "Rood", "Rivier", "Zwemmen"] },
 
-    // --- 🌎 Natuur & Wetenschap (20x) ---
+    // --- 🌎 Natuur & Wetenschap (Extra) ---
     { answer: "Zon", clues: ["Ster", "Warm", "Licht", "Geel"] },
     { answer: "Aarde", clues: ["Planeet", "Blauw", "Leven", "Draaien"] },
     { answer: "Water", clues: ["H₂O", "Vloeistof", "Dorst", "Zee"] },
@@ -271,7 +271,7 @@ const STANDAARD_R2_POOL = [
     { answer: "Neutron", clues: ["Atoom", "Kern", "Lading", "Deeltje"] },
     { answer: "Kalksteen", clues: ["Steen", "Wit", "Zee", "Bouw"] },
 
-    // --- 🎬 Film & TV (Aanvullend 20x) ---
+    // --- 🎬 Film & TV (Extra) ---
     { answer: "The Matrix", clues: ["Keuze", "Rood/Blauw", "Neo", "Kogels"] },
     { answer: "De Leeuwenkoning", clues: ["Disney", "Jungle", "Simba", "Cirkel van het Leven"] },
     { answer: "Pulp Fiction", clues: ["Tarantino", "Dans", "Koffer", "Bloed"] },
@@ -293,7 +293,7 @@ const STANDAARD_R2_POOL = [
     { answer: "Game of Thrones", clues: ["Winter", "Draken", "IJzeren Troon", "Westeros"] },
     { answer: "Peaky Blinders", clues: ["Engeland", "Hoed", "Bende", "Birmingham"] },
 
-    // --- 📝 Literaire Werken (20x) ---
+    // --- 📝 Literaire Werken ---
     { answer: "De Hobbit", clues: ["Tolkien", "Dwergen", "Bilbo", "Ring"] },
     { answer: "1984", clues: ["Orwell", "Big Brother", "Dystopie", "Grote Broer"] },
     { answer: "De Odyssee", clues: ["Homerus", "Grieks", "Zee", "Ithaka"] },
@@ -315,7 +315,7 @@ const STANDAARD_R2_POOL = [
     { answer: "Lord of the Flies", clues: ["Eiland", "Kinderen", "Orde", "Varken"] },
     { answer: "Frankenstein", clues: ["Monster", "Schepper", "Lichaam", "Wetenschap"] },
 
-    // --- 🇧🇪🇳🇱 Steden & Plaatsen (20x) ---
+    // --- 🇧🇪🇳🇱 Steden & Plaatsen ---
     { answer: "Rotterdam", clues: ["Haven", "Erasmusbrug", "Kubuswoningen", "Maas"] },
     { answer: "Brugge", clues: ["België", "Water", "Historisch", "Horeca"] },
     { answer: "Utrecht", clues: ["Domtoren", "Gracht", "Midden", "Nederland"] },
@@ -337,7 +337,7 @@ const STANDAARD_R2_POOL = [
     { answer: "Seoel", clues: ["Zuid-Korea", "Technologie", "Han", "Hoofdstad"] },
     { answer: "Dublin", clues: ["Ierland", "Guinness", "Groen", "Literatuur"] },
 
-    // --- 📦 Dagelijkse Objecten (20x) ---
+    // --- 📦 Dagelijkse Objecten ---
     { answer: "Sleutel", clues: ["Slot", "Metaal", "Huis", "Openen"] },
     { answer: "Schaar", clues: ["Twee gaten", "Knippen", "Metaal", "Papier"] },
     { answer: "Paraplu", clues: ["Regen", "Opklapbaar", "Stok", "Nat"] },
@@ -348,9 +348,7 @@ const STANDAARD_R2_POOL = [
     { answer: "Koptelefoon", clues: ["Oren", "Muziek", "Horen", "Draad"] },
     { answer: "Kaars", clues: ["Vuur", "Licht", "Was", "Feest"] },
     { answer: "Spiegel", clues: ["Reflectie", "Glas", "Kijken", "Badkamer"] },
-    { answer: "Klok", clues: ["Tijd", "Wijzers", "Tikken", "Rond"] },
     { answer: "Kussen", clues: ["Hoofd", "Zacht", "Slapen", "Bed"] },
-    { answer: "Portemonnee", clues: ["Geld", "Kaart", "Leder", "Tas"] },
     { answer: "Krijt", clues: ["Wit", "Bord", "School", "Teken"] },
     { answer: "Gloeilamp", clues: ["Licht", "Edison", "Glas", "Kap"] },
     { answer: "Zaklamp", clues: ["Batterij", "Donker", "Lichtbundel", "Hand"] },
@@ -358,8 +356,9 @@ const STANDAARD_R2_POOL = [
     { answer: "Kalender", clues: ["Datum", "Maanden", "Jaren", "Afdruk"] },
     { answer: "Deurbel", clues: ["Geluid", "Gasten", "Drukken", "Huis"] },
     { answer: "Thermosfles", clues: ["Warm/Koud", "Drinken", "Isoleren", "Metaal"] },
+    { answer: "Afstandsbediening", clues: ["TV", "Zappen", "Batterijen", "Knoppen"] },
 
-    // --- 🖼️ Merken & Logo's (20x) ---
+    // --- 🖼️ Merken & Logo's ---
     { answer: "Coca-Cola", clues: ["Frisdrank", "Rood-wit", "Amerika", "Kerstman"] },
     { answer: "Nike", clues: ["Sportkleding", "Swoosh", "Just Do It", "Grieks"] },
     { answer: "LEGO", clues: ["Deens", "Plastic blokjes", "Kinderen", "Bouwen"] },
@@ -381,7 +380,7 @@ const STANDAARD_R2_POOL = [
     { answer: "Barbie", clues: ["Pop", "Roze", "Ken", "Mattel"] },
     { answer: "VISA", clues: ["Creditcard", "Blauw-geel", "Betalen", "Wereldwijd"] },
 
-    // --- 🧪 Chemie & Materialen (20x) ---
+    // --- 🧪 Chemie & Materialen ---
     { answer: "Goud", clues: ["Metaal", "Geel", "Sieraad", "Au"] },
     { answer: "Zilver", clues: ["Metaal", "Wit", "Spiegel", "Ag"] },
     { answer: "Zout", clues: ["Wit", "Zee", "Keuken", "NaCl"] },
@@ -403,7 +402,7 @@ const STANDAARD_R2_POOL = [
     { answer: "Atoom", clues: ["Kleinste", "Deel", "Kern", "Neutron"] },
     { answer: "Polymeren", clues: ["Keten", "Plastic", "Groot", "Moleculen"] },
 
-    // --- 🎭 Fictieve Personages (20x) ---
+    // --- 🎭 Fictieve Personages ---
     { answer: "Sherlock Holmes", clues: ["Detective", "Londen", "Pijp", "Watson"] },
     { answer: "Darth Vader", clues: ["Star Wars", "Zwart", "Adem", "Vader"] },
     { answer: "Mickey Mouse", clues: ["Disney", "Muis", "Rood", "Oren"] },
@@ -425,7 +424,7 @@ const STANDAARD_R2_POOL = [
     { answer: "Winnie de Poeh", clues: ["Honing", "Beer", "Ezel", "Bos"] },
     { answer: "Hermelien Griffel", clues: ["Harry Potter", "Muis", "Slim", "Tijd"] },
 
-    // --- 🛠️ Gereedschap & Machines (20x) ---
+    // --- 🛠️ Gereedschap & Machines ---
     { answer: "Hamer", clues: ["Spijkers", "Slag", "Kop", "Handvat"] },
     { answer: "Schroevendraaier", clues: ["Draaien", "Philips", "Plat", "Hand"] },
     { answer: "Tang", clues: ["Vastgrijpen", "Knippen", "Bek", "Metaal"] },
@@ -447,7 +446,7 @@ const STANDAARD_R2_POOL = [
     { answer: "Steeksleutel", clues: ["Moer", "Vastdraaien", "Maat", "Open"] },
     { answer: "Nietmachine", clues: ["Kantoor", "Papier", "Metaal", "Vastzetten"] },
 
-    // --- 🐉 Mythen & Legenden (20x) ---
+    // --- 🐉 Mythen & Legenden ---
     { answer: "Pegasus", clues: ["Griekse mythe", "Vleugels", "Wit", "Paard"] },
     { answer: "Zeus", clues: ["Oppergod", "Bliksem", "Olympos", "Griek"] },
     { answer: "Sfinx", clues: ["Egypte", "Hoofd/Lichaam", "Raadsel", "Groot"] },
@@ -469,7 +468,7 @@ const STANDAARD_R2_POOL = [
     { answer: "Anubis", clues: ["Egypte", "Doden", "Jakhals", "Wegen"] },
     { answer: "Vampier", clues: ["Nacht", "Bloed", "Tanden", "Dracula"] },
 
-    // --- 👕 Kleding & Accessoires (20x) ---
+    // --- 👕 Kleding & Accessoires ---
     { answer: "Spijkerbroek", clues: ["Denim", "Blauw", "Werkkleding", "Levi's"] },
     { answer: "Schoenen", clues: ["Voeten", "Leder", "Veters", "Lopen"] },
     { answer: "Handschoenen", clues: ["Handen", "Koud", "Tien vingers", "Leer"] },
@@ -491,7 +490,7 @@ const STANDAARD_R2_POOL = [
     { answer: "Veters", clues: ["Schoen", "Strik", "Vastmaken", "Draad"] },
     { answer: "Ketting", clues: ["Nek", "Goud", "Hanger", "Sieraad"] },
 
-    // --- ⚖️ Maten, Gewichten & Geld (20x) ---
+    // --- ⚖️ Maten, Gewichten & Geld ---
     { answer: "Kilogram", clues: ["Gewicht", "1000 gram", "Massa", "Kilo"] },
     { answer: "Meter", clues: ["Lengte", "100 cm", "Afstand", "Basis"] },
     { answer: "Euro", clues: ["Munt", "Europa", "100 cent", "Geld"] },
@@ -513,9 +512,9 @@ const STANDAARD_R2_POOL = [
     { answer: "Pixel", clues: ["Beeld", "Scherm", "Punt", "Kleur"] },
     { answer: "Ounce", clues: ["Amerikaans", "Gewicht", "Goud", "Vloeistof"] },
 
-    // --- 🌿 Kruiden & Specerijen (20x) ---
-    { answer: "Peper", clues: ["Zwart/Wit", "Strooien", "Scherp", "Bessen"] },
-    { answer: "Zout", clues: ["Wit", "Zee", "Keuken", "NaCl"] },
+    // --- 🌿 Kruiden & Specerijen ---
+    { answer: "Zwarte Peper", clues: ["Zwart", "Strooien", "Scherp", "Bessen"] },
+    { answer: "Zeezout", clues: ["Wit", "Zee", "Keuken", "Kristallen"] },
     { answer: "Kaneel", clues: ["Bruin", "Stokje", "Zoet", "Speculaas"] },
     { answer: "Nootmuskaat", clues: ["Nootsmaak", "Rasp", "Indonesië", "Oranje"] },
     { answer: "Basilicum", clues: ["Groen", "Italiaans", "Pesto", "Plant"] },
@@ -535,7 +534,7 @@ const STANDAARD_R2_POOL = [
     { answer: "Anijs", clues: ["Zoet", "Drank", "Ouzo", "Ster"] },
     { answer: "Mosterdzaad", clues: ["Geel", "Scherp", "Saus", "Zaad"] },
 
-    // --- 🧑 De Mens (Anatomie) (20x) ---
+    // --- 🧑 De Mens (Anatomie) ---
     { answer: "Hart", clues: ["Kloppen", "Bloed", "Pomp", "Liefde"] },
     { answer: "Hersenen", clues: ["Denken", "Hoofd", "Controle", "Grijs"] },
     { answer: "Longen", clues: ["Ademen", "Zuurstof", "Twee", "Borst"] },
@@ -557,7 +556,7 @@ const STANDAARD_R2_POOL = [
     { answer: "Knie", clues: ["Gewricht", "Been", "Buigen", "Patella"] },
     { answer: "Hand", clues: ["Vijf vingers", "Grijpen", "Pols", "Schrijven"] },
 
-    // --- 🚀 Vervoer (20x) ---
+    // --- 🚀 Vervoer ---
     { answer: "Auto", clues: ["Vier wielen", "Motor", "Weg", "Rijden"] },
     { answer: "Vliegtuig", clues: ["Vleugels", "Lucht", "Jet", "Reizen"] },
     { answer: "Trein", clues: ["Rails", "Lang", "Stoom", "Stations"] },
@@ -579,12 +578,12 @@ const STANDAARD_R2_POOL = [
     { answer: "Spaceshuttle", clues: ["Ruimte", "Lanceer", "NASA", "Vleugels"] },
     { answer: "Slee", clues: ["Sneeuw", "Hout", "Trekken", "Winter"] },
 
-    // --- 💡 Willekeurige Feiten (Diversen) (30x) ---
+    // --- 💡 Willekeurige Feiten (Diversen) ---
     { answer: "Diamant", clues: ["Koolstof", "Hardst", "Ring", "Wit"] },
     { answer: "Vierkant", clues: ["Vier", "Gelijk", "Hoeken", "Vorm"] },
     { answer: "Echo", clues: ["Geluid", "Terug", "Bergen", "Herhaling"] },
     { answer: "Wapenstilstand", clues: ["Oorlog", "Einde", "11 november", "Pauze"] },
-    { answer: "Chinezen", clues: ["Azië", "Grootste", "Muur", "Taal"] },
+    { answer: "China", clues: ["Azië", "Grootste", "Muur", "Taal"] },
     { answer: "Zijde", clues: ["Stof", "Worm", "Zacht", "Chinees"] },
     { answer: "Potlood", clues: ["Hout", "Schrijven", "Gum", "Grijs"] },
     { answer: "Luchtbel", clues: ["Water", "Rond", "Boven", "Gas"] },
@@ -593,7 +592,6 @@ const STANDAARD_R2_POOL = [
     { answer: "Regenboog", clues: ["Zeven kleuren", "Water", "Zon", "Boog"] },
     { answer: "Schaduw", clues: ["Licht", "Donker", "Vorm", "Volgen"] },
     { answer: "Olie", clues: ["Zwart", "Motor", "Dikke vloeistof", "Arabisch"] },
-    { answer: "Goud", clues: ["Metaal", "Geel", "Sieraad", "Au"] },
     { answer: "Papier", clues: ["Boom", "Schrijven", "Vouwen", "Blad"] },
     { answer: "Klokkentoren", clues: ["Kerk", "Hoog", "Geluid", "Uur"] },
     { answer: "Wijn", clues: ["Druif", "Rood/Wit", "Fles", "Alcohol"] },
@@ -609,5 +607,204 @@ const STANDAARD_R2_POOL = [
     { answer: "Telefooncel", clues: ["Oud", "Bellen", "Rood", "Straat"] },
     { answer: "Barcode", clues: ["Strepen", "Scanner", "Product", "Winkel"] },
     { answer: "Klok", clues: ["Tijd", "Rond", "Wijzers", "Geluid"] },
-    { answer: "Briljant", clues: ["Slijpvorm", "Diamant", "Schitteren", "Licht"] }
+    { answer: "Briljant", clues: ["Slijpvorm", "Diamant", "Schitteren", "Licht"] },
+
+    // --- 👷 Beroepen (Nieuw) ---
+    { answer: "Brandweerman", clues: ["Vuur", "Slang", "Rood", "Blussen"] },
+    { answer: "Politieagent", clues: ["Blauw", "Boeien", "Wet", "Sirene"] },
+    { answer: "Dokter", clues: ["Ziekenhuis", "Wit", "Patiënt", "Medicijn"] },
+    { answer: "Piloot", clues: ["Vliegtuig", "Cockpit", "Uniform", "Vliegen"] },
+    { answer: "Bakker", clues: ["Brood", "Oven", "Meel", "Vroeg"] },
+    { answer: "Slager", clues: ["Vlees", "Mes", "Schort", "Worst"] },
+    { answer: "Kapper", clues: ["Haar", "Schaar", "Spiegel", "Föhn"] },
+    { answer: "Leraar", clues: ["School", "Klas", "Bord", "Les"] },
+    { answer: "Tandarts", clues: ["Kies", "Boor", "Stoel", "Mond"] },
+    { answer: "Boer", clues: ["Land", "Tractor", "Dieren", "Oogst"] },
+    { answer: "Astronaut", clues: ["Ruimte", "Raket", "Pak", "NASA"] },
+    { answer: "Schilder", clues: ["Kwast", "Verf", "Muur", "Ladder"] },
+    { answer: "Ober", clues: ["Restaurant", "Dienblad", "Bestelling", "Fooi"] },
+    { answer: "Dierenarts", clues: ["Huisdier", "Ziek", "Praktijk", "Spuitje"] },
+    { answer: "Rechter", clues: ["Rechtbank", "Hamer", "Toga", "Vonnis"] },
+    { answer: "Soldaat", clues: ["Leger", "Wapen", "Camouflage", "Oorlog"] },
+    { answer: "Kapitein", clues: ["Schip", "Boot", "Rang", "Stuur"] },
+    { answer: "Postbode", clues: ["Brieven", "Fiets/Auto", "Bezorgen", "Bus"] },
+    { answer: "Timmerman", clues: ["Hout", "Zaag", "Hamer", "Bouwen"] },
+    { answer: "Loodgieter", clues: ["Buizen", "Lek", "Water", "WC"] },
+    { answer: "Kok", clues: ["Keuken", "Muts", "Eten", "Restaurant"] },
+    { answer: "Bibliothecaris", clues: ["Boeken", "Stilte", "Uitleen", "Bieb"] },
+    { answer: "Detective", clues: ["Onderzoek", "Vergrootglas", "Misdaad", "Speuren"] },
+    { answer: "Verpleger", clues: ["Zorg", "Ziekenhuis", "Bed", "Hulp"] },
+    { answer: "Fotograaf", clues: ["Camera", "Foto", "Lens", "Flits"] },
+
+    // --- 🏠 Huis & Interieur (Nieuw) ---
+    { answer: "Bank", clues: ["Zitten", "Woonkamer", "TV", "Kussens"] },
+    { answer: "Tafel", clues: ["Eten", "Poten", "Blad", "Stoelen"] },
+    { answer: "Stoel", clues: ["Zitten", "Leuning", "Vier poten", "Tafel"] },
+    { answer: "Bed", clues: ["Slapen", "Matras", "Deken", "Nacht"] },
+    { answer: "Kast", clues: ["Opbergen", "Deuren", "Planken", "Kleding"] },
+    { answer: "Deur", clues: ["Open/Dicht", "Klink", "Slot", "Ingang"] },
+    { answer: "Raam", clues: ["Glas", "Kijken", "Licht", "Openen"] },
+    { answer: "Tapijt", clues: ["Vloer", "Zacht", "Stof", "Kleed"] },
+    { answer: "Gordijn", clues: ["Raam", "Stof", "Dicht", "Donker"] },
+    { answer: "Lamp", clues: ["Licht", "Aan/Uit", "Plafond", "Peer"] },
+    { answer: "Trap", clues: ["Omhoog", "Treden", "Leuning", "Etage"] },
+    { answer: "Dak", clues: ["Bovenkant", "Pannen", "Regen", "Beschutting"] },
+    { answer: "Schoorsteen", clues: ["Rook", "Dak", "Haard", "Sinterklaas"] },
+    { answer: "Garage", clues: ["Auto", "Opslag", "Deur", "Gereedschap"] },
+    { answer: "Zolder", clues: ["Bovenste", "Opslag", "Dak", "Stof"] },
+    { answer: "Kelder", clues: ["Onder", "Koud", "Opslag", "Donker"] },
+    { answer: "Keuken", clues: ["Koken", "Eten", "Aanrecht", "Koelkast"] },
+    { answer: "Badkamer", clues: ["Douche", "Wassen", "Tandenpoetsen", "Handdoek"] },
+    { answer: "Slaapkamer", clues: ["Bed", "Rust", "Nacht", "Kledingkast"] },
+    { answer: "Toilet", clues: ["WC", "Doortrekken", "Bril", "Kleinste kamertje"] },
+
+    // --- 🍳 Keukengerei (Nieuw) ---
+    { answer: "Vork", clues: ["Prikken", "Eten", "Bestek", "Vier tanden"] },
+    { answer: "Mes", clues: ["Snijden", "Scherp", "Bestek", "Smeren"] },
+    { answer: "Lepel", clues: ["Soep", "Roeren", "Opscheppen", "Rond"] },
+    { answer: "Pan", clues: ["Koken", "Vuur", "Deksel", "Bakken"] },
+    { answer: "Bord", clues: ["Eten", "Rond", "Plat", "Servies"] },
+    { answer: "Glas", clues: ["Drinken", "Doorzichtig", "Breken", "Water"] },
+    { answer: "Beker", clues: ["Oor", "Koffie", "Warm", "Mok"] },
+    { answer: "Vergiet", clues: ["Gaten", "Afgieten", "Pasta", "Water"] },
+    { answer: "Rasp", clues: ["Kaas", "Scherp", "Wortel", "Metaal"] },
+    { answer: "Schilmesje", clues: ["Aardappel", "Klein", "Schillen", "Fruit"] },
+    { answer: "Spatel", clues: ["Omkeren", "Bakken", "Plat", "Pan"] },
+    { answer: "Garde", clues: ["Kloppen", "Ei", "Slagroom", "Metaaldraad"] },
+    { answer: "Beslagkom", clues: ["Mixen", "Deeg", "Taart", "Rond"] },
+    { answer: "Weegschaal", clues: ["Gewicht", "Gram", "Meten", "Keuken"] },
+    { answer: "Ovenwant", clues: ["Heet", "Hand", "Bescherming", "Oven"] },
+
+    // --- 🏫 Kantoor & School (Nieuw) ---
+    { answer: "Pen", clues: ["Schrijven", "Inkt", "Blauw", "Papier"] },
+    { answer: "Gum", clues: ["Wissen", "Potlood", "Fout", "Rubber"] },
+    { answer: "Liniaal", clues: ["Recht", "Meten", "Centimeters", "Lijnen"] },
+    { answer: "Schrift", clues: ["Schrijven", "Lijntjes", "School", "Papier"] },
+    { answer: "Agenda", clues: ["Afspraken", "Data", "Huiswerk", "Boekje"] },
+    { answer: "Nietjes", clues: ["Vastmaken", "Metaal", "Papier", "Apparaat"] },
+    { answer: "Lijm", clues: ["Plakken", "Vloeibaar/Stift", "Knutselen", "Vast"] },
+    { answer: "Dossier", clues: ["Papieren", "Map", "Informatie", "Bewaren"] },
+    { answer: "Bureaustoel", clues: ["Zitten", "Wielen", "Draaien", "Werk"] },
+    { answer: "Whiteboard", clues: ["Stift", "Wissen", "Muur", "Wit"] },
+    { answer: "Markeerstift", clues: ["Geel", "Opvallen", "Tekst", "Neon"] },
+    { answer: "Paperclip", clues: ["Metaal", "Buigen", "Vasthouden", "Papier"] },
+    { answer: "Envelop", clues: ["Brief", "Post", "Dichtlikken", "Adres"] },
+    { answer: "Rekenmachine", clues: ["Cijfers", "Sommen", "Wiskunde", "Knoppen"] },
+    { answer: "Puntenslijper", clues: ["Potlood", "Scherp", "Draaien", "Afval"] },
+
+    // --- 🌳 Natuur & Landschap (Nieuw) ---
+    { answer: "Bos", clues: ["Bomen", "Wandelen", "Groen", "Dieren"] },
+    { answer: "Strand", clues: ["Zand", "Zee", "Zomer", "Schelpen"] },
+    { answer: "Berg", clues: ["Hoog", "Klimmen", "Top", "Sneeuw"] },
+    { answer: "Rivier", clues: ["Water", "Stromen", "Lang", "Bedding"] },
+    { answer: "Meer", clues: ["Water", "Stilstaand", "Eenden", "Zoet"] },
+    { answer: "Woestijn", clues: ["Zand", "Droog", "Kameel", "Cactus"] },
+    { answer: "Eiland", clues: ["Water", "Omringd", "Land", "Varen"] },
+    { answer: "Grot", clues: ["Donker", "Steen", "Vleermuis", "Onder"] },
+    { answer: "Dal", clues: ["Laag", "Tussen bergen", "Vallei", "Groen"] },
+    { answer: "Waterval", clues: ["Water", "Naar beneden", "Geluid", "Hoog"] },
+    { answer: "Oerwoud", clues: ["Tropisch", "Dicht", "Planten", "Jungle"] },
+    { answer: "Wei", clues: ["Gras", "Koeien", "Groen", "Boerderij"] },
+    { answer: "Heuvel", clues: ["Bult", "Gras", "Omhoog", "Klein"] },
+    { answer: "Duin", clues: ["Zand", "Kust", "Gras", "Wind"] },
+    { answer: "Moeras", clues: ["Nat", "Modder", "Vies", "Zakken"] },
+
+    // --- 🌤️ Weer & Seizoenen (Nieuw) ---
+    { answer: "Winter", clues: ["Koud", "Sneeuw", "December", "Schaatsen"] },
+    { answer: "Lente", clues: ["Bloemen", "Lammetjes", "Groen", "Maart"] },
+    { answer: "Herfst", clues: ["Bladeren", "Wind", "Regen", "Oktober"] },
+    { answer: "Hagel", clues: ["IJs", "Neerslag", "Hard", "Tikken"] },
+    { answer: "Mist", clues: ["Wit", "Slecht zicht", "Vocht", "Grijs"] },
+    { answer: "Storm", clues: ["Wind", "Waaien", "Schade", "Bomen"] },
+    { answer: "Onweer", clues: ["Bliksem", "Donder", "Bui", "Lichtflits"] },
+    { answer: "Hittegolf", clues: ["Warm", "Zomer", "Zon", "Zweten"] },
+    { answer: "Vorst", clues: ["Vriezen", "Koud", "Glad", "IJs"] },
+    { answer: "Regen", clues: ["Nat", "Wolken", "Paraplu", "Plassen"] },
+
+    // --- 🎉 Feestdagen (Nieuw) ---
+    { answer: "Kerstmis", clues: ["Boom", "25 december", "Cadeaus", "Lichtjes"] },
+    { answer: "Pasen", clues: ["Eieren", "Haas", "Verstoppen", "Lente"] },
+    { answer: "Sinterklaas", clues: ["5 december", "Piet", "Cadeaus", "Stoomboot"] },
+    { answer: "Halloween", clues: ["Pompoen", "Griezelen", "Snoep", "Oktober"] },
+    { answer: "Oudjaar", clues: ["31 december", "Vuurwerk", "Oliebollen", "Aftellen"] },
+    { answer: "Valentijn", clues: ["Liefde", "14 februari", "Hartje", "Rozen"] },
+    { answer: "Carnaval", clues: ["Verkleden", "Optocht", "Feest", "Alaaf"] },
+    { answer: "Verjaardag", clues: ["Taart", "Kaarsjes", "Jaar", "Feest"] },
+    { answer: "Moederdag", clues: ["Mama", "Ontbijt", "Zondag", "Mei"] },
+    { answer: "Vaderdag", clues: ["Papa", "Cadeau", "Zondag", "Juni"] },
+
+    // --- 🎲 Spelletjes & Hobby's (Nieuw) ---
+    { answer: "Monopoly", clues: ["Geld", "Straat", "Hotel", "Bordspel"] },
+    { answer: "Domino", clues: ["Stenen", "Ogen", "Aansluiten", "Omvallen"] },
+    { answer: "Dammen", clues: ["Schijven", "Zwart/Wit", "Bord", "Slaan"] },
+    { answer: "Ganzenbord", clues: ["Gans", "Dobbelsteen", "Put", "Bord"] },
+    { answer: "Kaarten", clues: ["Harten", "Schoppen", "Koning", "Aas"] },
+    { answer: "Poker", clues: ["Gokken", "Fiches", "Bluf", "Kaarten"] },
+    { answer: "Verstoppertje", clues: ["Zoeken", "Tellen", "Kinderspel", "Buut"] },
+    { answer: "Tikkertje", clues: ["Rennen", "Aanraken", "Hem", "Spel"] },
+    { answer: "Breien", clues: ["Wol", "Naalden", "Trui", "Oma"] },
+    { answer: "Vissen", clues: ["Hengel", "Water", "Geduld", "Worm"] },
+    { answer: "Lezen", clues: ["Boek", "Letters", "Verhaal", "Bladzijde"] },
+    { answer: "Gamen", clues: ["Computer", "Console", "Spelen", "Controller"] },
+    { answer: "Schilderen", clues: ["Verf", "Doek", "Kunst", "Kwast"] },
+    { answer: "Kruiswoordraadsel", clues: ["Puzzel", "Woorden", "Krant", "Invullen"] },
+    { answer: "Sudoku", clues: ["Cijfers", "9x9", "Vierkant", "Logica"] },
+
+    // --- 🌈 Kleuren (Nieuw) ---
+    { answer: "Rood", clues: ["Bloed", "Liefde", "Stoplicht", "Warm"] },
+    { answer: "Groen", clues: ["Gras", "Natuur", "Stoplicht", "Kikker"] },
+    { answer: "Geel", clues: ["Zon", "Banaan", "Citroen", "Licht"] },
+    { answer: "Paars", clues: ["Violet", "Druif", "Kerk", "Mengkleur"] },
+    { answer: "Oranje", clues: ["Nederland", "Sinaasappel", "Wortel", "Koningsdag"] },
+    { answer: "Zwart", clues: ["Donker", "Nacht", "Rouw", "Kleur"] },
+    { answer: "Wit", clues: ["Sneeuw", "Licht", "Bruid", "Vrede"] },
+    { answer: "Roze", clues: ["Varken", "Meisje", "Zoet", "Flamingo"] },
+    { answer: "Bruin", clues: ["Aarde", "Chocolade", "Hout", "Beer"] },
+    { answer: "Grijs", clues: ["Muis", "Wolken", "Oud", "Tussenin"] },
+
+    // --- 😊 Emoties & Staten (Nieuw) ---
+    { answer: "Blij", clues: ["Lachen", "Gelukkig", "Vrolijk", "Glimlach"] },
+    { answer: "Boos", clues: ["Kwaad", "Schreeuwen", "Rood", "Woede"] },
+    { answer: "Verdrietig", clues: ["Huilen", "Tranen", "Somber", "Pijn"] },
+    { answer: "Bang", clues: ["Angst", "Schrikken", "Trillen", "Gevaar"] },
+    { answer: "Moe", clues: ["Slapen", "Gapen", "Bed", "Rust"] },
+    { answer: "Honger", clues: ["Eten", "Maag", "Knocren", "Voedsel"] },
+    { answer: "Dorst", clues: ["Drinken", "Water", "Droog", "Keel"] },
+    { answer: "Ziek", clues: ["Koorts", "Bed", "Dokter", "Niet lekker"] },
+    { answer: "Verliefd", clues: ["Hartje", "Vlinders", "Kus", "Roze"] },
+    { answer: "Jaloers", clues: ["Groen", "Ander", "Willen", "Afgunst"] },
+
+    // --- 🦒 Extra Dieren (Nieuw) ---
+    { answer: "Giraf", clues: ["Lange nek", "Vlekken", "Afrika", "Hoog"] },
+    { answer: "Nijlpaard", clues: ["Water", "Groot", "Afrika", "Gevaarlijk"] },
+    { answer: "Neushoorn", clues: ["Hoorn", "Grijs", "Savanne", "Zwaar"] },
+    { answer: "Hert", clues: ["Bos", "Gewaai", "Bambi", "Schuw"] },
+    { answer: "Beer", clues: ["Honing", "Hol", "Winter", "Bruin/IJs"] },
+    { answer: "Wolf", clues: ["Hond", "Roedel", "Huilen", "Bos"] },
+    { answer: "Eend", clues: ["Kwak", "Water", "Snavel", "Vogel"] },
+    { answer: "Zwaan", clues: ["Wit", "Meer", "Lange nek", "Sierlijk"] },
+    { answer: "Muis", clues: ["Kaas", "Klein", "Piepen", "Staart"] },
+    { answer: "Rat", clues: ["Riool", "Staart", "Knaagdier", "Grijs"] },
+    { answer: "Hamster", clues: ["Wiel", "Kooi", "Wangen", "Huisdier"] },
+    { answer: "Cavia", clues: ["Piepen", "Kooi", "Huisdier", "Geen staart"] },
+    { answer: "Schildpad", clues: ["Schild", "Traag", "Oud", "Reptiel"] },
+    { answer: "Slak", clues: ["Huisje", "Slijm", "Traag", "Tuin"] },
+    { answer: "Spin", clues: ["Web", "Acht poten", "Eng", "Insect"] },
+
+    // --- 🍔 Extra Eten (Nieuw) ---
+    { answer: "Pannenkoek", clues: ["Plat", "Stroop", "Bakken", "Rond"] },
+    { answer: "Ei", clues: ["Kip", "Schaal", "Bakken/Koken", "Ovaal"] },
+    { answer: "Soep", clues: ["Kom", "Lepel", "Warm", "Vloeibaar"] },
+    { answer: "IJs", clues: ["Koud", "Hoorntje", "Zomer", "Smaken"] },
+    { answer: "Taart", clues: ["Verjaardag", "Zoet", "Kaarsjes", "Slagroom"] },
+    { answer: "Koekje", clues: ["Trommel", "Zoet", "Kruimels", "Thee"] },
+    { answer: "Snoep", clues: ["Zoet", "Kinderen", "Suiker", "Zak"] },
+    { answer: "Drop", clues: ["Zwart", "Zout/Zoet", "Snoep", "Nederlands"] },
+    { answer: "Chips", clues: ["Aardappel", "Zak", "Kraken", "Zout"] },
+    { answer: "Nootjes", clues: ["Borrel", "Zout", "Schaaltje", "Pinda"] },
+    { answer: "Yoghurt", clues: ["Zuivel", "Wit", "Ontbijt", "Schaaltje"] },
+    { answer: "Melk", clues: ["Koe", "Wit", "Drinken", "Calcium"] },
+    { answer: "Thee", clues: ["Zakje", "Heet", "Water", "Engels"] },
+    { answer: "Sap", clues: ["Fruit", "Drinken", "Glas", "Sinaasappel"] },
+    { answer: "Cola", clues: ["Zwart", "Prik", "Suiker", "Merk"] }
 ];

@@ -1,72 +1,20 @@
-// quizdata_r4.js - Data voor Ronde 4 (Geheugen)
+// quizdata_r4.js - Data voor Ronde 4 (Geheugen / Maak de zin af)
 
-const STANDAARD_R4_POOL = [
-    // --- Oorspronkelijke Quotes (20) ---
-    { q1: "Houston, we", a: "have a problem" },
-    { q1: "I'll be", a: "back" },
-    { q1: "May the Force", a: "be with you" },
-    { q1: "E.T. phone", a: "home" },
-    { q1: "To be or", a: "not to be" },
-    { q1: "Elementary,", a: "my dear Watson" },
-    { q1: "Frankly, my dear,", a: "I don't give a damn" },
-    { q1: "I'm the king", a: "of the world" },
+var STANDAARD_R4_POOL = [
+    // ---------------------------------------------------------
+    // DEEL 1: SPREEKWOORDEN & GEZEGDEN (De Klassiekers)
+    // ---------------------------------------------------------
     { q1: "Hoge bomen", a: "vangen veel wind" },
-    { q1: "Wie het kleine", a: "niet eert, is het grote niet weerd" },
-    { q1: "Beter één vogel", a: "in de hand dan tien in de lucht" },
+    { q1: "Wie het kleine niet eert,", a: "is het grote niet weerd" },
+    { q1: "Beter één vogel in de hand", a: "dan tien in de lucht" },
     { q1: "Boontje komt", a: "om zijn loontje" },
     { q1: "Oost west,", a: "thuis best" },
-    { q1: "Zoals het klokje", a: "thuis tikt, tikt het nergens" },
+    { q1: "Zoals het klokje thuis tikt,", a: "tikt het nergens" },
     { q1: "De appel valt", a: "niet ver van de boom" },
-    { q1: "Een ezel stoot", a: "zich geen tweemaal aan dezelfde steen" },
-    { q1: "Al draagt een aap", a: "een gouden ring, het is en blijft een lelijk ding" },
+    { q1: "Een ezel stoot zich geen tweemaal", a: "aan dezelfde steen" },
+    { q1: "Al draagt een aap een gouden ring,", a: "het is en blijft een lelijk ding" },
     { q1: "Haastige spoed", a: "is zelden goed" },
     { q1: "Wie A zegt,", a: "moet ook B zeggen" },
-    { q1: "We are the champions,", a: "my friend" },
-
-    // --- Nieuwe Quotes (50 stuks) ---
-
-    // Iconische Vlaamse Quotes & Cultuur
-    { q1: "Nog", a: "choco?" },
-    { q1: "Ge zult toch", a: "een patattenzak over uw hoofd moeten trekken" },
-    { q1: "Den draad, hé,", a: "Harry, den draad" },
-    { q1: "Alles is", a: "vol" },
-    { q1: "We gaan hem", a: "VERNEDEREN" },
-    { q1: "'t Leven, 't is", a: "geen ponykamp" },
-    { q1: "Zullen we dat", a: "afspreken, Guido?" },
-    { q1: "Ik ben toch", a: "een kieken, hé?" },
-    { q1: "Mijn", a: "gedacht!" },
-    { q1: "Ik heb ook", a: "altijd pech!" },
-    { q1: "Amaaai", a: "" },
-    { q1: "Zal 't", a: "gaan ja!" },
-    { q1: "'t Is de schuld", a: "van die van Zaffelare!" },
-    { q1: "Is er al zout", a: "op de patatten?" },
-    { q1: "Godvermiljaar,", a: "Godnondedju!" },
-
-    // Beroemde Nederlandstalige Quotes (NL/BE)
-    { q1: "Elk nadeel", a: "heb zijn voordeel" },
-    { q1: "Je gaat het pas zien", a: "als je het doorhebt" },
-    { q1: "Daar heb ik", a: "geen actieve herinnering aan" },
-    { q1: "Hij was", a: "een beetje dom" },
-    { q1: "Het leven is", a: "een feest, je moet zelf de slingers ophangen" },
-    { q1: "Zoals de waard", a: "is, vertrouwt hij zijn gasten" },
-    { q1: "Allememachies", a: "" },
-    { q1: "Ik rotzooi maar", a: "een beetje an" },
-    { q1: "U kijkt", a: "zo lief" },
-    { q1: "Dat is geen mes,", a: "dit is een mes!" },
-
-    // Quotes uit Nederlandstalige Liedjes
-    { q1: "Zeg me dat", a: "het niet zo is" },
-    { q1: "Alles is", a: "liefde" },
-    { q1: "Dromen", a: "zijn bedrog" },
-    { q1: "Rennen, springen, vliegen,", a: "duiken, vallen, opstaan en weer doorgaan" },
-    { q1: "Ik hou van", a: "mij" },
-    { q1: "Iedereen is van de wereld,", a: "en de wereld is van iedereen" },
-    { q1: "Blijf bij", a: "mij" },
-    { q1: "Pak maar mijn", a: "hand en lach" },
-    { q1: "Papa is", a: "in Afrika" },
-    { q1: "Wordt alles groener", a: "dan het groen was" },
-
-    // Spreekwoorden & Gezegden (NL/BE)
     { q1: "De beste stuurlui", a: "staan aan wal" },
     { q1: "Zoals de ouden zongen,", a: "piepen de jongen" },
     { q1: "Men moet het ijzer smeden", a: "als het heet is" },
@@ -78,16 +26,467 @@ const STANDAARD_R4_POOL = [
     { q1: "De kogel", a: "is door de kerk" },
     { q1: "Nu komt de aap", a: "uit de mouw" },
     { q1: "De pot verwijt de ketel", a: "dat hij zwart ziet" },
+    { q1: "Achter de wolken", a: "schijnt de zon" },
+    { q1: "Een dag niet gelachen,", a: "is een dag niet geleefd" },
+    { q1: "Beter een goede buur", a: "dan een verre vriend" },
+    { q1: "De morgenstond", a: "heeft goud in de mond" },
+    { q1: "Wie een kuil graaft voor een ander,", a: "valt er zelf in" },
+    { q1: "Als er één schaap over de dam is,", a: "volgen er meer" },
+    { q1: "Met de noorderzon", a: "vertrekken" },
+    { q1: "Blaffende honden", a: "bijten niet" },
+    { q1: "In het land der blinden", a: "is Eénoog koning" },
+    { q1: "Wie de schoen past,", a: "trekke hem aan" },
+    { q1: "Over smaak", a: "valt niet te twisten" },
+    { q1: "De liefde gaat", a: "door de maag" },
+    { q1: "Niet geschoten", a: "is altijd mis" },
+    { q1: "Een kinderhand", a: "is gauw gevuld" },
+    { q1: "Het gras is altijd groener", a: "aan de overkant" },
+    { q1: "Je moet een gegeven paard", a: "niet in de bek kijken" },
+    { q1: "Spreken is zilver,", a: "zwijgen is goud" },
+    { q1: "Vele handen", a: "maken licht werk" },
 
-    // Universele Quotes (Zeer Bekend in NL/BE)
+    // ---------------------------------------------------------
+    // DEEL 2: ICONISCHE FILMQUOTES (Internationaal)
+    // ---------------------------------------------------------
+    { q1: "Houston, we", a: "have a problem" },
+    { q1: "I'll be", a: "back" },
+    { q1: "May the Force", a: "be with you" },
+    { q1: "E.T. phone", a: "home" },
+    { q1: "Elementary,", a: "my dear Watson" },
+    { q1: "Frankly, my dear,", a: "I don't give a damn" },
+    { q1: "I'm the king", a: "of the world" },
+    { q1: "Bond,", a: "James Bond" },
+    { q1: "Run, Forrest,", a: "run!" },
+    { q1: "You talkin'", a: "to me?" },
+    { q1: "I see", a: "dead people" },
+    { q1: "Here's", a: "Johnny!" },
+    { q1: "Hasta la vista,", a: "baby" },
     { q1: "Go ahead,", a: "make my day" },
     { q1: "There's no place", a: "like home" },
     { q1: "Life is like", a: "a box of chocolates" },
     { q1: "Here's looking", a: "at you, kid" },
     { q1: "The truth is", a: "out there" },
     { q1: "Live long", a: "and prosper" },
-    { q1: "Hasta la vista,", a: "baby" },
     { q1: "I'll have what", a: "she's having" },
     { q1: "May the odds", a: "be ever in your favor" },
-    { q1: "Winter", a: "is coming" }
+    { q1: "Winter", a: "is coming" },
+    { q1: "Hakuna", a: "Matata" },
+    { q1: "To infinity", a: "and beyond!" },
+    { q1: "Why so", a: "serious?" },
+    { q1: "Say hello to", a: "my little friend" },
+    { q1: "Keep your friends close, but", a: "your enemies closer" },
+    { q1: "I am your", a: "father" },
+    { q1: "Nobody puts Baby", a: "in a corner" },
+    { q1: "Show me", a: "the money!" },
+    { q1: "You can't handle", a: "the truth!" },
+    { q1: "Yippie-Ki-Yay,", a: "motherf*cker" },
+    { q1: "Just keep", a: "swimming" },
+    { q1: "My precious,", a: "Gollum" },
+
+    // ---------------------------------------------------------
+    // DEEL 3: VLAAMSE TV & CULTUUR (Iconisch)
+    // ---------------------------------------------------------
+    { q1: "Mijn", a: "gedacht!" },
+    { q1: "Nog", a: "choco?" },
+    { q1: "Ik moest kloppen,", a: "want de bel doet het niet" },
+    { q1: "Dag vriendjes", a: "en vriendinnetjes" },
+    { q1: "'t Is nie waar, hé?", a: "'t Is wél waar!" }, // Samson
+    { q1: "Aan tafel!", a: "Ik kom!" }, // Samson
+    { q1: "Ten eerste: het is Albertooo,", a: "ten tweede..." },
+    { q1: "Zal 't gaan", a: "ja!" },
+    { q1: "Ge zult toch een patattenzak", a: "over uw hoofd moeten trekken" },
+    { q1: "Den draad, hé, Harry,", a: "den draad" },
+    { q1: "Alles is", a: "vol" }, // In de Gloria
+    { q1: "In mijn poep,", a: "in mijn poep" }, // In de Gloria
+    { q1: "We gaan hem", a: "VERNEDEREN" },
+    { q1: "'t Leven, 't is", a: "geen ponykamp" },
+    { q1: "Zullen we dat afspreken,", a: "Guido?" },
+    { q1: "Ik ben toch", a: "een kieken, hé?" },
+    { q1: "Het is gebeurd!", a: "(Slimste Mens)" },
+    { q1: "Wat als...", a: "?" },
+    { q1: "Dag Sinterklaasje,", a: "daaag!" },
+    { q1: "Plopperdeplopperde", a: "plop" },
+    { q1: "Ik wil", a: "naar huis" }, // De Mol / Huilend
+    { q1: "Is er al zout", a: "op de patatten?" },
+    { q1: "Godvermiljaar,", a: "Godnondedju!" },
+    { q1: "Problemen in", a: "de dansschool?" },
+
+    // ---------------------------------------------------------
+    // DEEL 4: NEDERLANDSE TV & CULTUUR (Iconisch)
+    // ---------------------------------------------------------
+    { q1: "Even Apeldoorn", a: "bellen" },
+    { q1: "Foutje,", a: "bedankt!" },
+    { q1: "Goeiesmorgens,", a: "juffrouw Jannie" },
+    { q1: "Ik ben toch niet", a: "gek?" },
+    { q1: "Dat is dom,", a: "dat doe je toch niet" },
+    { q1: "Mand!", a: "" },
+    { q1: "Buurman,", a: "wat doet u nu?" },
+    { q1: "Elk nadeel", a: "heb zijn voordeel" },
+    { q1: "Je gaat het pas zien", a: "als je het doorhebt" },
+    { q1: "Daar heb ik geen", a: "actieve herinnering aan" },
+    { q1: "Hij was een beetje", a: "dom" },
+    { q1: "Het leven is een feest,", a: "je moet zelf de slingers ophangen" },
+    { q1: "Allememachies", a: "Adriaan" },
+    { q1: "Drommels, drommels,", a: "en nog eens drommels" },
+    { q1: "Ik zeg maar zo,", a: "ik zeg maar niks" },
+    { q1: "Hallo,", a: "Jumbo" },
+    { q1: "Wij van WC-Eend", a: "adviseren WC-Eend" },
+    { q1: "U kijkt", a: "zo lief" },
+    { q1: "Goeiemoggel", a: "" },
+    { q1: "1 kopje koffie,", a: "glazenwasser" },
+
+    // ---------------------------------------------------------
+    // DEEL 5: MUZIEKTEKSTEN (Nederlandstalig - Meezingers)
+    // ---------------------------------------------------------
+    { q1: "Zeg me dat", a: "het niet zo is" },
+    { q1: "Alles is", a: "liefde" },
+    { q1: "Dromen", a: "zijn bedrog" },
+    { q1: "Rennen, springen, vliegen, duiken,", a: "vallen, opstaan en weer doorgaan" },
+    { q1: "Ik hou van", a: "mij" },
+    { q1: "Iedereen is van de wereld,", a: "en de wereld is van iedereen" },
+    { q1: "Blijf bij", a: "mij" },
+    { q1: "Papa is", a: "in Afrika" }, // Of: "Papa, ik lijk steeds meer op jou"
+    { q1: "Heb je even", a: "voor mij" },
+    { q1: "Zij gelooft", a: "in mij" },
+    { q1: "Ik leef niet meer", a: "voor jou" },
+    { q1: "Het is een nacht,", a: "die je normaal alleen in films ziet" },
+    { q1: "Brabant,", a: "mijn Brabant" },
+    { q1: "Oya lélé,", a: "ik voel me plots weer zo oya lélé" },
+    { q1: "Heyah", a: "mama" },
+    { q1: "Dos", a: "Cervezas" },
+    { q1: "Laat de zon", a: "in je hart" },
+    { q1: "Ik heb de hele nacht liggen dromen", a: "van een motorboot" },
+    { q1: "Met de vlam", a: "in de pijp" },
+    { q1: "Een beetje", a: "verliefd" },
+    { q1: "Kronenburg", a: "Park" },
+    { q1: "België (Is er leven", a: "op Pluto?)" },
+    { q1: "Suzanne,", a: "ik ben stapelgek op jou" },
+    { q1: "Sex met die", a: "kale" },
+    { q1: "Ik wil je", a: "blijven trouw" },
+    { q1: "Alle kleuren", a: "van de regenboog" },
+    { q1: "Anne,", a: "als ik jou zie zijn" },
+    { q1: "Daar gaat ze,", a: "en zoveel schoonheid" },
+    { q1: "Ik spring uit een vliegmachien,", a: "alleen maar om jou te zien" },
+
+    // ---------------------------------------------------------
+    // DEEL 6: MUZIEKTEKSTEN (Internationaal - Meezingers)
+    // ---------------------------------------------------------
+    { q1: "We are the champions,", a: "my friend" },
+    { q1: "Is this the real life?", a: "Is this just fantasy?" },
+    { q1: "Mama,", a: "just killed a man" },
+    { q1: "Hello,", a: "it's me" },
+    { q1: "I will always", a: "love you" },
+    { q1: "Billie Jean is not", a: "my lover" },
+    { q1: "Let it", a: "be" },
+    { q1: "Yesterday,", a: "all my troubles seemed so far away" },
+    { q1: "It's raining", a: "men" },
+    { q1: "Who run the world?", a: "Girls" },
+    { q1: "Oops!...", a: "I did it again" },
+    { q1: "Hit me baby", a: "one more time" },
+    { q1: "All I want for Christmas", a: "is you" },
+    { q1: "Last Christmas,", a: "I gave you my heart" },
+    { q1: "Never gonna give you up,", a: "never gonna let you down" },
+    { q1: "Sweet Caroline,", a: "bum bum bum" },
+    { q1: "Country roads,", a: "take me home" },
+    { q1: "I kissed a girl", a: "and I liked it" },
+    { q1: "Dancing", a: "Queen" },
+    { q1: "Mamma", a: "Mia" },
+    { q1: "No woman,", a: "no cry" },
+    { q1: "Don't worry,", a: "be happy" },
+    { q1: "Hello darkness,", a: "my old friend" },
+    { q1: "I want to break", a: "free" },
+
+    // ---------------------------------------------------------
+    // DEEL 7: HISTORISCHE & LITERAIRE QUOTES
+    // ---------------------------------------------------------
+    { q1: "To be or", a: "not to be" },
+    { q1: "I have", a: "a dream" },
+    { q1: "Ich bin", a: "ein Berliner" },
+    { q1: "Veni, vidi,", a: "vici" },
+    { q1: "Cogito,", a: "ergo sum" },
+    { q1: "Ik denk,", a: "dus ik ben" },
+    { q1: "One small step for man,", a: "one giant leap for mankind" },
+    { q1: "Yes", a: "we can" },
+    { q1: "Make America", a: "Great Again" },
+    { q1: "Liberté, égalité,", a: "fraternité" },
+    { q1: "Alle mensen", a: "worden broeders" },
+    { q1: "Big Brother", a: "is watching you" },
+    { q1: "It was the best of times,", a: "it was the worst of times" },
+    { q1: "In den beginne", a: "was het Woord" },
+
+    // ---------------------------------------------------------
+    // DEEL 8: KINDEREN & SPROOKJES
+    // ---------------------------------------------------------
+    { q1: "Spiegeltje, spiegeltje", a: "aan de wand" },
+    { q1: "Er was", a: "eens" },
+    { q1: "Ze leefden nog lang", a: "en gelukkig" },
+    { q1: "Knibbel, knabbel, knuisje,", a: "wie knabbelt er aan mijn huisje?" },
+    { q1: "Ik ben vandaag", a: "zo vrolijk" },
+    { q1: "Pippi", a: "Langkous" },
+    { q1: "Nijntje", a: "Pluis" },
+    { q1: "Bob", a: "de Bouwer" },
+    { q1: "Kunnen wij het maken?", a: "Nou en of!" },
+    { q1: "Rupsje", a: "Nooitgenoeg" }
+// ---------------------------------------------------------
+    // DEEL 9: RECLAMES & SLOGANS (Het collectieve geheugen)
+    // ---------------------------------------------------------
+    { q1: "Carglass herstelt,", a: "Carglass vervangt" },
+    { q1: "Heerlijk helder", a: "Heineken" },
+    { q1: "Mmm...", a: "van Mora" },
+    { q1: "Duyvis, als er een", a: "fuif is" },
+    { q1: "Melk, de witte", a: "motor" },
+    { q1: "Gillette, the best a man", a: "can get" },
+    { q1: "Red Bull geeft je", a: "vleugels" },
+    { q1: "Just", a: "do it" }, // Nike
+    { q1: "I'm lovin'", a: "it" }, // McDonald's
+    { q1: "Nespresso, what", a: "else?" },
+    { q1: "Mannen weten", a: "waarom" }, // Jupiler
+    { q1: "Vakmanschap is", a: "meesterschap" }, // Grolsch
+    { q1: "Dat zeg ik,", a: "Gamma" },
+    { q1: "Leuker kunnen we het niet maken,", a: "wel makkelijker" }, // Belastingdienst
+    { q1: "Kip, het meest veelzijdige", a: "stukje vlees" },
+    { q1: "Schat, staat de Bokma", a: "koud?" },
+    { q1: "Solo is", a: "boter" }, // (Oude, maar bekende)
+    { q1: "Wasmachines leven langer", a: "met Calgon" },
+    { q1: "Vroeger of later", a: "kom je bij Scotch & Soda" }, // Of variaties
+    { q1: "L'Oréal, want ik ben het", a: "waard" },
+    { q1: "Maybe she's born with it,", a: "maybe it's Maybelline" },
+    { q1: "Hotel?", a: "Trivago" },
+    { q1: "Echt Hema", a: "" },
+    { q1: "Kruidvat, steeds verrassend,", a: "altijd voordelig" },
+    { q1: "Miele, er is", a: "geen betere" },
+
+    // ---------------------------------------------------------
+    // DEEL 10: EXTRA SPREEKWOORDEN (De 'Net zo bekende')
+    // ---------------------------------------------------------
+    { q1: "De laatste loodjes", a: "wegen het zwaarst" },
+    { q1: "Na regen", a: "komt zonneschijn" },
+    { q1: "Niet geschoten is", a: "altijd mis" },
+    { q1: "Wie niet waagt,", a: "wie niet wint" },
+    { q1: "Vroeger was alles", a: "beter" },
+    { q1: "De tijd", a: "heelt alle wonden" },
+    { q1: "Beter laat", a: "dan nooit" },
+    { q1: "Oude liefde", a: "roest niet" },
+    { q1: "Wie zwijgt", a: "stemt toe" },
+    { q1: "Eerlijk", a: "duurt het langst" },
+    { q1: "Wie goed doet,", a: "goed ontmoet" },
+    { q1: "Een vliegende kraai", a: "vangt altijd wat" },
+    { q1: "Met onwillige honden", a: "is het kwaad hazen vangen" },
+    { q1: "Ieder huisje", a: "heeft zijn kruisje" },
+    { q1: "Als het kalf verdronken is,", a: "dempt men de put" },
+    { q1: "Het bloed kruipt", a: "waar het niet gaan kan" },
+    { q1: "Een goede buur", a: "is beter dan een verre vriend" },
+    { q1: "Door de bomen", a: "het bos niet meer zien" },
+    { q1: "Van uitstel", a: "komt afstel" },
+    { q1: "Stille waters", a: "hebben diepe gronden" },
+    { q1: "De wonderen zijn", a: "de wereld nog niet uit" },
+    { q1: "Dat slaat", a: "als een tang op een varken" },
+    { q1: "Op ieder potje", a: "past een dekseltje" },
+    { q1: "Wie zijn billen brandt,", a: "moet op de blaren zitten" },
+    { q1: "Al is de leugen nog zo snel,", a: "de waarheid achterhaalt hem wel" },
+    { q1: "Beter een half ei", a: "dan een lege dop" },
+    { q1: "Het is niet al goud", a: "wat er blinkt" },
+    { q1: "Van een mug", a: "een olifant maken" },
+    { q1: "Met de deur", a: "in huis vallen" },
+    { q1: "Je moet het dak repareren", a: "als de zon schijnt" },
+
+    // ---------------------------------------------------------
+    // DEEL 11: TV & FILM CLASSICS (Uitbreiding)
+    // ---------------------------------------------------------
+    { q1: "You're a wizard,", a: "Harry" },
+    { q1: "I feel the need,", a: "the need for speed" }, // Top Gun
+    { q1: "Nobody's perfect", a: "" }, // Some Like It Hot
+    { q1: "You had me", a: "at hello" }, // Jerry Maguire
+    { q1: "They may take our lives, but they'll never take", a: "our freedom!" }, // Braveheart
+    { q1: "First rule of Fight Club:", a: "You do not talk about Fight Club" },
+    { q1: "I see what", a: "you did there" },
+    { q1: "Don't mention", a: "the war" }, // Fawlty Towers
+    { q1: "How you", a: "doin'?" }, // Friends
+    { q1: "We were", a: "on a break!" }, // Friends
+    { q1: "Pivot!", a: "Pivot!" }, // Friends
+    { q1: "Bazinga!", a: "" }, // Big Bang Theory
+    { q1: "Doh!", a: "" }, // Homer Simpson
+    { q1: "Who lives in a pineapple", a: "under the sea?" },
+    { q1: "SpongeBob", a: "SquarePants" },
+    { q1: "Scooby Dooby Doo,", a: "where are you?" },
+    { q1: "Yabba Dabba", a: "Doo!" },
+    { q1: "Dracarys", a: "" }, // Game of Thrones
+    { q1: "You know nothing,", a: "Jon Snow" },
+    { q1: "A Lannister always", a: "pays his debts" },
+    { q1: "Resistance is", a: "futile" }, // Star Trek
+    { q1: "Wubba Lubba", a: "Dub Dub" }, // Rick & Morty
+    { q1: "I pity", a: "the fool" }, // A-Team
+    { q1: "Whatcha talkin' bout,", a: "Willis?" },
+    { q1: "Suit", a: "up!" }, // HIMYM
+    { q1: "Legen - wait for it -", a: "dary!" },
+    { q1: "Is that", a: "your final answer?" }, // Weekend Miljonairs
+    { q1: "And the winner", a: "is..." },
+
+    // ---------------------------------------------------------
+    // DEEL 12: MUZIEK (Refreinen & One-Liners)
+    // ---------------------------------------------------------
+    { q1: "It's my life,", a: "it's now or never" }, // Bon Jovi
+    { q1: "Livin' on", a: "a prayer" },
+    { q1: "Wake me up", a: "before you go-go" },
+    { q1: "Girls just want to", a: "have fun" },
+    { q1: "Sweet dreams are", a: "made of this" },
+    { q1: "Every breath", a: "you take" },
+    { q1: "I want to hold", a: "your hand" },
+    { q1: "She loves you,", a: "yeah, yeah, yeah" },
+    { q1: "All you need", a: "is love" },
+    { q1: "We all live in a", a: "yellow submarine" },
+    { q1: "Smells like", a: "teen spirit" },
+    { q1: "Come as", a: "you are" },
+    { q1: "Wonderwall", a: "" }, // Of: "Today is gonna be the day"
+    { q1: "Don't look back", a: "in anger" },
+    { q1: "Viva", a: "La Vida" },
+    { q1: "Clocks", a: "" },
+    { q1: "Paradise City", a: "" },
+    { q1: "Welcome to the", a: "jungle" },
+    { q1: "Knockin' on", a: "heaven's door" },
+    { q1: "Hotel", a: "California" },
+    { q1: "You can check out any time you like,", a: "but you can never leave" },
+    { q1: "Thunder!", a: "Thunder!" }, // AC/DC
+    { q1: "Highway to", a: "hell" },
+    { q1: "Back in", a: "black" },
+    { q1: "Smoke on", a: "the water" },
+    { q1: "Born to be", a: "wild" },
+    { q1: "Born in the", a: "USA" },
+    { q1: "Dancing in", a: "the dark" },
+    { q1: "Purple", a: "Rain" },
+    { q1: "Kiss", a: "" },
+    { q1: "Like a", a: "Virgin" },
+    { q1: "Material", a: "Girl" },
+    { q1: "Vogue", a: "" },
+    { q1: "Thriller", a: "" },
+    { q1: "Beat it", a: "" },
+    { q1: "Man in the", a: "Mirror" },
+    { q1: "Black or", a: "White" },
+    { q1: "Smooth", a: "Criminal" },
+    { q1: "I'm still", a: "standing" },
+    { q1: "Rocket", a: "Man" },
+    { q1: "Candle in the", a: "Wind" },
+    { q1: "Tiny", a: "Dancer" },
+    { q1: "Piano", a: "Man" },
+    { q1: "Uptown", a: "Girl" },
+    { q1: "We didn't start", a: "the fire" },
+    { q1: "Eye of the", a: "Tiger" },
+    { q1: "The Final", a: "Countdown" },
+    { q1: "We're not gonna", a: "take it" },
+    { q1: "I was made for lovin' you", a: "baby" },
+    { q1: "Rock and Roll", a: "all nite" },
+    { q1: "Walk this", a: "way" },
+    { q1: "Dream", a: "On" },
+    { q1: "Another one bites", a: "the dust" },
+    { q1: "Under", a: "Pressure" },
+    { q1: "Radio", a: "Ga Ga" },
+    { q1: "Don't stop", a: "me now" },
+    { q1: "Somebody to", a: "love" },
+    { q1: "Crazy little thing", a: "called love" },
+    { q1: "Show must", a: "go on" },
+    { q1: "Imagine", a: "all the people" },
+    { q1: "Give peace", a: "a chance" },
+    { q1: "Paint it", a: "black" },
+    { q1: "Sympathy for the", a: "Devil" },
+    { q1: "Satisfaction", a: "(I can't get no)" },
+    { q1: "Start me", a: "up" },
+    { q1: "Angie", a: "" },
+    { q1: "Wild", a: "Horses" },
+    { q1: "Stairway to", a: "Heaven" },
+    { q1: "Whole Lotta", a: "Love" },
+    { q1: "Kashmir", a: "" },
+    { q1: "Black", a: "Dog" },
+    { q1: "Sultans of", a: "Swing" },
+    { q1: "Money for", a: "nothing" },
+    { q1: "Walk of", a: "Life" },
+    { q1: "Brothers in", a: "Arms" },
+    { q1: "Message in a", a: "Bottle" },
+    { q1: "Roxanne", a: "" },
+    { q1: "Every little thing", a: "she does is magic" },
+    { q1: "Englishman in", a: "New York" },
+    { q1: "Fields of", a: "Gold" },
+    { q1: "Sunday Bloody", a: "Sunday" },
+    { q1: "With or without", a: "you" },
+    { q1: "Where the streets", a: "have no name" },
+    { q1: "One", a: "" }, // U2
+    { q1: "Beautiful", a: "Day" },
+    { q1: "Vertigo", a: "" },
+    { q1: "Pride (In the name", a: "of love)" },
+    { q1: "Losing my", a: "religion" },
+    { q1: "Everybody", a: "hurts" },
+    { q1: "Man on the", a: "Moon" },
+    { q1: "Shiny Happy", a: "People" },
+    { q1: "Creep", a: "" }, // Radiohead
+    { q1: "Karma", a: "Police" },
+    { q1: "No", a: "Surprises" },
+    { q1: "Paranoid", a: "Android" },
+    { q1: "Bitter Sweet", a: "Symphony" },
+    { q1: "Seven Nation", a: "Army" },
+    { q1: "Mr.", a: "Brightside" },
+    { q1: "Sex on", a: "Fire" },
+    { q1: "Use", a: "Somebody" },
+    { q1: "Take me to", a: "Church" },
+    { q1: "Rolling in the", a: "Deep" },
+    { q1: "Someone like", a: "you" },
+    { q1: "Hello", a: "(Adele)" },
+    { q1: "Skyfall", a: "" },
+    { q1: "Happy", a: "(Pharrell Williams)" },
+    { q1: "Get", a: "Lucky" },
+    { q1: "Uptown", a: "Funk" },
+    { q1: "Can't stop the", a: "feeling" },
+    { q1: "Shape of", a: "You" },
+    { q1: "Thinking out", a: "Loud" },
+    { q1: "Perfect", a: "" },
+    { q1: "Castle on the", a: "Hill" },
+    { q1: "Bad", a: "Guy" }, // Billie Eilish
+    { q1: "Old Town", a: "Road" },
+    { q1: "Blinding", a: "Lights" }, // The Weeknd
+    { q1: "Save your", a: "tears" },
+    { q1: "As it", a: "was" }, // Harry Styles
+    { q1: "Watermelon", a: "Sugar" },
+
+    // ---------------------------------------------------------
+    // DEEL 13: NEDERLANDSTALIGE HITS (Aanvulling)
+    // ---------------------------------------------------------
+    { q1: "Mag ik dan bij jou", a: "schuilen" },
+    { q1: "Leef,", a: "alsof het je laatste dag is" },
+    { q1: "Ik wil slapen", a: "in de blote kont" }, // (Voor de sfeer)
+    { q1: "Engelbewaarder", a: "" },
+    { q1: "Kali", a: "(Django Wagner)" },
+    { q1: "Jij krijgt die lach niet", a: "van mijn gezicht" },
+    { q1: "Soldiers of Love", a: "(Liliane Saint-Pierre)" },
+    { q1: "Goeiemorgen,", a: "morgen" },
+    { q1: "J'aime", a: "la vie" },
+    { q1: "Hé, lekker", a: "beest" },
+    { q1: "Marijke,", a: "Marijke" }, // Sam Gooris
+    { q1: "Laat de zon", a: "in je hart" },
+    { q1: "Ik heb de hele nacht", a: "liggen dromen" },
+    { q1: "Que si, que", a: "no" },
+    { q1: "Oya", a: "lélé" },
+    { q1: "Toveren", a: "(K3)" },
+    { q1: "Kusjesdag", a: "" },
+    { q1: "Spring", a: "(Spring)" },
+    { q1: "De wereld is", a: "om zeep" }, // Urbanus
+    { q1: "Madammen met een", a: "bontjas" },
+    { q1: "Banger", a: "Hart" },
+    { q1: "Vlaanderen", a: "boven" },
+    { q1: "Blauw", a: "(The Scene)" },
+    { q1: "Iedereen is", a: "van de wereld" },
+    { q1: "Stil aan de", a: "overkant" },
+    { q1: "Ik mis je", a: "zo graag" }, // Claudia de Breij / Waylon
+    { q1: "Zoutelande", a: "(BLØF)" },
+    { q1: "Harder dan ik", a: "hebben kan" },
+    { q1: "Dat komt door", a: "jou" },
+    { q1: "Smoorverliefd", a: "(Doe Maar)" },
+    { q1: "De bom", a: "(Doe Maar)" },
+    { q1: "Pa", a: "(Doe Maar)" },
+    { q1: "1 nacht", a: "alleen" },
+    { q1: "Is dit alles?", a: "" },
+    { q1: "Belle", a: "Hélène" },
+    { q1: "Suzanne", a: "(VOF de Kunst)" },
+    { q1: "Een kopje", a: "koffie" },
+    { q1: "Nooduitgang", a: "(Het Goede Doel)" },
+    { q1: "Vriendschap", a: "(Het Goede Doel)" },
+    { q1: "België", a: "(Het Goede Doel)" },
+    { q1: "Gijzelaar", a: "(Het Goede Doel)" }
 ];
