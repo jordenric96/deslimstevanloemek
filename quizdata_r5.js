@@ -5,7 +5,7 @@ const RONDE5_DATA = {
     "KAMPIOENEN": [
         {
             videoBron: "fragmenten/fragment1.mp4", 
-             thumbnail: "fragmenten/foto1.jpg",
+             thumbnail: "fragmenten/thumbnail1.png",
             vraag1_seizoen: "Seizoen 1",
             vraag2_aflevering: "Verkiezingen",
             vraag3_zinEind: "yoghurt voor iedereen",
