@@ -51,11 +51,11 @@
                 <ul id="geheugen-board"></ul>
             </div>
 
-            <!-- DE NIEUWE STIJL VOOR RONDE 5 -->
             <div id="beeld-display-area" style="display: none; width: 100%; flex-direction: column; align-items: center;">
                 <div id="beeld-grid" style="display: flex; gap: 20px; justify-content: center; flex-wrap: wrap; width: 90%; margin-top: 20px;"></div>
                 <div id="beeld-player-container" style="display: none; width: 100%; max-width: 1000px; margin: 0 auto;">
-                    <video id="beeld-video-player" style="width: 100%; border: 4px solid var(--kamp-geel); border-radius: 12px; box-shadow: 0 15px 40px rgba(0,0,0,0.9); background: #000;"></video>
+                    <!-- 'playsinline' toegevoegd voor betere browser support -->
+                    <video id="beeld-video-player" playsinline style="width: 100%; border: 4px solid var(--kamp-geel); border-radius: 12px; box-shadow: 0 15px 40px rgba(0,0,0,0.9); background: #000;"></video>
                 </div>
                 <div id="beeld-tasks-container" style="display: none; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; width: 95%; margin-top: 20px;"></div>
             </div>
@@ -575,7 +575,7 @@
     function setupRound5() {
         currentRound = 5; currentBeeldIndex = -1; startingPlayersThisRound = []; playedVideos = [];
         activePlayerIndex = getNextStartingPlayerIndex(5); roundTitle.textContent = `Ronde 5: De Beeldronde`; 
-        activeBeeldQuestions = shuffleArray([...quizData.ronde5_beeld]).slice(0, players.length); 
+        activeBeeldQuestions = shuffleArray([...quizData.ronde5_beeld]).slice(0, players.length); // Kiest exact evenveel video's als spelers!
         
         hideAllGameAreas(); 
         document.getElementById('beeld-display-area').style.display = 'flex'; 
@@ -602,7 +602,7 @@
             const bgImage = q.thumbnail ? `url('${q.thumbnail}')` : 'none';
             
             return `<div style="width: 200px; height: 150px; background-color: var(--bg-card); background-image: ${bgImage}; background-size: cover; background-position: center; border: 3px solid var(--kamp-geel); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 1.8em; font-weight: bold; opacity: ${opacity}; filter: ${filter}; flex-direction: column; text-shadow: 2px 2px 4px #000; box-shadow: 0 5px 15px rgba(0,0,0,0.5);">
-                ${isPlayed ? '❌' : 'Fragment ' + (i+1)}
+                ${isPlayed ? '❌' : '<span style="background: rgba(0,0,0,0.6); padding: 5px 10px; border-radius: 6px;">Fragment ' + (i+1) + '</span>'}
             </div>`;
         }).join('');
         
@@ -611,7 +611,8 @@
         document.getElementById('beeld-tasks-container').style.display = 'none';
         
         stopTimer();
-        channel.postMessage({ type: 'SYNC_R5_GRID', total: players.length, played: playedVideos });
+        // Hier werd per ongeluk 'total' naar '1' gezet bij test. We sturen nu altijd de lengte van de reeks door.
+        channel.postMessage({ type: 'SYNC_R5_GRID', total: activeBeeldQuestions.length, played: playedVideos }); 
     }
 
     function returnToVideoGrid() {
@@ -625,7 +626,7 @@
 
     function loadBeeldVraag(index) {
         currentBeeldIndex = index;
-        currentSetAttempts = []; let q = activeBeeldQuestions[currentBeeldIndex];
+        currentSetAttempts = []; let q = activeBeeldQuestions[currentBeeldIndex]; 
         startingPlayersThisRound.push(activePlayerIndex); 
         
         questionText.textContent = "Kijk naar het fragment!";
@@ -700,7 +701,6 @@
         renderBeeldUI();
         
         stopTimer(); currentSetAttempts = players.map(p => p.originalIndex); activePlayerIndex = getNextStartingPlayerIndex(5); 
-        // 4 seconden wachten om gemiste (rode) antwoorden te tonen, daarna naar grid
         setTimeout(() => { returnToVideoGrid(); }, 4000);
     }
 
