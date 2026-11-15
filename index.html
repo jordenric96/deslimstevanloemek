@@ -235,7 +235,7 @@
             else if (name) players.push({ name: name, seconds: 60, originalIndex: i });
         }
 
-      if (allNamesValid && players.length >= 2) {
+        if (allNamesValid && players.length >= 2) {
             setupScreen.style.display = 'none'; 
             playerContainer.style.display = 'flex'; 
             gameBoard.style.display = 'block';
@@ -246,7 +246,8 @@
             hideAllGameAreas();
             document.getElementById('question-text').style.display = 'block';
             document.getElementById('question-text').textContent = "Klaar voor de start! Wachten op de spelleider...";
-        } else { alert("Minimaal 2 spelers nodig."); }
+        } else { 
+            alert("Minimaal 2 spelers nodig."); 
         }
     }
 
@@ -624,14 +625,22 @@
     document.getElementById('add-seconds-10').addEventListener('click', () => { updateSeconds(activePlayerIndex, 10); showBonusFeedback(activePlayerIndex, 10); });
     document.getElementById('add-seconds-20').addEventListener('click', () => { updateSeconds(activePlayerIndex, 20); showBonusFeedback(activePlayerIndex, 20); });
 
-    const remoteChannel = new BroadcastChannel('trivial_time_channel');
-    remoteChannel.onmessage = (event) => {
+    channel.onmessage = (event) => {
         if (!event.data) return;
         if (event.data.type === 'FILL_ANSWER') { inputAnswer.value = event.data.answer; btnCheckAnswer.click(); }
         if (event.data.type === 'TRIGGER_FAIL') { inputAnswer.value = "###FAIL###"; btnCheckAnswer.click(); }
         if (event.data.type === 'TOGGLE_TIMER') toggleTimer(activePlayerIndex);
         if (event.data.type === 'SELECT_PLAYER') { activePlayerIndex = event.data.playerIndex; renderPlayers(); }
         
+        if (event.data.type === 'START_ROUND') {
+            if (event.data.round == 1) document.getElementById('start-round-1').click();
+            if (event.data.round == 2) document.getElementById('start-round-2').click();
+            if (event.data.round == 3) document.getElementById('start-round-3').click();
+            if (event.data.round == 4) document.getElementById('start-round-4').click();
+            if (event.data.round == 5) document.getElementById('start-round-5').click();
+            if (event.data.round == 6) document.getElementById('start-finale').click();
+        }
+
         if (event.data.type === 'NEXT_QUESTION') {
             if(currentRound==2) btnNextPuzzle.click();
             if(currentRound==3) btnNextOpenDeur.click();
