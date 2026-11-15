@@ -15,7 +15,7 @@
         #dashboard-header { height: 70px; background: rgba(0,0,0,0.6); border-bottom: 2px solid var(--kamp-geel); display: flex; align-items: center; justify-content: space-between; padding: 0 20px; flex-shrink: 0; z-index: 10; }
         h1 { display: block !important; margin: 0; font-size: 1.8em; text-align: left; width: auto; color: var(--kamp-geel); }
         .round-controls { display: flex; gap: 8px; }
-        .round-controls button { margin: 0; padding: 10px 15px; font-size: 0.95em; height: 45px; display: block !important; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); }
+        .round-controls button { margin: 0; padding: 10px 15px; font-size: 0.95em; height: 45px; display: block !important; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); cursor: pointer; }
         .round-controls button.active-round { background: var(--kamp-geel); color: #000; box-shadow: 0 0 15px rgba(255,215,0,0.5); border: 1px solid #fff; font-weight: bold; }
         
         /* 3-KOLOMMEN LAYOUT */
@@ -45,7 +45,7 @@
 
         /* RECHTER KOLOM: Antwoorden & Spelverloop */
         .game-flow-actions { display: flex; flex-direction: column; gap: 10px; margin-bottom: 15px; padding-bottom: 15px; border-bottom: 1px solid var(--border-col); }
-        .game-flow-actions button { padding: 15px; font-size: 1.2em; border-radius: 8px; margin: 0; }
+        .game-flow-actions button { padding: 15px; font-size: 1.2em; border-radius: 8px; margin: 0; cursor: pointer; border:none; }
         .game-flow-row { display: flex; gap: 10px; }
         .game-flow-row button { flex: 1; }
 
@@ -54,22 +54,21 @@
         
         /* KLIKBARE ANTWOORDKNOPPEN */
         .correct-btn {
-            background: var(--kamp-donkergroen);
-            color: #fff;
-            border: 2px solid var(--kamp-groen);
-            padding: 10px 20px;
-            font-size: 1.1em;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: bold;
-            display: inline-block;
-            margin: 5px 5px 5px 0;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-            transition: 0.2s;
-            text-transform: none;
-            font-family: 'Open Sans', sans-serif;
+            background: var(--kamp-donkergroen); color: #fff; border: 2px solid var(--kamp-groen);
+            padding: 10px 20px; font-size: 1.1em; border-radius: 8px; cursor: pointer; font-weight: bold;
+            display: inline-block; margin: 5px 5px 5px 0; box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            transition: 0.2s; text-transform: none; font-family: 'Open Sans', sans-serif;
         }
         .correct-btn:hover { background: var(--correct-color); color: #000; border-color: #fff; transform: scale(1.05); }
+
+        /* VIDEO SELECTIE GRID (DASHBOARD) */
+        .grid-select-btn {
+            background: var(--kamp-groen); color: #fff; padding: 15px; border-radius: 8px; 
+            border: 2px solid var(--kamp-geel); cursor: pointer; font-weight: bold; font-size: 1.2em;
+            flex: 1; min-width: 120px; text-align: center;
+        }
+        .grid-select-btn:hover { background: var(--kamp-geel); color: #000; }
+        .grid-select-btn:disabled { background: #333; color: #666; border-color: #444; cursor: not-allowed; text-decoration: line-through; }
 
         ::-webkit-scrollbar { width: 8px; }
         ::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); }
@@ -137,7 +136,7 @@
             </div>
         </div>
 
-        <!-- RECHTS: Antwoorden (Klikbaar!) -->
+        <!-- RECHTS: Antwoorden & Spelverloop -->
         <div class="panel">
             <h2>📝 Antwoorden (Klikbaar!)</h2>
             
@@ -145,7 +144,7 @@
                 <button onclick="channel.postMessage({ type: 'START_ROUND', round: activeRound })" style="background: var(--kamp-groen); color: #fff; font-weight: bold;">
                     ▶ START GESELECTEERDE RONDE
                 </button>
-                <div class="game-flow-row">
+                <div class="game-flow-row" id="flow-buttons">
                     <button onclick="channel.postMessage({ type: 'NEXT_QUESTION' })" style="background: var(--kamp-geel); color: #000; font-weight: bold;">Volgende Vraag</button>
                     <button onclick="channel.postMessage({ type: 'SHOW_ANSWERS' })" style="background: var(--kamp-rood); color: #fff; font-weight: bold;">Toon op Scherm</button>
                 </div>
@@ -153,8 +152,7 @@
 
             <div id="result-area">
                 <div style="text-align: center; color: var(--text-muted); margin-top: 30px;">
-                    <p style="font-size: 1.2em;">Zodra een vraag start, verschijnen de antwoorden hier.</p>
-                    <p style="font-size: 0.9em; color: var(--kamp-geel);">Klik op een antwoord om het goed te rekenen!</p>
+                    <p style="font-size: 1.2em;">Zodra een ronde start, verschijnen de keuzes hier.</p>
                 </div>
             </div>
         </div>
@@ -181,6 +179,21 @@
             }); 
         });
 
+        // 1 KLIK VIDEO START FUNCTIE
+        function triggerVideo(index) {
+            channel.postMessage({ type: 'SELECT_VIDEO', index: index });
+            // Kleine vertraging om de video te laten inladen op het grote scherm, en start direct
+            setTimeout(() => {
+                channel.postMessage({ type: 'PLAY_VIDEO' });
+            }, 300);
+            
+            // Toon op dashboard alvast de 'Wachten...' status
+            resultArea.innerHTML = `<div style="text-align:center; color:#fff; margin-top:40px;">
+                <h3 style="color:var(--kamp-geel);">🎬 Video speelt af...</h3>
+                <p>Wacht tot de video eindigt. De antwoorden verschijnen dan automatisch hier!</p>
+            </div>`;
+        }
+
         channel.onmessage = (event) => {
             if (event.data.type === 'SYNC_PLAYERS') {
                 const container = document.getElementById('live-players-container');
@@ -199,7 +212,6 @@
                     const textColor = p.isActive ? 'var(--kamp-geel)' : '#fff';
                     const scoreColor = p.isRunning ? 'var(--kamp-rood)' : 'var(--kamp-geel)';
                     
-                    // Toon een vinkje als deze speler zijn eigen vraag al heeft gekregen
                     const playedIcon = p.hasPlayed ? '<span style="color:var(--correct-color); font-size:0.9em; margin-right:5px;" title="Heeft eigen vraag al gehad">✔️</span>' : '';
 
                     container.innerHTML += `
@@ -241,10 +253,32 @@
                 }
             }
 
+            // NIEUW: ONTVANG DE R5 VIDEOMUUR
+            if (event.data.type === 'SYNC_R5_GRID') {
+                activeRound = 5;
+                buttons.forEach(btn => btn.classList.remove('active-round'));
+                document.getElementById(`btn-round-5`).classList.add('active-round');
+
+                let html = `<h3 style="color:var(--kamp-geel); margin-top:0;">Kies een Fragment:</h3>
+                            <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:15px;">`;
+                
+                for (let i = 0; i < event.data.total; i++) {
+                    const isPlayed = event.data.played.includes(i);
+                    if (isPlayed) {
+                        html += `<button disabled class="grid-select-btn">❌ Fragment ${i+1}</button>`;
+                    } else {
+                        html += `<button onclick="triggerVideo(${i})" class="grid-select-btn">▶ Fragment ${i+1}</button>`;
+                    }
+                }
+                html += `</div>`;
+                resultArea.innerHTML = html;
+            }
+
             if (event.data.type === 'SYNC_QUESTION') {
                 activeRound = event.data.round;
                 buttons.forEach(btn => btn.classList.remove('active-round'));
                 document.getElementById(`btn-round-${activeRound}`).classList.add('active-round');
+                
                 lookupAnswers(event.data.ids);
             }
         };
@@ -298,7 +332,7 @@
                         const safeZ = escapeAnswer(q.vraag3_zinEind);
                         const keywordsHtml = q.vraag4_keywords.map(k => `<button class="correct-btn" onclick="sendAnswer('${escapeAnswer(k)}')">✅ ${k}</button>`).join(' ');
                         
-                        html += `<strong style="color:#fff; font-size:1.1em;">Kijk goed!</strong><br>
+                        html += `<strong style="color:#fff; font-size:1.1em;">Keur goed!</strong><br>
                                  <div style="margin-top: 10px; display: flex; flex-direction: column; gap: 5px;">
                                      <div><span style="color:#aaa; width: 80px; display: inline-block;">Seizoen:</span> <button class="correct-btn" onclick="sendAnswer('${safeS}')">✅ ${q.vraag1_seizoen}</button></div>
                                      <div><span style="color:#aaa; width: 80px; display: inline-block;">Aflevering:</span> <button class="correct-btn" onclick="sendAnswer('${safeA}')">✅ ${q.vraag2_aflevering}</button></div>
