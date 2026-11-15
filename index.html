@@ -54,7 +54,6 @@
             <div id="beeld-display-area" style="display: none; width: 100%; flex-direction: column; align-items: center;">
                 <div id="beeld-grid" style="display: flex; gap: 20px; justify-content: center; flex-wrap: wrap; width: 90%; margin-top: 20px;"></div>
                 
-                <!-- Aangepaste container voor Full-Screen effect -->
                 <div id="beeld-player-container" style="display: none; width: 100%; height: 60vh; margin: 0 auto; display: flex; align-items: center; justify-content: center;">
                     <video id="beeld-video-player" playsinline style="width: 100%; height: 100%; object-fit: contain; border: 4px solid var(--kamp-geel); border-radius: 12px; box-shadow: 0 15px 40px rgba(0,0,0,0.9); background: #000;"></video>
                 </div>
@@ -359,7 +358,10 @@
     }
 
     function pasDeBeurt() {
-        const previousPlayerIndex = timerPlayerIndex; stopTimer();
+        // BELANGRIJKE FIX: We gebruiken nu de actieve speler, niet de laatst gestarte timer-speler,
+        // zodat voortijdig passen direct de juiste persoon uitschakelt.
+        const previousPlayerIndex = activePlayerIndex; 
+        stopTimer();
         
         if (currentRound === 1) {
             let idx = players.findIndex(p => p.originalIndex === activePlayerIndex);
@@ -471,7 +473,8 @@
     function checkRound2Answer() {
         const foundItem = currentPuzzleSet.find(p => !p.found && stringSimilarity(p.answer, inputAnswer.value) >= SIMILARITY_THRESHOLD);
         if (foundItem) {
-            showFeedback(true); foundItem.found = true; updateSeconds(activePlayerIndex, R2_R3_R4_BONUS_SECONDS); showBonusFeedback(activePlayerIndex, R2_R3_R4_BONUS_SECONDS); currentSetAttempts = []; 
+            showFeedback(true); foundItem.found = true; updateSeconds(activePlayerIndex, R2_R3_R4_BONUS_SECONDS); showBonusFeedback(activePlayerIndex, R2_R3_R4_BONUS_SECONDS); 
+            // FIX: currentSetAttempts wordt NIET meer gewist. Eén beurt per persoon per puzzel!
             document.getElementById('puzzle-answers-container').innerHTML = currentPuzzleSet.map(p => `<div class="puzzle-answer ${p.found && !p.missed ? 'found '+p.color : ''} ${p.missed ? 'missed' : ''}">${p.found ? p.answer : '???'}</div>`).join('');
             Array.from(document.getElementById('puzzle-clues-container').children).forEach(el => { if(el.dataset.answer === foundItem.answer.toLowerCase()) el.className = `puzzle-clue found ${foundItem.color}`; });
             if (currentPuzzleSet.every(p => p.found)) { 
@@ -520,7 +523,8 @@
     function checkRound3Answer() {
         let activeOD = activeOpenDeurQuestions[currentOpenDeurIndex]; const foundItem = activeOD.keywords.find(k => !k.found && stringSimilarity(k.word, inputAnswer.value) >= SIMILARITY_THRESHOLD);
         if (foundItem) {
-            showFeedback(true); foundItem.found = true; updateSeconds(activePlayerIndex, R2_R3_R4_BONUS_SECONDS); showBonusFeedback(activePlayerIndex, R2_R3_R4_BONUS_SECONDS); currentSetAttempts = []; opendeurSubject.classList.remove('blurred-subject');
+            showFeedback(true); foundItem.found = true; updateSeconds(activePlayerIndex, R2_R3_R4_BONUS_SECONDS); showBonusFeedback(activePlayerIndex, R2_R3_R4_BONUS_SECONDS); opendeurSubject.classList.remove('blurred-subject');
+            // FIX: currentSetAttempts wordt NIET meer gewist
             document.getElementById('opendeur-keywords-container').innerHTML = activeOD.keywords.map(k => `<div class="opendeur-keyword ${k.found && !k.missed ? 'found' : ''} ${k.missed ? 'missed' : ''}">${k.found ? k.word : '???'}</div>`).join('');
             if (activeOD.keywords.every(k => k.found)) { stopTimer(); currentSetAttempts = players.map(p => p.originalIndex); activePlayerIndex = getNextStartingPlayerIndex(3); } else { setTimeout(() => { if (!isTimerRunning) startTimer(activePlayerIndex); }, 50); }
         } else { 
@@ -558,7 +562,8 @@
     function checkRound4Answer() {
         const foundItem = activeRound4Questions.find(q => !q.found && stringSimilarity(q.a, inputAnswer.value) >= SIMILARITY_THRESHOLD);
         if (foundItem) {
-            showFeedback(true); foundItem.found = true; updateSeconds(activePlayerIndex, R2_R3_R4_BONUS_SECONDS); showBonusFeedback(activePlayerIndex, R2_R3_R4_BONUS_SECONDS); currentSetAttempts = []; window.renderMemUI();
+            showFeedback(true); foundItem.found = true; updateSeconds(activePlayerIndex, R2_R3_R4_BONUS_SECONDS); showBonusFeedback(activePlayerIndex, R2_R3_R4_BONUS_SECONDS); window.renderMemUI();
+            // FIX: currentSetAttempts wordt NIET meer gewist
             if (activeRound4Questions.every(q => q.found)) { stopTimer(); currentSetAttempts = players.map(p => p.originalIndex); activePlayerIndex = getNextStartingPlayerIndex(4); } else { setTimeout(() => { if (!isTimerRunning) startTimer(activePlayerIndex); }, 50); }
         } else { 
             showFeedback(false); inputAnswer.value = ''; pasDeBeurt(); 
@@ -681,7 +686,8 @@
         const foundItem = tasks.find(t => !t.found && stringSimilarity(t.word, inputAnswer.value) >= SIMILARITY_THRESHOLD);
         
         if (foundItem) {
-            showFeedback(true); foundItem.found = true; updateSeconds(activePlayerIndex, R2_R3_R4_BONUS_SECONDS); showBonusFeedback(activePlayerIndex, R2_R3_R4_BONUS_SECONDS); currentSetAttempts = []; renderBeeldUI();
+            showFeedback(true); foundItem.found = true; updateSeconds(activePlayerIndex, R2_R3_R4_BONUS_SECONDS); showBonusFeedback(activePlayerIndex, R2_R3_R4_BONUS_SECONDS); renderBeeldUI();
+            // FIX: currentSetAttempts wordt NIET meer gewist
             if (tasks.every(t => t.found)) { 
                 document.getElementById('beeld-tasks-container').classList.add('answers-shown');
                 document.getElementById('beeld-tasks-container').classList.remove('blurred-board');
