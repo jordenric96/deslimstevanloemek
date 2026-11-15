@@ -22,19 +22,9 @@
         .panel-left { background: rgba(0, 0, 0, 0.2); border-right: 1px solid var(--border-col); }
         .panel-right { background: transparent; padding: 0; display: flex; flex-direction: column; }
         h2 { font-size: 1.1em; margin-bottom: 10px; border-bottom: 1px solid var(--border-col); padding-bottom: 5px; color: var(--text-muted); text-transform: uppercase; }
-        #player-config-bar { display: flex; gap: 5px; margin-bottom: 10px; }
-        #player-names-container { display: grid; grid-template-columns: 1fr; gap: 5px; margin-bottom: 10px; }
-        #player-names-container input { padding: 6px 10px; font-size: 0.9em; background: rgba(255,255,255,0.05); border: 1px solid var(--border-col); margin-top: 0; }
-        #save-players-button { width: 100%; padding: 8px; margin-top: 0; font-size: 0.9em; }
-        #round-tracker-table { width: 100%; border-collapse: collapse; font-size: 0.9em; margin-top: 10px; }
-        #round-tracker-table th { text-align: left; padding: 5px; color: var(--primary-accent); font-size: 0.8em; text-transform: uppercase; }
-        #round-tracker-table td { padding: 8px 5px; border-bottom: 1px solid rgba(255,255,255,0.05); vertical-align: middle; }
-        .player-action-btn { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: #ccc; padding: 4px 8px; font-size: 0.8em; cursor: pointer; margin: 0 2px; border-radius: 4px; min-width: 30px; }
-        .player-action-btn:hover { background: rgba(255,255,255,0.2); color: #fff; }
-        .btn-select-player { color: var(--primary-accent); border-color: var(--primary-accent); }
-        .btn-toggle-timer { color: var(--gold-color); border-color: var(--gold-color); }
+        
         .search-strip { padding: 15px; background: rgba(255,255,255,0.02); border-bottom: 1px solid var(--border-col); display: flex; align-items: center; gap: 15px; flex-shrink: 0; }
-        .search-strip input { margin: 0; width: 300px; padding: 8px 12px; font-size: 1em; opacity: 0.5; } /* Iets transparanter want het is nu automatisch */
+        .search-strip input { margin: 0; width: 300px; padding: 8px 12px; font-size: 1em; opacity: 0.5; }
         #result-area { flex: 1; padding: 20px; overflow-y: auto; background: rgba(0,0,0,0.1); }
         .list-item { background: rgba(255,255,255,0.03); border: 1px solid var(--border-col); margin-bottom: 8px; padding: 10px 15px; border-radius: 4px; line-height: 1.5; }
         .list-item strong { color: var(--secondary-accent); }
@@ -63,43 +53,38 @@
             <h1>GM Console</h1>
             <span style="margin-left: 15px; padding: 4px 8px; background: var(--primary-accent); color: black; border-radius: 4px; font-weight: bold; font-size: 0.8em;">F.C. De Kampioenen</span>
             <div class="global-actions">
-                <button id="btn-trigger-fail" class="btn-fail" title="Druk op Pas/Fout">❌ FOUT / PAS</button>
+                <button onclick="channel.postMessage({ type: 'TRIGGER_FAIL' })" class="btn-fail" title="Druk op Pas/Fout">❌ FOUT / PAS</button>
             </div>
         </div>
 
         <div class="round-controls controls">
-            <button id="btn-round-1" data-round="1" class="active-round">R1</button>
-            <button id="btn-round-2" data-round="2">R2</button>
-            <button id="btn-round-3" data-round="3">R3</button>
-            <button id="btn-round-4" data-round="4">R4</button>
-            <button id="btn-round-5" data-round="5">R5 (Beeld)</button>
-            <button id="btn-round-6" data-round="6">R6 (Finale)</button>
+            <button id="btn-round-1" class="active-round">R1</button>
+            <button id="btn-round-2">R2</button>
+            <button id="btn-round-3">R3</button>
+            <button id="btn-round-4">R4</button>
+            <button id="btn-round-5">R5 (Beeld)</button>
+            <button id="btn-round-6">R6 (Finale)</button>
         </div>
     </div>
     
     <div id="dashboard-main">
-        <div class="panel panel-left">
-            <h2>👥 Speler Controls</h2>
-            <div id="player-config">
-                <div id="player-config-bar">
-                    <input type="number" id="num-players-input" value="4" min="2" max="10" style="width: 60px; text-align: center; margin:0;">
-                    <button id="generate-inputs-button" style="margin:0; padding: 5px 10px;">Set</button>
-                    <button id="save-players-button" style="background: var(--correct-color); margin:0; flex:1;">💾 Opslaan</button>
-                </div>
-                <div id="player-names-container"></div>
+        <div class="panel panel-left" style="display: flex; flex-direction: column;">
+            <h2>👥 Live Spelers & Timers</h2>
+            
+            <!-- HIER KOMT DE LIVE DATA VAN HET GROTE SCHERM -->
+            <div id="live-players-container" style="flex: 1; overflow-y: auto;">
+                <p style="color: var(--text-muted); text-align: center; margin-top: 20px;">Wacht tot de spelers hun naam hebben ingevuld en het spel is gestart op het hoofdscherm...</p>
             </div>
 
-            <h2 style="margin-top: 20px;">🎮 Live Control (R<span id="current-round-number">1</span>)</h2>
-            <table id="round-tracker-table" style="display: none;">
-                <thead>
-                    <tr>
-                        <th style="width: 40%">Speler</th>
-                        <th style="width: 40%">Controls</th>
-                        <th style="text-align: center;">Gedaan?</th>
-                    </tr>
-                </thead>
-                <tbody id="tracker-tbody"></tbody>
-            </table>
+            <!-- SPELLEIDER SECONDEN CONTROLES -->
+            <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid var(--border-col); display: flex; flex-direction: column; gap: 8px;">
+                <h3 style="margin: 0; font-size: 0.9em; color: var(--text-muted);">Tijd Toevoegen / Aftrekken:</h3>
+                <button onclick="channel.postMessage({ type: 'ADJUST_TIME', amount: -20 })" style="background: var(--kamp-rood); margin: 0;">-20 Seconden (Fout)</button>
+                <div style="display: flex; gap: 5px;">
+                    <button onclick="channel.postMessage({ type: 'ADJUST_TIME', amount: 10 })" style="flex: 1; margin: 0; background: var(--kamp-groen);">+10 Sec</button>
+                    <button onclick="channel.postMessage({ type: 'ADJUST_TIME', amount: 20 })" style="flex: 1; margin: 0; background: var(--kamp-groen);">+20 Sec</button>
+                </div>
+            </div>
         </div>
 
         <div class="panel panel-right">
@@ -109,13 +94,13 @@
             </div>
             
             <div style="padding: 15px; background: rgba(255,255,255,0.05); display: flex; gap: 10px; border-bottom: 1px solid var(--border-col);">
-                <button onclick="channel.postMessage({ type: 'NEXT_QUESTION' })" style="background: var(--kamp-geel); color: #000; padding: 8px 15px; cursor: pointer; border-radius: 4px; border:none; font-weight:bold;">Volgende Vraag</button>
+                <button onclick="channel.postMessage({ type: 'NEXT_QUESTION' })" style="background: var(--kamp-geel); color: #000; padding: 8px 15px; cursor: pointer; border-radius: 4px; border:none; font-weight:bold;">Volgende Vraag / Speler</button>
                 <button onclick="channel.postMessage({ type: 'SHOW_ANSWERS' })" style="background: var(--kamp-rood); color: #fff; padding: 8px 15px; cursor: pointer; border-radius: 4px; border:none; font-weight:bold;">Toon Antwoorden</button>
             </div>
 
             <div id="result-area">
                 <div style="text-align: center; color: var(--text-muted); margin-top: 50px;">
-                    <p style="font-size: 1.2em;">Zodra het spel start op het hoofdscherm, verschijnen de antwoorden hier automatisch!</p>
+                    <p style="font-size: 1.2em;">Zodra een ronde start, verschijnen de antwoorden hier automatisch!</p>
                 </div>
             </div>
         </div>
@@ -123,83 +108,50 @@
     
     <script>
         const channel = new BroadcastChannel('trivial_time_channel');
-
-        function sendAnswer(text) { channel.postMessage({ type: 'FILL_ANSWER', answer: text }); showToast(`Gestuurd: "${text}"`); }
-        function triggerFail() { channel.postMessage({ type: 'TRIGGER_FAIL' }); showToast("❌ FOUT/PAS Signaal Verstuurd"); }
-        function selectPlayer(index) { channel.postMessage({ type: 'SELECT_PLAYER', playerIndex: index }); showToast(`Speler ${index+1} Geselecteerd`); }
-        function toggleTimer(index) { channel.postMessage({ type: 'TOGGLE_TIMER', playerIndex: index }); showToast(`Timer Toggle Speler ${index+1}`); }
-
-        function showToast(msg) {
-            const feedback = document.createElement('div');
-            feedback.textContent = msg; feedback.style.position = 'fixed'; feedback.style.bottom = '20px'; feedback.style.right = '20px';
-            feedback.style.background = 'var(--primary-accent)'; feedback.style.color = '#000'; feedback.style.padding = '8px 15px';
-            feedback.style.borderRadius = '4px'; feedback.style.zIndex = '2000'; feedback.style.fontWeight = 'bold'; feedback.style.boxShadow = '0 4px 10px rgba(0,0,0,0.3)';
-            document.body.appendChild(feedback); setTimeout(() => feedback.remove(), 1500);
-        }
-
-        document.getElementById('btn-trigger-fail').addEventListener('click', triggerFail);
-
-        const resultArea = document.getElementById('result-area'), inputField = document.getElementById('question-id-input'), buttons = document.querySelectorAll('.round-controls button');
-        const numPlayersInput = document.getElementById('num-players-input'), generateInputsButton = document.getElementById('generate-inputs-button');
-        const playerNamesContainer = document.getElementById('player-names-container'), savePlayersButton = document.getElementById('save-players-button');
-        const roundTrackerTable = document.getElementById('round-tracker-table'), trackerTbody = document.getElementById('tracker-tbody'), currentRoundNumber = document.getElementById('current-round-number');
-
+        const resultArea = document.getElementById('result-area');
+        const inputField = document.getElementById('question-id-input');
+        const buttons = document.querySelectorAll('.round-controls button');
         let activeRound = 1;
-        const STORAGE_PLAYERS_KEY = 'trivialTime_playerNames', STORAGE_TRACKER_KEY = 'trivialTime_roundTracker';
-        let playerNames = [], roundTracker = {}; 
 
-        window.addEventListener('load', () => { loadPlayerNames(); loadRoundTracker(); setActiveRound(1); });
-        buttons.forEach(button => { button.addEventListener('click', () => { setActiveRound(button.dataset.round); }); });
-        
-        generateInputsButton.addEventListener('click', () => { const num = parseInt(numPlayersInput.value); generatePlayerNameInputs(num); });
-        savePlayersButton.addEventListener('click', savePlayerNames);
-
-        function setActiveRound(round) {
-            buttons.forEach(btn => btn.classList.remove('active-round'));
-            document.getElementById(`btn-round-${round}`).classList.add('active-round');
-            activeRound = parseInt(round);
-            currentRoundNumber.textContent = activeRound; updateRoundTrackerTable();
-        }
-
-        function loadPlayerNames() {
-            const stored = localStorage.getItem(STORAGE_PLAYERS_KEY);
-            if (stored) { playerNames = JSON.parse(stored); generatePlayerNameInputs(playerNames.length, playerNames); numPlayersInput.value = playerNames.length; updateRoundTrackerTable(); }
-        }
-        function loadRoundTracker() { const stored = localStorage.getItem(STORAGE_TRACKER_KEY); if (stored) roundTracker = JSON.parse(stored); }
-
-        function generatePlayerNameInputs(num, initialNames = []) {
-            playerNamesContainer.innerHTML = '';
-            for (let i = 0; i < num; i++) {
-                const name = initialNames[i] || `Speler ${i + 1}`; const input = document.createElement('input');
-                input.type = 'text'; input.value = name; input.placeholder = `Naam ${i+1}`; playerNamesContainer.appendChild(input);
-            }
-        }
-        
-        function savePlayerNames() {
-            const inputs = playerNamesContainer.querySelectorAll('input'); playerNames = Array.from(inputs).map(i => i.value.trim()).filter(n => n);
-            localStorage.setItem(STORAGE_PLAYERS_KEY, JSON.stringify(playerNames)); updateRoundTrackerTable();
-            const originalText = savePlayersButton.textContent; savePlayersButton.textContent = "✅ Opgeslagen"; setTimeout(() => savePlayersButton.textContent = originalText, 1500);
-        }
-        
-        function updateRoundTrackerTable() {
-            trackerTbody.innerHTML = ''; if (playerNames.length === 0) { roundTrackerTable.style.display = 'none'; return; }
-            roundTrackerTable.style.display = 'table'; const roundKey = `ronde_${activeRound}`;
-            if (!roundTracker[roundKey]) roundTracker[roundKey] = {};
-            playerNames.forEach((name, index) => {
-                if (!(name in roundTracker[roundKey])) roundTracker[roundKey][name] = false;
-                const row = document.createElement('tr'); const isChecked = roundTracker[roundKey][name];
-                row.innerHTML = `<td>${name}</td><td><button class="player-action-btn btn-select-player" onclick="selectPlayer(${index})" title="Selecteer Speler">👆</button><button class="player-action-btn btn-toggle-timer" onclick="toggleTimer(${index})" title="Start/Stop Timer">⏱️</button></td><td style="text-align: center;"><input type="checkbox" style="transform: scale(1.2); accent-color: var(--primary-accent);" data-player="${name}" ${isChecked ? 'checked' : ''} onchange="toggleTracker('${roundKey}', '${name}', this.checked)"></td>`;
-                trackerTbody.appendChild(row);
-            });
-        }
-        window.toggleTracker = function(roundKey, player, isChecked) { roundTracker[roundKey][player] = isChecked; localStorage.setItem(STORAGE_TRACKER_KEY, JSON.stringify(roundTracker)); };
-
+        function sendAnswer(text) { channel.postMessage({ type: 'FILL_ANSWER', answer: text }); }
+        function selectPlayer(index) { channel.postMessage({ type: 'SELECT_PLAYER', playerIndex: index }); }
+        function toggleTimer(index) { channel.postMessage({ type: 'TOGGLE_TIMER', playerIndex: index }); }
         function escapeAnswer(str) { if (!str) return ''; return str.replace(/'/g, "\\'"); }
 
-        // LUISTERT NAAR DE NIEUWE AUTOMATISCHE SYNC!
+        // LUISTER NAAR HET HOOFDSCHERM
         channel.onmessage = (event) => {
+            // 1. LIVE SPELERS OVERNEMEN
+            if (event.data.type === 'SYNC_PLAYERS') {
+                const container = document.getElementById('live-players-container');
+                container.innerHTML = '';
+                event.data.players.forEach(p => {
+                    const color = p.isActive ? 'var(--kamp-geel)' : 'white';
+                    const bg = p.isActive ? 'rgba(255,215,0,0.1)' : 'rgba(255,255,255,0.02)';
+                    const border = p.isActive ? `1px solid var(--kamp-geel)` : `1px solid rgba(255,255,255,0.1)`;
+                    
+                    container.innerHTML += `
+                        <div style="background: ${bg}; border: ${border}; padding: 10px; margin-bottom: 8px; border-radius: 6px; display: flex; justify-content: space-between; align-items: center;">
+                            <span style="color: ${color}; font-weight: bold; font-size: 1.1em; max-width: 130px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                                ${p.isActive ? '👉 ' : ''}${p.name}
+                            </span>
+                            <span style="font-family: 'Chakra Petch', sans-serif; font-size: 1.8em; font-weight: bold; color: ${p.isRunning ? 'var(--kamp-rood)' : 'var(--kamp-geel)'};">
+                                ${p.seconds}
+                            </span>
+                            <div style="display: flex; gap: 5px;">
+                                <button onclick="selectPlayer(${p.index})" style="padding: 5px; margin: 0; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); font-size: 1em;" title="Selecteer Speler">👆</button>
+                                <button onclick="toggleTimer(${p.index})" style="padding: 5px; margin: 0; background: rgba(255,255,255,0.1); border: 1px solid var(--kamp-geel); font-size: 1em;" title="Start/Stop Timer">⏱️</button>
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+
+            // 2. AUTOMATISCHE ANTWOORDEN TONEN
             if (event.data.type === 'SYNC_QUESTION') {
-                setActiveRound(event.data.round);
+                activeRound = event.data.round;
+                buttons.forEach(btn => btn.classList.remove('active-round'));
+                document.getElementById(`btn-round-${activeRound}`).classList.add('active-round');
+                
                 inputField.value = event.data.ids.join(', '); // Toon de ids enkel ter info
                 lookupAnswers(event.data.ids);
             }
