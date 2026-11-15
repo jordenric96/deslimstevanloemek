@@ -25,5 +25,13 @@ const RONDE5_DATA = {
             vraag3_zinEind: "Ja, de kampioenen moet ge vooral psychologisch aanpakken",
             vraag4_keywords: ["Dokter Anders", "De vrouwen willen zijn aandacht"]
         },
+
+           {
+            videoBron: "fragmenten/fragment4.mp4", 
+            vraag1_seizoen: "Seizoen ",
+            vraag2_aflevering: "Radiosterren",
+            vraag3_zinEind: "Ja, de smalle is weer aan't prutsen",
+            vraag4_keywords: ["Een uur zendtijd vrijgekomen", "Carmen, Bieke, Oscar, DDT doen mee"]
+        },
        
 };
