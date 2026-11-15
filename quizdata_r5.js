@@ -8,7 +8,7 @@ const RONDE5_DATA = {
             vraag2_aflevering: "Verkiezingen",
             vraag3_zinBegin: "Ne..",
             vraag3_zinEind: "yoghurt voor iedereen",
-            vraag4_keywords: ["Sponsor", "Ruzie"]
+            vraag4_keywords: ["Verkiezingen voorzitterschap", "DDT,Oscar en Boma"]
         },
        
 };
