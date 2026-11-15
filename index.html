@@ -68,36 +68,26 @@
             </div>
         </div>
 
-        <div class="controls">
-            <button id="start-round-1" style="display: none;">START RONDE 1</button>
-            <button id="start-round-2" style="display: none;">Start Ronde 2: Puzzel</button>
-            <button id="start-round-3" style="display: none;">Start Ronde 3: Open Deur</button>
-            <button id="start-round-4" style="display: none;">Start Ronde 4: Geheugen</button>
-            <button id="start-round-5" style="display: none;">Start Ronde 5: Beeldfragmenten</button>
-            <button id="start-finale" style="display: none;">START DE FINALE</button>
+        <div class="controls" style="display: none;">
+            <button id="start-round-1">START RONDE 1</button>
+            <button id="start-round-2">Start Ronde 2: Puzzel</button>
+            <button id="start-round-3">Start Ronde 3: Open Deur</button>
+            <button id="start-round-4">Start Ronde 4: Geheugen</button>
+            <button id="start-round-5">Start Ronde 5: Beeldfragmenten</button>
+            <button id="start-finale">START DE FINALE</button>
 
-            <button id="next-puzzle" style="display: none;">Volgende Puzzel</button>
-            <button id="next-opendeur" style="display: none;">Volgende Vraag</button>
-            <button id="next-geheugen-speler" style="display: none;">Volgende Speler</button>
-            <button id="next-beeld" style="display: none;">Volgend Fragment</button>
+            <button id="next-puzzle">Volgende Puzzel</button>
+            <button id="next-opendeur">Volgende Vraag</button>
+            <button id="next-geheugen-speler">Volgende Speler</button>
+            <button id="next-beeld">Volgend Fragment</button>
 
-            <button id="show-puzzle-answers" style="display: none;">Toon Puzzel Antwoorden</button>
-            <button id="show-opendeur-answers" style="display: none;">Toon Restant</button>
-            <button id="show-geheugen-answers" style="display: none;">Toon Alle Antwoorden</button>
-            <button id="show-beeld-answers" style="display: none;">Toon Antwoorden</button>
+            <button id="show-puzzle-answers">Toon Puzzel Antwoorden</button>
+            <button id="show-opendeur-answers">Toon Restant</button>
+            <button id="show-geheugen-answers">Toon Alle Antwoorden</button>
+            <button id="show-beeld-answers">Toon Antwoorden</button>
 
-            <button id="btn-finale-show" style="display: none;">Toon Antwoorden</button>
-            <button id="btn-finale-next" style="display: none;">Volgende Vraag</button>
-        </div>
-
-        <hr style="margin-top: 30px; border-color: #333;">
-
-        <div class="player-controls">
-            <h3>Spelmeester Controles</h3>
-            <p>Klik op de **Spelerkaart** om de klok te starten/stoppen (R2-R6).</p>
-            <button id="wrong-answer">Fout Antwoord (-20 sec)</button>
-            <button id="add-seconds-10">+10 Seconden</button>
-            <button id="add-seconds-20">+20 Seconden</button>
+            <button id="btn-finale-show">Toon Antwoorden</button>
+            <button id="btn-finale-next">Volgende Vraag</button>
         </div>
     </div>
 
@@ -146,6 +136,7 @@
 
     let players = [], isGameOver = false, finalists = [], activeFinalistIndex = 0, currentRound = 0, currentQuestionIndex = 0;
     let activePlayerIndex = 0, timerInterval = null, isTimerRunning = false, timerPlayerIndex = null, currentSetAttempts = [], currentQuestionAttempts = [];
+    let startingPlayersThisRound = []; // Houdt bij wie zijn eigen vraag al heeft gekregen in ronde 2 t/m 5
 
     const setupScreen = document.getElementById('setup-screen'), playerNameInputs = document.getElementById('player-name-inputs');
     const numPlayersInput = document.getElementById('num-players'), playerContainer = document.getElementById('player-container');
@@ -192,17 +183,9 @@
     }
 
     function initializeGame(startRound = 1) {
-        if (!window.ThemeManager) { 
-            alert("Systeemfout: ThemeManager is niet geladen. Controleer of quizdata_loader.js goed gekoppeld is."); 
-            return; 
-        }
-        
+        if (!window.ThemeManager) { alert("Systeemfout: ThemeManager is niet geladen."); return; }
         quizData = window.ThemeManager.getTheme('KAMPIOENEN');
-        
-        if (!quizData) {
-            alert("Oeps! Het thema 'KAMPIOENEN' is niet gevonden in je databestanden.");
-            return;
-        }
+        if (!quizData) { alert("Oeps! Het thema 'KAMPIOENEN' is niet gevonden."); return; }
 
         quizData.ronde1_pool = (quizData.ronde1_pool || []).map((q, i) => ({ ...q, id: i + 1 }));
         quizData.ronde2_answer_pool = (quizData.ronde2_answer_pool || []).map((q, i) => ({ ...q, id: i + 1 }));
@@ -242,13 +225,10 @@
             activePlayerIndex = players[0].originalIndex; 
             renderPlayers(); 
             
-            // Zorg dat het scherm netjes wacht op jouw commando vanaf het dashboard
             hideAllGameAreas();
             document.getElementById('question-text').style.display = 'block';
             document.getElementById('question-text').textContent = "Klaar voor de start! Wachten op de spelleider...";
-        } else { 
-            alert("Minimaal 2 spelers nodig."); 
-        }
+        } else { alert("Minimaal 2 spelers nodig."); }
     }
 
     window.addEventListener('load', () => { updatePlayerInputs(); setupScreen.classList.add('visible'); });
@@ -259,13 +239,17 @@
     }
 
     function getNextStartingPlayerIndex(round) {
-        let eligiblePlayers = players.filter(p => p.seconds > 0);
+        // Pakt de speler met laagste score die ZIJN EIGEN vraag nog NIET heeft gehad in deze ronde
+        let eligiblePlayers = players.filter(p => p.seconds > 0 && !startingPlayersThisRound.includes(p.originalIndex));
+        // Fallback voor ronde 1 en ronde 6 (waar dit niet geldt)
+        if (eligiblePlayers.length === 0) eligiblePlayers = players.filter(p => p.seconds > 0);
         if (eligiblePlayers.length === 0) return (players.sort((a, b) => a.seconds - b.seconds)[0]?.originalIndex || 0);
         eligiblePlayers.sort((a, b) => a.seconds - b.seconds);
         return eligiblePlayers[0].originalIndex;
     }
 
     function getNextPlayerForSet(currentIndex, attemptsArray) {
+        // Wie is er aan de beurt als iemand past? (Degene met laagste score die déze vraag nog niet zag)
         let eligible = players.filter(p => p.seconds > 0 && !attemptsArray.includes(p.originalIndex));
         if (eligible.length === 0) return -1;
         eligible.sort((a, b) => a.seconds - b.seconds);
@@ -299,7 +283,12 @@
                 timerButtonSymbol = '❚❚'; timerButtonClass += ' running'; 
                 isRunning = true;
             }
-            card.innerHTML = `<div class="player-name">${player.name}</div><div class="player-seconds">${player.seconds}</div><button class="${timerButtonClass}" data-player-index="${originalIndex}" style="position: absolute; top: 5px; right: 5px;">${timerButtonSymbol}</button><div class="bonus-feedback"></div>`;
+            
+            // HET GROENE VINKJE!
+            let hasPlayed = (currentRound >= 2 && currentRound <= 5 && startingPlayersThisRound.includes(originalIndex));
+            let playedIcon = hasPlayed ? '<span style="color:var(--correct-color); font-size:0.8em; margin-right:5px; text-shadow:none;">✔️</span>' : '';
+
+            card.innerHTML = `<div class="player-name">${playedIcon}${player.name}</div><div class="player-seconds">${player.seconds}</div><button class="${timerButtonClass}" data-player-index="${originalIndex}" style="position: absolute; top: 5px; right: 5px; display:none;">${timerButtonSymbol}</button><div class="bonus-feedback"></div>`;
             playerContainer.appendChild(card);
 
             syncData.push({
@@ -307,7 +296,8 @@
                 name: player.name,
                 seconds: player.seconds,
                 isActive: (originalIndex === activePlayerIndex),
-                isRunning: isRunning
+                isRunning: isRunning,
+                hasPlayed: hasPlayed
             });
         });
 
@@ -329,6 +319,8 @@
         
         isTimerRunning = true; timerPlayerIndex = playerIndex;
         
+        // MAAK RONDES HELDER ZODRA TIMER START
+        if (currentRound === 2) document.getElementById('puzzle-clues-container').classList.remove('blurred-board');
         if (currentRound === 3) opendeurSubject.classList.remove('blurred-subject');
         if (currentRound === 4) geheugenBoard.classList.remove('blurred-board');
         if (currentRound === 6) document.getElementById('finale-subject').classList.remove('blurred-subject');
@@ -355,8 +347,18 @@
     function stopTimer() {
         document.body.classList.add('timer-stopped'); clearInterval(timerInterval);
         isTimerRunning = false; timerInterval = null; inputAnswer.disabled = true;
-        if (currentRound === 4 && !geheugenBoard.classList.contains('answers-shown')) geheugenBoard.classList.add('blurred-board');
-        if (currentRound === 6 && document.getElementById('btn-finale-next').style.display === 'none') document.getElementById('finale-subject').classList.add('blurred-subject');
+        
+        // MAAK RONDES TROEBEL ALS TIMER STOPT (EN ZE NOG NIET OPGELOST ZIJN)
+        if (currentRound === 2 && !document.getElementById('puzzle-clues-container').classList.contains('answers-shown')) {
+            document.getElementById('puzzle-clues-container').classList.add('blurred-board');
+        }
+        if (currentRound === 4 && !geheugenBoard.classList.contains('answers-shown')) {
+            geheugenBoard.classList.add('blurred-board');
+        }
+        if (currentRound === 6 && document.getElementById('btn-finale-next').style.display === 'none') {
+            document.getElementById('finale-subject').classList.add('blurred-subject');
+        }
+        
         renderPlayers();
     }
 
@@ -402,7 +404,7 @@
     }
 
     function hideAllGameAreas() {
-        document.querySelectorAll('#game-board > div[id$="-display-area"], .controls button').forEach(el => el.style.display = 'none');
+        document.querySelectorAll('#game-board > div[id$="-display-area"]').forEach(el => el.style.display = 'none');
         questionText.style.display = 'none'; questionIdElement.style.display = 'none'; puzzleIdsElement.style.display = 'none';
         inputAnswer.style.display = 'none'; btnCheckAnswer.style.display = 'none'; questionCounter.style.display = 'none';
         
@@ -459,7 +461,7 @@
     // --- RONDE 2 ---
     let activeRound2Puzzles = [], currentPuzzleSet = null, currentR2SetCount = 0;
     function setupRound2() {
-        currentRound = 2; currentR2SetCount = 0; activePlayerIndex = getNextStartingPlayerIndex(2); roundTitle.textContent = `Ronde 2: De Puzzel`; 
+        currentRound = 2; currentR2SetCount = 0; startingPlayersThisRound = []; activePlayerIndex = getNextStartingPlayerIndex(2); roundTitle.textContent = `Ronde 2: De Puzzel`; 
         const fullPool = shuffleArray([...quizData.ronde2_answer_pool]); activeRound2Puzzles = [];
         for (let i = 0; i < players.length; i++) { activeRound2Puzzles.push(fullPool.slice(i * 3, (i + 1) * 3).map((p, j) => ({ ...p, found: false, color: `color-${(j % 3) + 1}`, clues: p.clues.map(c => ({ text: c, color: `color-${(j % 3) + 1}` })) }))); }
         hideAllGameAreas(); document.getElementById('puzzle-display-area').style.display = 'flex';
@@ -468,11 +470,19 @@
     function loadNewPuzzle() {
         if (currentR2SetCount >= players.length) { hideAllGameAreas(); questionText.style.display = 'block'; questionText.textContent = "Einde van Ronde 2."; document.getElementById('start-round-3').style.display = 'inline-block'; return; }
         activePlayerIndex = getNextStartingPlayerIndex(2); currentSetAttempts = []; currentPuzzleSet = activeRound2Puzzles[currentR2SetCount];
+        startingPlayersThisRound.push(activePlayerIndex); // Markeer deze speler
+        
         questionCounter.innerHTML = `Puzzel ${currentR2SetCount + 1} / ${players.length}`; formatAndDisplayIDs(currentPuzzleSet.map(p => p.id));
         channel.postMessage({ type: 'SYNC_QUESTION', round: 2, ids: currentPuzzleSet.map(p => p.id) });
+        
         let allClues = []; currentPuzzleSet.forEach(p => { p.clues.forEach(c => { allClues.push({ text: c.text, answer: p.answer, color: c.color, isFound: p.found }); }); }); shuffleArray(allClues);
         document.getElementById('puzzle-answers-container').innerHTML = currentPuzzleSet.map(p => `<div class="puzzle-answer ${p.found ? 'found '+p.color : ''}">${p.found ? p.answer : '???'}</div>`).join('');
         document.getElementById('puzzle-clues-container').innerHTML = allClues.map(c => `<div class="puzzle-clue ${c.isFound ? 'found '+c.color : ''}" data-answer="${c.answer.toLowerCase()}">${c.text}</div>`).join('');
+        
+        // MAAK DE PUZZEL STANDAARD TROEBEL VOORDAT TIMER START
+        document.getElementById('puzzle-clues-container').classList.remove('answers-shown');
+        document.getElementById('puzzle-clues-container').classList.add('blurred-board');
+        
         btnNextPuzzle.style.display = 'none'; btnShowPuzzleAnswers.style.display = 'inline-block'; btnCheckAnswer.style.display = 'inline-block'; inputAnswer.style.display = 'inline-block'; inputAnswer.disabled = true; stopTimer(); inputAnswer.value = '';
     }
     function checkRound2Answer() {
@@ -481,22 +491,33 @@
             showFeedback(true); foundItem.found = true; updateSeconds(activePlayerIndex, R2_R3_R4_BONUS_SECONDS); showBonusFeedback(activePlayerIndex, R2_R3_R4_BONUS_SECONDS); currentSetAttempts = []; 
             document.getElementById('puzzle-answers-container').innerHTML = currentPuzzleSet.map(p => `<div class="puzzle-answer ${p.found ? 'found '+p.color : ''}">${p.found ? p.answer : '???'}</div>`).join('');
             Array.from(document.getElementById('puzzle-clues-container').children).forEach(el => { if(el.dataset.answer === foundItem.answer.toLowerCase()) el.className = `puzzle-clue found ${foundItem.color}`; });
-            if (currentPuzzleSet.every(p => p.found)) { stopTimer(); btnShowPuzzleAnswers.style.display = 'none'; btnCheckAnswer.style.display = 'none'; inputAnswer.style.display = 'none'; btnNextPuzzle.style.display = 'inline-block'; currentSetAttempts = players.map(p => p.originalIndex); activePlayerIndex = getNextStartingPlayerIndex(2); } else { setTimeout(() => { if (!isTimerRunning) startTimer(activePlayerIndex); }, 50); }
+            if (currentPuzzleSet.every(p => p.found)) { 
+                document.getElementById('puzzle-clues-container').classList.add('answers-shown');
+                document.getElementById('puzzle-clues-container').classList.remove('blurred-board');
+                stopTimer(); btnShowPuzzleAnswers.style.display = 'none'; btnCheckAnswer.style.display = 'none'; inputAnswer.style.display = 'none'; btnNextPuzzle.style.display = 'inline-block'; currentSetAttempts = players.map(p => p.originalIndex); activePlayerIndex = getNextStartingPlayerIndex(2); 
+            } else { setTimeout(() => { if (!isTimerRunning) startTimer(activePlayerIndex); }, 50); }
         } else { showFeedback(false); setTimeout(() => { if (!isTimerRunning) startTimer(activePlayerIndex); }, 1000); }
         inputAnswer.value = '';
     }
-    function showPuzzleAnswers() { currentPuzzleSet.forEach(p => p.found = true); checkRound2Answer(); }
+    function showPuzzleAnswers() { 
+        currentPuzzleSet.forEach(p => p.found = true); 
+        document.getElementById('puzzle-clues-container').classList.add('answers-shown');
+        document.getElementById('puzzle-clues-container').classList.remove('blurred-board');
+        checkRound2Answer(); 
+    }
 
     // --- RONDE 3 ---
     let activeOpenDeurQuestions = [], currentOpenDeurIndex = 0;
     function setupRound3() {
-        currentRound = 3; currentOpenDeurIndex = 0; activePlayerIndex = getNextStartingPlayerIndex(3); roundTitle.textContent = `Ronde 3: Open Deur`; 
+        currentRound = 3; currentOpenDeurIndex = 0; startingPlayersThisRound = []; activePlayerIndex = getNextStartingPlayerIndex(3); roundTitle.textContent = `Ronde 3: Open Deur`; 
         activeOpenDeurQuestions = shuffleArray([...quizData.ronde3_openDeur]).slice(0, players.length);
         hideAllGameAreas(); opendeurDisplayArea.style.display = 'block'; questionText.style.display = 'block'; questionCounter.style.display = 'block'; inputAnswer.style.display = 'inline-block'; btnCheckAnswer.style.display = 'inline-block'; loadOpenDeur();
     }
     function loadOpenDeur() {
         if (currentOpenDeurIndex >= players.length) { hideAllGameAreas(); questionText.style.display = 'block'; questionText.textContent = "Einde van Ronde 3."; btnStartRound4.style.display = 'inline-block'; return; }
         activePlayerIndex = getNextStartingPlayerIndex(3); currentSetAttempts = []; let activeOD = activeOpenDeurQuestions[currentOpenDeurIndex];
+        startingPlayersThisRound.push(activePlayerIndex); // Markeer speler
+        
         questionCounter.innerHTML = `Vraag ${currentOpenDeurIndex + 1} / ${players.length}`; opendeurSubject.textContent = activeOD.subject; opendeurSubject.classList.add('blurred-subject'); formatAndDisplayIDs([activeOD.id]);
         channel.postMessage({ type: 'SYNC_QUESTION', round: 3, ids: [activeOD.id] });
         document.getElementById('opendeur-keywords-container').innerHTML = activeOD.keywords.map(k => `<div class="opendeur-keyword ${k.found ? 'found' : ''}">${k.found ? k.word : '???'}</div>`).join('');
@@ -516,13 +537,15 @@
     // --- RONDE 4 ---
     let activeRound4Questions = [], currentMemoryList = 0;
     function setupRound4() {
-        currentRound = 4; currentMemoryList = 0; activePlayerIndex = getNextStartingPlayerIndex(4); roundTitle.textContent = `Ronde 4: Het Geheugen`; 
+        currentRound = 4; currentMemoryList = 0; startingPlayersThisRound = []; activePlayerIndex = getNextStartingPlayerIndex(4); roundTitle.textContent = `Ronde 4: Het Geheugen`; 
         quizData.ronde4_geheugen = shuffleArray(quizData.ronde4_geheugen);
         hideAllGameAreas(); geheugenDisplayArea.style.display = 'block'; questionText.style.display = 'block'; questionCounter.style.display = 'block'; questionIdElement.style.display = 'block'; inputAnswer.style.display = 'inline-block'; btnCheckAnswer.style.display = 'inline-block'; loadMemoryQuestion();
     }
     function loadMemoryQuestion() {
         if (currentMemoryList >= players.length) { hideAllGameAreas(); questionText.style.display = 'block'; questionText.textContent = "Einde van Ronde 4!"; btnStartRound5.style.display = 'inline-block'; return; }
         activePlayerIndex = getNextStartingPlayerIndex(4); currentSetAttempts = []; activeRound4Questions = quizData.ronde4_geheugen.slice(currentMemoryList*6, (currentMemoryList+1)*6);
+        startingPlayersThisRound.push(activePlayerIndex); // Markeer speler
+        
         geheugenBoard.classList.remove('answers-shown'); geheugenBoard.classList.add('blurred-board'); questionCounter.innerHTML = `Beurt ${currentMemoryList + 1} / ${players.length}`; formatAndDisplayIDs(activeRound4Questions.map(q => q.id));
         channel.postMessage({ type: 'SYNC_QUESTION', round: 4, ids: activeRound4Questions.map(q => q.id) });
         const renderMem = () => geheugenBoard.innerHTML = activeRound4Questions.map((q,i) => `<li class="geheugen-item ${q.found ? 'found' : ''}"><span>${i+1}. <strong>${q.q1}</strong>...</span><span class="geheugen-antwoord">${q.found ? q.a : '...?'}</span></li>`).join(''); renderMem(); window.renderMemUI = renderMem;
@@ -541,13 +564,15 @@
     // --- RONDE 5 (Beeldronde) ---
     let activeBeeldQuestions = [], currentBeeldIndex = 0;
     function setupRound5() {
-        currentRound = 5; currentBeeldIndex = 0; activePlayerIndex = getNextStartingPlayerIndex(5); roundTitle.textContent = `Ronde 5: De Beeldronde`; 
+        currentRound = 5; currentBeeldIndex = 0; startingPlayersThisRound = []; activePlayerIndex = getNextStartingPlayerIndex(5); roundTitle.textContent = `Ronde 5: De Beeldronde`; 
         activeBeeldQuestions = shuffleArray([...quizData.ronde5_beeld]).slice(0, players.length);
         hideAllGameAreas(); document.getElementById('beeld-display-area').style.display = 'block'; questionText.style.display = 'block'; questionCounter.style.display = 'block'; inputAnswer.style.display = 'inline-block'; btnCheckAnswer.style.display = 'inline-block'; loadBeeldVraag();
     }
     function loadBeeldVraag() {
         if (currentBeeldIndex >= activeBeeldQuestions.length || currentBeeldIndex >= players.length) { hideAllGameAreas(); questionText.style.display = 'block'; questionText.textContent = "Einde van de Beeldronde!"; btnStartFinale.style.display = 'inline-block'; return; }
         activePlayerIndex = getNextStartingPlayerIndex(5); currentSetAttempts = []; let q = activeBeeldQuestions[currentBeeldIndex];
+        startingPlayersThisRound.push(activePlayerIndex); // Markeer speler
+        
         questionCounter.innerHTML = `Fragment ${currentBeeldIndex + 1} / ${players.length}`; formatAndDisplayIDs([q.id]); 
         channel.postMessage({ type: 'SYNC_QUESTION', round: 5, ids: [q.id] });
         document.getElementById('beeld-video-player').src = q.videoBron;
@@ -605,12 +630,6 @@
         if (currentRound === 1 || event.target.classList.contains('player-timer-btn') === false) { activePlayerIndex = clickedIndex; renderPlayers(); } else toggleTimer(clickedIndex);
     });
 
-    btnCheckAnswer.addEventListener('click', () => {
-        if(currentRound==1) checkRound1Answer(); else if(currentRound==2) checkRound2Answer(); else if(currentRound==3) checkRound3Answer();
-        else if(currentRound==4) checkRound4Answer(); else if(currentRound==5) checkRound5Answer(); else if(currentRound==6) checkFinaleAnswer();
-    });
-    inputAnswer.addEventListener('keyup', (e) => { if (e.key === 'Enter') { e.preventDefault(); btnCheckAnswer.click(); } });
-
     document.getElementById('start-round-1').addEventListener('click', startGameR1); document.getElementById('start-round-2').addEventListener('click', setupRound2);
     document.getElementById('start-round-3').addEventListener('click', setupRound3); document.getElementById('start-round-4').addEventListener('click', setupRound4);
     document.getElementById('start-round-5').addEventListener('click', setupRound5); btnStartFinale.addEventListener('click', setupFinale);
@@ -627,8 +646,8 @@
 
     channel.onmessage = (event) => {
         if (!event.data) return;
-        if (event.data.type === 'FILL_ANSWER') { inputAnswer.value = event.data.answer; btnCheckAnswer.click(); }
-        if (event.data.type === 'TRIGGER_FAIL') { inputAnswer.value = "###FAIL###"; btnCheckAnswer.click(); }
+        if (event.data.type === 'FILL_ANSWER') { inputAnswer.value = event.data.answer; if(currentRound==1) checkRound1Answer(); else if(currentRound==2) checkRound2Answer(); else if(currentRound==3) checkRound3Answer(); else if(currentRound==4) checkRound4Answer(); else if(currentRound==5) checkRound5Answer(); else if(currentRound==6) checkFinaleAnswer(); }
+        if (event.data.type === 'TRIGGER_FAIL') { inputAnswer.value = "###FAIL###"; if(currentRound==1) checkRound1Answer(); else if(currentRound==2) checkRound2Answer(); else if(currentRound==3) checkRound3Answer(); else if(currentRound==4) checkRound4Answer(); else if(currentRound==5) checkRound5Answer(); else if(currentRound==6) checkFinaleAnswer(); }
         if (event.data.type === 'TOGGLE_TIMER') toggleTimer(activePlayerIndex);
         if (event.data.type === 'SELECT_PLAYER') { activePlayerIndex = event.data.playerIndex; renderPlayers(); }
         
@@ -642,17 +661,17 @@
         }
 
         if (event.data.type === 'NEXT_QUESTION') {
-            if(currentRound==2) btnNextPuzzle.click();
-            if(currentRound==3) btnNextOpenDeur.click();
-            if(currentRound==4) btnNextGeheugenSpeler.click();
-            if(currentRound==5) btnNextBeeld.click();
+            if(currentRound==2) document.getElementById('next-puzzle').click();
+            if(currentRound==3) document.getElementById('next-opendeur').click();
+            if(currentRound==4) document.getElementById('next-geheugen-speler').click();
+            if(currentRound==5) document.getElementById('next-beeld').click();
             if(currentRound==6) document.getElementById('btn-finale-next').click();
         }
         if (event.data.type === 'SHOW_ANSWERS') {
-            if(currentRound==2) btnShowPuzzleAnswers.click();
-            if(currentRound==3) btnShowOpenDeurAnswers.click();
-            if(currentRound==4) btnShowGeheugenAnswers.click();
-            if(currentRound==5) btnShowBeeld.click();
+            if(currentRound==2) document.getElementById('show-puzzle-answers').click();
+            if(currentRound==3) document.getElementById('show-opendeur-answers').click();
+            if(currentRound==4) document.getElementById('show-geheugen-answers').click();
+            if(currentRound==5) document.getElementById('show-beeld-answers').click();
             if(currentRound==6) document.getElementById('btn-finale-show').click();
         }
         if (event.data.type === 'ADJUST_TIME') {
