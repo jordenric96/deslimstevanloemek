@@ -13,6 +13,7 @@ const RONDE5_DATA = {
         },
         {
             videoBron: "fragmenten/fragment2.mp4", 
+                  thumbnail: "fragmenten/thumbnail2.png",
             vraag1_seizoen: "Seizoen 2",
             vraag2_aflevering: "Naar Amerika",
             vraag3_zinEind: "Zijn ze kapot",
@@ -20,13 +21,15 @@ const RONDE5_DATA = {
         },
         {
             videoBron: "fragmenten/fragment3.mp4", 
+                  thumbnail: "fragmenten/thumbnail3.png",
             vraag1_seizoen: "Seizoen 3",
             vraag2_aflevering: "De haptonoom",
             vraag3_zinEind: "Ja, de kampioenen moet ge vooral psychologisch aanpakken",
             vraag4_keywords: ["Dokter Anders", "De vrouwen willen zijn aandacht"]
         },
         {
-            videoBron: "fragmenten/fragment4.mp4", 
+            videoBron: "fragmenten/fragment4.mp4",
+                  thumbnail: "fragmenten/thumbnail4.png",
             vraag1_seizoen: "Seizoen 4",
             vraag2_aflevering: "Radiosterren",
             vraag3_zinEind: "Ja, de smalle is weer aan't prutsen",
@@ -34,6 +37,7 @@ const RONDE5_DATA = {
         },
         {
             videoBron: "fragmenten/fragment5.mp4", 
+                  thumbnail: "fragmenten/thumbnail5.png",
             vraag1_seizoen: "Seizoen 7",
             vraag2_aflevering: "De helderziende",
             vraag3_zinEind: "Oei, er vallen er nog uit",
