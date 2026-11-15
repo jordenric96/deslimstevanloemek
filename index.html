@@ -53,10 +53,12 @@
 
             <div id="beeld-display-area" style="display: none; width: 100%; flex-direction: column; align-items: center;">
                 <div id="beeld-grid" style="display: flex; gap: 20px; justify-content: center; flex-wrap: wrap; width: 90%; margin-top: 20px;"></div>
-                <div id="beeld-player-container" style="display: none; width: 100%; max-width: 1000px; margin: 0 auto;">
-                    <!-- 'playsinline' toegevoegd voor betere browser support -->
-                    <video id="beeld-video-player" playsinline style="width: 100%; border: 4px solid var(--kamp-geel); border-radius: 12px; box-shadow: 0 15px 40px rgba(0,0,0,0.9); background: #000;"></video>
+                
+                <!-- Aangepaste container voor Full-Screen effect -->
+                <div id="beeld-player-container" style="display: none; width: 100%; height: 60vh; margin: 0 auto; display: flex; align-items: center; justify-content: center;">
+                    <video id="beeld-video-player" playsinline style="width: 100%; height: 100%; object-fit: contain; border: 4px solid var(--kamp-geel); border-radius: 12px; box-shadow: 0 15px 40px rgba(0,0,0,0.9); background: #000;"></video>
                 </div>
+
                 <div id="beeld-tasks-container" style="display: none; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; width: 95%; margin-top: 20px;"></div>
             </div>
 
@@ -575,7 +577,7 @@
     function setupRound5() {
         currentRound = 5; currentBeeldIndex = -1; startingPlayersThisRound = []; playedVideos = [];
         activePlayerIndex = getNextStartingPlayerIndex(5); roundTitle.textContent = `Ronde 5: De Beeldronde`; 
-        activeBeeldQuestions = shuffleArray([...quizData.ronde5_beeld]).slice(0, players.length); // Kiest exact evenveel video's als spelers!
+        activeBeeldQuestions = shuffleArray([...quizData.ronde5_beeld]).slice(0, players.length); 
         
         hideAllGameAreas(); 
         document.getElementById('beeld-display-area').style.display = 'flex'; 
@@ -611,7 +613,6 @@
         document.getElementById('beeld-tasks-container').style.display = 'none';
         
         stopTimer();
-        // Hier werd per ongeluk 'total' naar '1' gezet bij test. We sturen nu altijd de lengte van de reeks door.
         channel.postMessage({ type: 'SYNC_R5_GRID', total: activeBeeldQuestions.length, played: playedVideos }); 
     }
 
@@ -638,7 +639,7 @@
         const videoContainer = document.getElementById('beeld-player-container');
         const videoPlayer = document.getElementById('beeld-video-player');
         
-        videoContainer.style.display = 'block';
+        videoContainer.style.display = 'flex';
         videoPlayer.src = q.videoBron;
         
         videoPlayer.onended = () => {
