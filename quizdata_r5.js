@@ -1,9 +1,6 @@
 // quizdata_r5.js - Ronde 5 (Beeldronde)
 {
-            videoBron: "fragmenten/fragment1.mp4", 
-            thumbnail: "fragmenten/foto1.jpg", // <-- DIT TOEVOEGEN
-            vraag1_seizoen: "Seizoen 1",
-            // ...
+         
 const RONDE5_DATA = {
     "KAMPIOENEN": [
         {
