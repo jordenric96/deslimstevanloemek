@@ -26,6 +26,14 @@ const RONDE5_DATA = {
             vraag4_keywords: ["Dokter Anders", "De vrouwen willen zijn aandacht"]
         },
 
+         {
+            videoBron: "fragmenten/fragment5.mp4", 
+            vraag1_seizoen: "Seizoen 7",
+            vraag2_aflevering: "De helderziende",
+            vraag3_zinEind: "Oei, er vallen er nog uit",
+            vraag4_keywords: ["Doortje wijsmaken dat Pol met Doortje is", "Pascal aan Xavier koppelen"]
+        },
+
            {
             videoBron: "fragmenten/fragment4.mp4", 
             vraag1_seizoen: "Seizoen 4",
