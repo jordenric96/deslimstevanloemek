@@ -15,7 +15,7 @@ const RONDE5_DATA = {
             vraag1_seizoen: "Seizoen 2",
             vraag2_aflevering: "Naar Amerika",
             vraag3_zinEind: "Zijn ze kapot",
-            vraag4_keywords: ["Verkiezingen voorzitterschap", "DDT,Oscar en Boma"]
+            vraag4_keywords: ["Geld ophalen", "Jean-Marie Pfaff"]
         },
        
 };
