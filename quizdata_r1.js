@@ -1,6 +1,5 @@
-// quizdata_300_vragen_jongvolwassenen.js - 300 Vragen voor 18-40 jarigen
-
-var STANDAARD_R1_POOL = [
+const RONDE1_DATA = {
+    "STANDAARD": [
     // --- Algemene Kennis & Technologie ---
     { q: "Wat is de naam van de technologie achter Bitcoin en andere crypto?", a: "Blockchain" },
     { q: "Wat is de naam van de populaire app voor het delen van korte video's?", a: "TikTok" },
@@ -265,3 +264,12 @@ var STANDAARD_R1_POOL = [
     { q: "Welk land heeft de extensie .nl?", a: "Nederland" },
     { q: "Wat is de naam van de virtuele wereld van Facebook?", a: "Metaverse" }
 ];
+
+"KAMPIOENEN": [
+        { q: "Wat is het beroep van Balthasar Boma?", a: "Worstenfabrikant" },
+        { q: "Hoe heet het hondje van Carmen?", a: "Nero" },
+        { q: "Welk stamcafé bezoeken de Kampioenen als hun eigen kantine dicht is?", a: "De Scheve Schaats" },
+        { q: "Welke acteur speelt de rol van Xavier Waterslaeghers?", a: "Johny Voners" }
+        // ... voeg hier al je Ronde 1 Kampioenen-vragen toe ...
+    ]
+};
