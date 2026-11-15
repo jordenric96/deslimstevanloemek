@@ -1,5 +1,3 @@
-// quizdata_loader.js - Combineert de rondes en bouwt het thema op
-
 window.ThemeManager = (function() {
     const THEMES = {};
     return {
@@ -9,7 +7,6 @@ window.ThemeManager = (function() {
     };
 })();
 
-// We laden nu exclusief het KAMPIOENEN thema in
 const BESCHIKBARE_THEMAS = ["KAMPIOENEN"];
 
 BESCHIKBARE_THEMAS.forEach(themeName => {
@@ -19,9 +16,9 @@ BESCHIKBARE_THEMAS.forEach(themeName => {
         ronde2_answer_pool: typeof RONDE2_DATA !== 'undefined' && RONDE2_DATA[themeName] ? RONDE2_DATA[themeName] : [],
         ronde3_openDeur: typeof RONDE3_DATA !== 'undefined' && RONDE3_DATA[themeName] ? RONDE3_DATA[themeName] : [],
         ronde4_geheugen: typeof RONDE4_DATA !== 'undefined' && RONDE4_DATA[themeName] ? RONDE4_DATA[themeName] : [],
-        ronde5_finale: typeof RONDE5_DATA !== 'undefined' && RONDE5_DATA[themeName] ? RONDE5_DATA[themeName] : [],
-        ronde6_beeld: typeof RONDE6_DATA !== 'undefined' && RONDE6_DATA[themeName] ? RONDE6_DATA[themeName] : [] 
+        // R5 is nu Beeld, R6 is nu Finale
+        ronde5_beeld: typeof RONDE5_DATA !== 'undefined' && RONDE5_DATA[themeName] ? RONDE5_DATA[themeName] : [],
+        ronde6_finale: typeof RONDE6_DATA !== 'undefined' && RONDE6_DATA[themeName] ? RONDE6_DATA[themeName] : [] 
     };
-    
     window.ThemeManager.registerTheme(themeName, themeData);
 });
