@@ -14,6 +14,16 @@ const RONDE1_DATA = {
         { q: "Wat was de militaire rang van Xavier in het leger?", a: "Sergeant" },
         { q: "Naar welk Afrikaans land trok Pol in het verleden als ontwikkelingshelper?", a: "Ouagadougou (Burkina Faso)" },
         { q: "Hoe heet de concurrerende voetbalploeg van burgemeester Freddy Van Overloop?", a: "F.C. De Stampers" },
+        In welke jaar werd de eerste aflevering van FC De Kampioenen uitgezonden? a: 1900
+        Hoe heet de zus van Fernand? a: Terese
+Hoe heet de overgrootvader van Boma? a: Melchior
+Wat was de voornaam van de dokter die de kampioenen moest goedkeuren, en die ook samen met Marc in de klas zat? a: Saskia
+Hoe heette het knuffelkonijntje van Boma? a: Zippy
+Hoe heette de hond van Ma DDT? a: Marcel
+Hoe heet de vader van Carmen: a: Jules
+op hoeveel plaatsen heeft Doortje gewoond in de serie? a: 4
+Hoeveel seizoenen zijn er? a: 21
+Hoe heet de vrouw voor wie Pico Doortje liet zitten? a: Ria De Stekker
        
     ]
 };
