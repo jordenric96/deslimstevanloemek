@@ -1,17 +1,17 @@
-// quizdata_r6.js - Ronde 6 (Beeldronde)
+// quizdata_r5.js - Ronde 5 (Beeldronde)
 
-const RONDE6_DATA = {
+const RONDE5_DATA = {
     "KAMPIOENEN": [
         {
-            videoBron: "fragment1.mp4", 
-            vraag1_seizoen: "Seizoen 4",
-            vraag2_aflevering: "De nieuwe truitjes",
-            vraag3_zinBegin: "Hij heeft minder...",
-            vraag3_zinEind: "haar op zijn kop",
+            videoBron: "fragmenten/fragment1.mp4", 
+            vraag1_seizoen: "Seizoen 1",
+            vraag2_aflevering: "Verkiezingen",
+            vraag3_zinBegin: "Ne..",
+            vraag3_zinEind: "yoghurt voor iedereen",
             vraag4_keywords: ["Sponsor", "Ruzie"]
         },
         {
-            videoBron: "fragment2.mp4",
+            videoBron: "fragmenten/fragment2.mp4",
             vraag1_seizoen: "Seizoen 1",
             vraag2_aflevering: "De grasmachine",
             vraag3_zinBegin: "Gij zijt een...",
