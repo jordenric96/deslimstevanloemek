@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FC De Kampioenen Quiz</title>
-
     <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@600;700&family=Open+Sans:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="stijl.css">
 </head>
@@ -52,9 +51,9 @@
             </div>
 
             <div id="beeld-display-area" style="display: none;">
-                <h3 id="beeld-subject" style="color: var(--primary-accent); margin-bottom: 20px;">Kijk naar het fragment!</h3>
-                <div id="beeld-tasks-container" style="display: grid; gap: 15px; text-align: left; font-size: 1.1em;">
-                </div>
+                <h3 id="beeld-subject" style="color: var(--primary-accent); margin-bottom: 10px;">Kijk naar het fragment!</h3>
+                <video id="beeld-video-player" style="width: 100%; max-height: 300px; border: 2px solid var(--kamp-geel); border-radius: 8px; margin-bottom: 10px;" controls></video>
+                <div id="beeld-tasks-container" style="display: grid; gap: 8px; text-align: left; font-size: 1.1em;"></div>
             </div>
 
             <div id="finale-display-area" style="display: none;">
@@ -101,7 +100,6 @@
         </div>
     </div>
 
-    <!-- INLADEN VAN DATA SCRIPTS -->
     <script src="quizdata_r1.js"></script>
     <script src="quizdata_r2.js"></script>
     <script src="quizdata_r3.js"></script>
@@ -192,26 +190,23 @@
 
     function initializeGame(startRound = 1) {
         if (!window.ThemeManager) { 
-            alert("Systeemfout: ThemeManager is niet geladen. Controleer of quizdata_loader.js goed gekoppeld is."); 
+            alert("Systeemfout: ThemeManager is niet geladen."); 
             return; 
         }
         
         quizData = window.ThemeManager.getTheme('KAMPIOENEN');
         
         if (!quizData) {
-            alert("Oeps! Het thema 'KAMPIOENEN' is niet gevonden. Waarschijnlijk staat er een typfout (zoals een ontbrekende komma of aanhalingsteken) in één van je quizdata bestanden.");
+            alert("Oeps! Het thema 'KAMPIOENEN' is niet gevonden in je databestanden.");
             return;
         }
 
         quizData.ronde1_pool = (quizData.ronde1_pool || []).map((q, i) => ({ ...q, id: i + 1 }));
         quizData.ronde2_answer_pool = (quizData.ronde2_answer_pool || []).map((q, i) => ({ ...q, id: i + 1 }));
-        
         quizData.ronde3_openDeur = (quizData.ronde3_openDeur || []).map((q, i) => ({ 
             ...q, id: i + 1, keywords: (q.keywords || []).map(w => ({ word: w, found: false })) 
         }));
-        
         quizData.ronde4_geheugen = (quizData.ronde4_geheugen || []).map((q, i) => ({ ...q, id: i + 1, found: false }));
-        
         quizData.ronde5_beeld = (quizData.ronde5_beeld || []).map((q, i) => ({ 
             ...q, id: i + 1, 
             ans_seizoen: { word: q.vraag1_seizoen || "?", found: false, label: "Seizoen" }, 
@@ -220,7 +215,6 @@
             ans_kw1: { word: (q.vraag4_keywords && q.vraag4_keywords[0]) ? q.vraag4_keywords[0] : "?", found: false, label: "Trefwoord 1" }, 
             ans_kw2: { word: (q.vraag4_keywords && q.vraag4_keywords[1]) ? q.vraag4_keywords[1] : "?", found: false, label: "Trefwoord 2" } 
         }));
-
         quizData.ronde6_finale = (quizData.ronde6_finale || []).map((q, i) => ({ 
             ...q, id: i + 1, keywords: (q.keywords || []).map(w => ({ word: w, found: false })) 
         }));
@@ -244,7 +238,7 @@
             renderPlayers(); 
             startGameR1();
         } else {
-            alert("Zorg dat op z'n minst Speler 1 en Speler 2 een naam hebben ingevuld!");
+            alert("Minimaal 2 spelers nodig.");
         }
     }
 
@@ -381,6 +375,13 @@
         document.querySelectorAll('#game-board > div[id$="-display-area"], .controls button').forEach(el => el.style.display = 'none');
         questionText.style.display = 'none'; questionIdElement.style.display = 'none'; puzzleIdsElement.style.display = 'none';
         inputAnswer.style.display = 'none'; btnCheckAnswer.style.display = 'none'; questionCounter.style.display = 'none';
+        
+        // Zorg dat de video stopt met spelen als je van ronde wisselt
+        const videoPlayer = document.getElementById('beeld-video-player');
+        if (videoPlayer) {
+            videoPlayer.pause();
+            videoPlayer.src = "";
+        }
     }
 
     // --- RONDE 1 ---
@@ -517,7 +518,12 @@
     function loadBeeldVraag() {
         if (currentBeeldIndex >= activeBeeldQuestions.length || currentBeeldIndex >= players.length) { hideAllGameAreas(); questionText.style.display = 'block'; questionText.textContent = "Einde van de Beeldronde!"; btnStartFinale.style.display = 'inline-block'; return; }
         activePlayerIndex = getNextStartingPlayerIndex(5); currentSetAttempts = []; let q = activeBeeldQuestions[currentBeeldIndex];
-        questionCounter.innerHTML = `Fragment ${currentBeeldIndex + 1} / ${players.length}`; formatAndDisplayIDs([q.id]); renderBeeldUI();
+        questionCounter.innerHTML = `Fragment ${currentBeeldIndex + 1} / ${players.length}`; formatAndDisplayIDs([q.id]); 
+        
+        // VIDEO KOPPELEN
+        document.getElementById('beeld-video-player').src = q.videoBron;
+        
+        renderBeeldUI();
         btnNextBeeld.style.display = 'none'; btnShowBeeld.style.display = 'inline-block'; inputAnswer.style.display = 'inline-block'; btnCheckAnswer.style.display = 'inline-block'; inputAnswer.disabled = true; stopTimer(); inputAnswer.value = "";
     }
     function renderBeeldUI() {
@@ -578,7 +584,7 @@
 
     document.getElementById('start-round-1').addEventListener('click', startGameR1); document.getElementById('start-round-2').addEventListener('click', setupRound2);
     document.getElementById('start-round-3').addEventListener('click', setupRound3); document.getElementById('start-round-4').addEventListener('click', setupRound4);
-    btnStartRound5.addEventListener('click', setupRound5); btnStartFinale.addEventListener('click', setupFinale);
+    document.getElementById('start-round-5').addEventListener('click', setupRound5); btnStartFinale.addEventListener('click', setupFinale);
     
     document.getElementById('next-puzzle').addEventListener('click', () => { currentR2SetCount++; loadNewPuzzle(); }); document.getElementById('show-puzzle-answers').addEventListener('click', showPuzzleAnswers);
     document.getElementById('next-opendeur').addEventListener('click', () => { currentOpenDeurIndex++; loadOpenDeur(); }); document.getElementById('show-opendeur-answers').addEventListener('click', showOpenDeurAnswers);
