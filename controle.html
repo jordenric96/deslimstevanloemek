@@ -145,7 +145,7 @@
                     ▶ START GESELECTEERDE RONDE
                 </button>
                 <div class="game-flow-row" id="flow-buttons">
-                    <button onclick="channel.postMessage({ type: 'NEXT_QUESTION' })" style="background: var(--kamp-geel); color: #000; font-weight: bold;">Volgende Vraag</button>
+                    <button onclick="channel.postMessage({ type: 'NEXT_QUESTION' })" style="background: var(--kamp-geel); color: #000; font-weight: bold;">Terug / Volgende</button>
                     <button onclick="channel.postMessage({ type: 'SHOW_ANSWERS' })" style="background: var(--kamp-rood); color: #fff; font-weight: bold;">Toon op Scherm</button>
                 </div>
             </div>
@@ -182,12 +182,11 @@
         // 1 KLIK VIDEO START FUNCTIE
         function triggerVideo(index) {
             channel.postMessage({ type: 'SELECT_VIDEO', index: index });
-            // Kleine vertraging om de video te laten inladen op het grote scherm, en start direct
+            
             setTimeout(() => {
                 channel.postMessage({ type: 'PLAY_VIDEO' });
             }, 300);
             
-            // Toon op dashboard alvast de 'Wachten...' status
             resultArea.innerHTML = `<div style="text-align:center; color:#fff; margin-top:40px;">
                 <h3 style="color:var(--kamp-geel);">🎬 Video speelt af...</h3>
                 <p>Wacht tot de video eindigt. De antwoorden verschijnen dan automatisch hier!</p>
@@ -253,7 +252,7 @@
                 }
             }
 
-            // NIEUW: ONTVANG DE R5 VIDEOMUUR
+            // ONTVANG DE R5 VIDEOMUUR
             if (event.data.type === 'SYNC_R5_GRID') {
                 activeRound = 5;
                 buttons.forEach(btn => btn.classList.remove('active-round'));
