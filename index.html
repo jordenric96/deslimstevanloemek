@@ -235,15 +235,18 @@
             else if (name) players.push({ name: name, seconds: 60, originalIndex: i });
         }
 
-        if (allNamesValid && players.length >= 2) {
+      if (allNamesValid && players.length >= 2) {
             setupScreen.style.display = 'none'; 
             playerContainer.style.display = 'flex'; 
             gameBoard.style.display = 'block';
             activePlayerIndex = players[0].originalIndex; 
             renderPlayers(); 
-            startGameR1();
-        } else {
-            alert("Minimaal 2 spelers nodig.");
+            
+            // Zorg dat het scherm netjes wacht op jouw commando vanaf het dashboard
+            hideAllGameAreas();
+            document.getElementById('question-text').style.display = 'block';
+            document.getElementById('question-text').textContent = "Klaar voor de start! Wachten op de spelleider...";
+        } else { alert("Minimaal 2 spelers nodig."); }
         }
     }
 
