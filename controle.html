@@ -3,39 +3,59 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GM Dashboard - FC De Kampioenen</title>
+    <title>GM Regiekamer - FC De Kampioenen</title>
     <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;600;700&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="stijl.css">
     
     <style>
         :root { --panel-bg: rgba(15, 23, 42, 0.95); --border-col: rgba(255, 255, 255, 0.15); }
         body { margin: 0; padding: 0; height: 100vh; width: 100vw; overflow: hidden; display: flex; flex-direction: column; background: var(--bg-dark); font-family: 'Open Sans', sans-serif; font-size: 14px; }
-        #dashboard-header { height: 60px; background: var(--bg-card); border-bottom: 1px solid var(--border-col); display: flex; align-items: center; justify-content: space-between; padding: 0 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); flex-shrink: 0; z-index: 10; }
-        h1 { display: block !important; margin: 0; font-size: 1.5em; text-align: left; width: auto; }
-        .round-controls { display: flex; gap: 5px; }
-        .round-controls button { margin: 0; padding: 5px 15px; font-size: 0.85em; height: 36px; display: block !important; }
-        .round-controls button.active-round { background: var(--primary-accent); color: #000; box-shadow: 0 0 10px var(--primary-accent); border: 1px solid #fff; }
-        .global-actions { margin-left: 20px; }
-        .btn-fail { background: linear-gradient(135deg, #ef4444, #991b1b) !important; color: white !important; border: 1px solid #ffaaaa !important; font-weight: bold; }
-        #dashboard-main { flex: 1; display: grid; grid-template-columns: 400px 1fr; gap: 0; overflow: hidden; }
-        .panel { padding: 15px; overflow-y: auto; display: flex; flex-direction: column; }
-        .panel-left { background: rgba(0, 0, 0, 0.2); border-right: 1px solid var(--border-col); }
-        .panel-right { background: transparent; padding: 0; display: flex; flex-direction: column; }
-        h2 { font-size: 1.1em; margin-bottom: 10px; border-bottom: 1px solid var(--border-col); padding-bottom: 5px; color: var(--text-muted); text-transform: uppercase; }
         
-        .search-strip { padding: 15px; background: rgba(255,255,255,0.02); border-bottom: 1px solid var(--border-col); display: flex; align-items: center; gap: 15px; flex-shrink: 0; }
-        .search-strip input { margin: 0; width: 300px; padding: 8px 12px; font-size: 1em; opacity: 0.5; }
-        #result-area { flex: 1; padding: 20px; overflow-y: auto; background: rgba(0,0,0,0.1); }
-        .list-item { background: rgba(255,255,255,0.03); border: 1px solid var(--border-col); margin-bottom: 8px; padding: 10px 15px; border-radius: 4px; line-height: 1.5; }
-        .list-item strong { color: var(--secondary-accent); }
-        .answer-box { display: inline-block; background: rgba(34, 197, 94, 0.1); color: var(--correct-color); padding: 2px 8px; border-radius: 4px; cursor: pointer; border: 1px solid rgba(34, 197, 94, 0.3); margin: 0 2px; font-weight: 600; }
-        .answer-box:hover { background: var(--correct-color); color: #000; }
-        .clickable-keyword { display: inline-block; margin: 2px 5px 2px 0; padding: 2px 6px; border: 1px dashed var(--text-muted); border-radius: 3px; cursor: pointer; font-size: 0.9em; }
-        .clickable-keyword:hover { border-color: var(--correct-color); color: var(--correct-color); }
+        /* HEADER */
+        #dashboard-header { height: 70px; background: rgba(0,0,0,0.6); border-bottom: 2px solid var(--kamp-geel); display: flex; align-items: center; justify-content: space-between; padding: 0 20px; flex-shrink: 0; z-index: 10; }
+        h1 { display: block !important; margin: 0; font-size: 1.8em; text-align: left; width: auto; color: var(--kamp-geel); }
+        .round-controls { display: flex; gap: 8px; }
+        .round-controls button { margin: 0; padding: 10px 20px; font-size: 1em; height: 45px; display: block !important; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); }
+        .round-controls button.active-round { background: var(--kamp-geel); color: #000; box-shadow: 0 0 15px rgba(255,215,0,0.5); border: 1px solid #fff; font-weight: bold; }
+        
+        /* 3-KOLOMMEN LAYOUT */
+        #dashboard-main { flex: 1; display: grid; grid-template-columns: 280px 1fr 450px; gap: 20px; padding: 20px; overflow: hidden; }
+        
+        .panel { background: rgba(0, 0, 0, 0.4); border: 1px solid var(--border-col); border-radius: 12px; padding: 20px; display: flex; flex-direction: column; overflow: hidden; }
+        h2 { font-size: 1.2em; margin: 0 0 15px 0; border-bottom: 1px solid var(--border-col); padding-bottom: 10px; color: #fff; text-transform: uppercase; text-align: center; }
+
+        /* LINKER KOLOM: Spelers */
+        #live-players-container { flex: 1; overflow-y: auto; padding-right: 5px; }
+        .sidebar-player { padding: 12px 15px; margin-bottom: 8px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; transition: 0.2s; }
+        .sidebar-player:hover { filter: brightness(1.2); }
+        
+        /* MIDDEN KOLOM: Actieve Speler Control */
+        #panel-center { background: rgba(11, 128, 67, 0.15); border: 3px solid var(--kamp-geel); align-items: center; justify-content: center; box-shadow: 0 0 30px rgba(255, 215, 0, 0.1); transition: 0.3s; }
+        #ap-name { font-size: 3.5em; font-family: 'Chakra Petch', sans-serif; margin: 0 0 10px 0; color: #fff; text-align: center; text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%; }
+        #ap-score { font-family: 'Chakra Petch', sans-serif; font-size: 8em; font-weight: bold; color: var(--kamp-geel); text-shadow: 0 5px 20px rgba(0,0,0,0.8); line-height: 1; margin-bottom: 30px; }
+        
+        .massive-btn { width: 85%; font-size: 1.8em; padding: 25px; border-radius: 12px; font-weight: bold; text-transform: uppercase; cursor: pointer; transition: 0.2s; border: none; box-shadow: 0 8px 20px rgba(0,0,0,0.4); margin-bottom: 15px; }
+        .massive-btn:active { transform: scale(0.98); }
+        
+        .time-adjust-row { display: flex; gap: 15px; width: 85%; margin-top: 10px; }
+        .time-adjust-row button { flex: 1; padding: 15px; font-size: 1.2em; border-radius: 8px; font-weight: bold; border: none; cursor: pointer; box-shadow: 0 5px 15px rgba(0,0,0,0.3); transition: 0.2s; }
+        .time-adjust-row button:active { transform: scale(0.95); }
+
+        /* RECHTER KOLOM: Antwoorden & Spelverloop */
+        .game-flow-actions { display: flex; flex-direction: column; gap: 10px; margin-bottom: 15px; padding-bottom: 15px; border-bottom: 1px solid var(--border-col); }
+        .game-flow-actions button { padding: 15px; font-size: 1.2em; border-radius: 8px; margin: 0; }
+        .game-flow-row { display: flex; gap: 10px; }
+        .game-flow-row button { flex: 1; }
+
+        #result-area { flex: 1; overflow-y: auto; background: rgba(0,0,0,0.2); border-radius: 8px; padding: 15px; border: 1px solid rgba(255,255,255,0.1); }
+        .list-item { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,215,0,0.3); margin-bottom: 10px; padding: 15px; border-radius: 8px; line-height: 1.5; font-size: 1.1em; }
+        .list-item strong { color: var(--kamp-geel); }
+        
+        /* Custom Scrollbars */
         ::-webkit-scrollbar { width: 8px; }
         ::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); }
-        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
+        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.4); }
     </style>
 </head>
 <body>
@@ -50,54 +70,65 @@
 
     <div id="dashboard-header">
         <div style="display:flex; align-items:center;">
-            <h1>GM Console</h1>
-            <span style="margin-left: 15px; padding: 4px 8px; background: var(--primary-accent); color: black; border-radius: 4px; font-weight: bold; font-size: 0.8em;">F.C. De Kampioenen</span>
-            <div class="global-actions">
-                <button onclick="channel.postMessage({ type: 'TRIGGER_FAIL' })" class="btn-fail" title="Druk op Pas/Fout" style="display:block!important;">❌ FOUT / PAS</button>
-            </div>
+            <h1>GM REGIEKAMER</h1>
+            <span style="margin-left: 15px; padding: 6px 12px; background: var(--kamp-groen); color: white; border-radius: 6px; font-weight: bold; font-size: 0.9em; letter-spacing: 1px;">F.C. De Kampioenen</span>
         </div>
 
         <div class="round-controls">
-            <!-- Data-rounds toegevoegd zodat javascript ze weer snapt! -->
             <button id="btn-round-1" data-round="1" class="active-round">R1</button>
-            <button id="btn-round-2" data-round="2">R2</button>
-            <button id="btn-round-3" data-round="3">R3</button>
-            <button id="btn-round-4" data-round="4">R4</button>
+            <button id="btn-round-2" data-round="2">R2 (Puzzel)</button>
+            <button id="btn-round-3" data-round="3">R3 (Open Deur)</button>
+            <button id="btn-round-4" data-round="4">R4 (Geheugen)</button>
             <button id="btn-round-5" data-round="5">R5 (Beeld)</button>
             <button id="btn-round-6" data-round="6">R6 (Finale)</button>
         </div>
     </div>
     
     <div id="dashboard-main">
-        <div class="panel panel-left" style="display: flex; flex-direction: column;">
-            <h2>👥 Live Spelers & Timers</h2>
-            
-            <div id="live-players-container" style="flex: 1; overflow-y: auto;">
-                <p style="color: var(--text-muted); text-align: center; margin-top: 20px;">Wacht tot de spelers hun naam hebben ingevuld en het spel is gestart op het hoofdscherm...</p>
-            </div>
-
-            <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid var(--border-col); display: flex; flex-direction: column; gap: 8px;">
-                <h3 style="margin: 0; font-size: 0.9em; color: var(--text-muted);">Tijd Toevoegen / Aftrekken:</h3>
-                <button onclick="channel.postMessage({ type: 'ADJUST_TIME', amount: -20 })" style="background: var(--kamp-rood); margin: 0; display:block!important;">-20 Seconden (Fout)</button>
-                <div style="display: flex; gap: 5px;">
-                    <button onclick="channel.postMessage({ type: 'ADJUST_TIME', amount: 10 })" style="flex: 1; margin: 0; background: var(--kamp-groen); display:block!important;">+10 Sec</button>
-                    <button onclick="channel.postMessage({ type: 'ADJUST_TIME', amount: 20 })" style="flex: 1; margin: 0; background: var(--kamp-groen); display:block!important;">+20 Sec</button>
-                </div>
+        
+        <!-- LINKS: Alle Spelers (Overzicht) -->
+        <div class="panel">
+            <h2>👥 Overzicht Spelers</h2>
+            <p style="font-size: 0.85em; color: var(--text-muted); text-align: center; margin-top: -10px; margin-bottom: 15px;">Klik op een speler om handmatig de beurt te geven.</p>
+            <div id="live-players-container">
+                <p style="color: var(--text-muted); text-align: center; margin-top: 50px;">Wacht tot het spel gestart is op het Grote Scherm...</p>
             </div>
         </div>
 
-        <div class="panel panel-right">
-            <div class="search-strip">
-                <h3 id="input-label" style="margin:0; min-width: 100px; color: var(--primary-accent);">Actieve ID(s):</h3>
-                <input type="text" id="question-id-input" placeholder="Wacht op hoofdscherm..." autocomplete="off" disabled>
-            </div>
+        <!-- MIDDEN: Actieve Speler (De Grote Knoppen) -->
+        <div class="panel" id="panel-center">
+            <h2 style="border: none; color: var(--kamp-groen); font-weight: bold; margin-bottom: 5px;">🎯 Actieve Speler</h2>
             
-            <div style="padding: 15px; background: rgba(255,255,255,0.05); display: flex; gap: 10px; border-bottom: 1px solid var(--border-col);">
-                <!-- NIEUW: Knop om de ronde te starten op het grote scherm -->
-                <button onclick="channel.postMessage({ type: 'START_ROUND', round: activeRound })" style="background: var(--kamp-groen); color: #fff; padding: 8px 15px; cursor: pointer; border-radius: 4px; border:none; font-weight:bold; display:block!important;">▶ Start Ronde</button>
-                
-                <button onclick="channel.postMessage({ type: 'NEXT_QUESTION' })" style="background: var(--kamp-geel); color: #000; padding: 8px 15px; cursor: pointer; border-radius: 4px; border:none; font-weight:bold; display:block!important;">Volgende Vraag</button>
-                <button onclick="channel.postMessage({ type: 'SHOW_ANSWERS' })" style="background: var(--kamp-rood); color: #fff; padding: 8px 15px; cursor: pointer; border-radius: 4px; border:none; font-weight:bold; display:block!important;">Toon Antwoorden</button>
+            <div id="active-player-name" id="ap-name">Niemand</div>
+            <div id="active-player-score" id="ap-score">0</div>
+            
+            <button id="btn-massive-timer" class="massive-btn" style="background: var(--kamp-geel); color: #000;" onclick="toggleTimer(activePlayerIndex)">
+                ▶ START TIMER
+            </button>
+            
+            <button class="massive-btn" style="background: var(--kamp-rood); color: #fff; font-size: 1.4em;" onclick="channel.postMessage({ type: 'TRIGGER_FAIL' })">
+                ❌ FOUT / PAS (Volgende)
+            </button>
+
+            <div class="time-adjust-row">
+                <button style="background: var(--kamp-rood); color: #fff;" onclick="channel.postMessage({ type: 'ADJUST_TIME', amount: -20 })">-20 SEC</button>
+                <button style="background: var(--kamp-groen); color: #fff;" onclick="channel.postMessage({ type: 'ADJUST_TIME', amount: 10 })">+10 SEC</button>
+                <button style="background: var(--kamp-groen); color: #fff;" onclick="channel.postMessage({ type: 'ADJUST_TIME', amount: 20 })">+20 SEC</button>
+            </div>
+        </div>
+
+        <!-- RECHTS: Spelverloop & Antwoorden -->
+        <div class="panel">
+            <h2>📝 Spelverloop & Antwoorden</h2>
+            
+            <div class="game-flow-actions">
+                <button onclick="channel.postMessage({ type: 'START_ROUND', round: activeRound })" style="background: var(--kamp-groen); color: #fff; font-weight: bold;">
+                    ▶ START GESELECTEERDE RONDE
+                </button>
+                <div class="game-flow-row">
+                    <button onclick="channel.postMessage({ type: 'NEXT_QUESTION' })" style="background: var(--kamp-geel); color: #000; font-weight: bold;">Volgende Vraag</button>
+                    <button onclick="channel.postMessage({ type: 'SHOW_ANSWERS' })" style="background: var(--kamp-rood); color: #fff; font-weight: bold;">Toon Antwoord</button>
+                </div>
             </div>
 
             <div id="result-area">
@@ -111,58 +142,99 @@
     <script>
         const channel = new BroadcastChannel('trivial_time_channel');
         const resultArea = document.getElementById('result-area');
-        const inputField = document.getElementById('question-id-input');
         const buttons = document.querySelectorAll('.round-controls button');
+        
         let activeRound = 1;
+        let activePlayerIndex = 0; // Wordt live overschreven door het hoofdscherm
 
-        function sendAnswer(text) { channel.postMessage({ type: 'FILL_ANSWER', answer: text }); }
+        // Helper Functies
         function selectPlayer(index) { channel.postMessage({ type: 'SELECT_PLAYER', playerIndex: index }); }
         function toggleTimer(index) { channel.postMessage({ type: 'TOGGLE_TIMER', playerIndex: index }); }
         function escapeAnswer(str) { if (!str) return ''; return str.replace(/'/g, "\\'"); }
 
+        // Ronde Selectie (Bovenaan)
         buttons.forEach(button => { 
-            button.addEventListener('click', () => { setActiveRound(button.dataset.round); }); 
+            button.addEventListener('click', () => { 
+                buttons.forEach(btn => btn.classList.remove('active-round'));
+                button.classList.add('active-round');
+                activeRound = parseInt(button.dataset.round);
+            }); 
         });
 
-        function setActiveRound(round) {
-            buttons.forEach(btn => btn.classList.remove('active-round'));
-            document.getElementById(`btn-round-${round}`).classList.add('active-round');
-            activeRound = parseInt(round);
-        }
-
+        // LUISTER NAAR HET HOOFDSCHERM
         channel.onmessage = (event) => {
+            
+            // 1. LIVE SPELERS UPDATE
             if (event.data.type === 'SYNC_PLAYERS') {
                 const container = document.getElementById('live-players-container');
                 container.innerHTML = '';
+                
+                let activePlayerFound = null;
+
                 event.data.players.forEach(p => {
-                    const color = p.isActive ? 'var(--kamp-geel)' : 'white';
-                    const bg = p.isActive ? 'rgba(255,215,0,0.1)' : 'rgba(255,255,255,0.02)';
-                    const border = p.isActive ? `1px solid var(--kamp-geel)` : `1px solid rgba(255,255,255,0.1)`;
-                    
+                    // Update Active Player variabele
+                    if (p.isActive) {
+                        activePlayerFound = p;
+                        activePlayerIndex = p.index;
+                    }
+
+                    // Bouw zijbalk
+                    const bgColor = p.isActive ? 'rgba(255,215,0,0.15)' : 'rgba(255,255,255,0.05)';
+                    const borderStyle = p.isActive ? `2px solid var(--kamp-geel)` : `2px solid transparent`;
+                    const textColor = p.isActive ? 'var(--kamp-geel)' : '#fff';
+                    const scoreColor = p.isRunning ? 'var(--kamp-rood)' : 'var(--kamp-geel)';
+
                     container.innerHTML += `
-                        <div style="background: ${bg}; border: ${border}; padding: 10px; margin-bottom: 8px; border-radius: 6px; display: flex; justify-content: space-between; align-items: center;">
-                            <span style="color: ${color}; font-weight: bold; font-size: 1.1em; max-width: 130px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                        <div class="sidebar-player" style="background: ${bgColor}; border: ${borderStyle};" onclick="selectPlayer(${p.index})">
+                            <span style="font-weight: bold; font-size: 1.1em; color: ${textColor}; max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
                                 ${p.isActive ? '👉 ' : ''}${p.name}
                             </span>
-                            <span style="font-family: 'Chakra Petch', sans-serif; font-size: 1.8em; font-weight: bold; color: ${p.isRunning ? 'var(--kamp-rood)' : 'var(--kamp-geel)'};">
+                            <span style="font-family: 'Chakra Petch', sans-serif; font-size: 1.5em; font-weight: bold; color: ${scoreColor};">
                                 ${p.seconds}
                             </span>
-                            <div style="display: flex; gap: 5px;">
-                                <button onclick="selectPlayer(${p.index})" style="padding: 5px; margin: 0; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); font-size: 1em; display:block!important;" title="Selecteer Speler">👆</button>
-                                <button onclick="toggleTimer(${p.index})" style="padding: 5px; margin: 0; background: rgba(255,255,255,0.1); border: 1px solid var(--kamp-geel); font-size: 1em; display:block!important;" title="Start/Stop Timer">⏱️</button>
-                            </div>
                         </div>
                     `;
                 });
+
+                // Update Centrale Grote Blok
+                if (activePlayerFound) {
+                    document.getElementById('active-player-name').textContent = activePlayerFound.name;
+                    document.getElementById('active-player-score').textContent = activePlayerFound.seconds;
+                    
+                    const btnTimer = document.getElementById('btn-massive-timer');
+                    const centerPanel = document.getElementById('panel-center');
+
+                    if (activePlayerFound.isRunning) {
+                        btnTimer.textContent = '❚❚ STOP TIMER';
+                        btnTimer.style.background = 'var(--kamp-rood)';
+                        btnTimer.style.color = '#fff';
+                        centerPanel.style.borderColor = 'var(--kamp-rood)';
+                        centerPanel.style.background = 'rgba(217, 37, 37, 0.1)';
+                        centerPanel.style.boxShadow = '0 0 40px rgba(217, 37, 37, 0.2)';
+                        document.getElementById('active-player-score').style.color = 'var(--kamp-rood)';
+                    } else {
+                        btnTimer.textContent = '▶ START TIMER';
+                        btnTimer.style.background = 'var(--kamp-geel)';
+                        btnTimer.style.color = '#000';
+                        centerPanel.style.borderColor = 'var(--kamp-geel)';
+                        centerPanel.style.background = 'rgba(11, 128, 67, 0.15)';
+                        centerPanel.style.boxShadow = '0 0 30px rgba(255, 215, 0, 0.1)';
+                        document.getElementById('active-player-score').style.color = 'var(--kamp-geel)';
+                    }
+                }
             }
 
+            // 2. AUTOMATISCHE ANTWOORDEN TONEN
             if (event.data.type === 'SYNC_QUESTION') {
-                setActiveRound(event.data.round);
-                inputField.value = event.data.ids.join(', ');
+                activeRound = event.data.round;
+                buttons.forEach(btn => btn.classList.remove('active-round'));
+                document.getElementById(`btn-round-${activeRound}`).classList.add('active-round');
+                
                 lookupAnswers(event.data.ids);
             }
         };
 
+        // ANTWOORDEN OPHALEN
         function lookupAnswers(ids) {
             if (!ids || ids.length === 0) return;
             const themeData = window.ThemeManager.getTheme("KAMPIOENEN");
@@ -178,36 +250,36 @@
 
             if (!pool || pool.length === 0) { resultArea.innerHTML = `<p style="color: var(--wrong-color)">Geen data beschikbaar voor deze ronde.</p>`; return; }
 
-            let html = `<ul style="list-style: none; padding: 0;">`;
+            let html = `<ul style="list-style: none; padding: 0; margin: 0;">`;
             ids.forEach(id => {
                 const q = pool.find(item => item.id === id) || pool[id - 1]; 
                 if (q) {
-                    html += `<li class="list-item"><strong style="color: var(--primary-accent); margin-right: 10px;">#${id}</strong> `;
+                    html += `<li class="list-item"><strong style="color: var(--kamp-geel); margin-right: 10px;">ID #${id}</strong><br>`;
                     
                     if (activeRound === 1) {
-                        const safeAnswer = escapeAnswer(q.a);
-                        html += `${q.q} <br><span style="color:#aaa;">→</span> <span class="answer-box" onclick="sendAnswer('${safeAnswer}')" title="Klik om in te vullen">${q.a}</span>`;
+                        html += `${q.q} <br><br><span style="color:#aaa;">Antwoord:</span> <strong style="color: var(--correct-color); font-size: 1.2em;">${q.a}</strong>`;
                     }
                     else if (activeRound === 2) {
-                        const safeAnswer = escapeAnswer(q.answer);
-                        html += `<strong style="color:#fff;">${q.answer}</strong> <span class="answer-box" onclick="sendAnswer('${safeAnswer}')">📋</span><br><span style="font-size:0.9em; color:#aaa;">Hints: ${q.clues.join(' - ')}</span>`;
+                        html += `Puzzelwoord: <strong style="color:var(--correct-color); font-size: 1.2em;">${q.answer}</strong><br><span style="font-size:0.9em; color:#aaa;">Hints: ${q.clues.join(' - ')}</span>`;
                     }
                     else if (activeRound === 3) {
-                        const keywordsHtml = q.keywords.map(k => { const word = k.word ? k.word : k; return `<span class="clickable-keyword" onclick="sendAnswer('${escapeAnswer(word)}')">${word}</span>`; }).join(' ');
-                        html += `<strong>${q.subject}</strong><br><div style="margin-top:5px;">${keywordsHtml}</div>`;
+                        const keywordsHtml = q.keywords.map(k => { const word = k.word ? k.word : k; return `<span style="display:inline-block; border:1px solid #aaa; padding:2px 8px; margin:2px; border-radius:4px; color:var(--correct-color); font-weight:bold;">${word}</span>`; }).join(' ');
+                        html += `<strong style="font-size:1.1em; color:#fff;">${q.subject}</strong><br><div style="margin-top:8px;">${keywordsHtml}</div>`;
                     }
                     else if (activeRound === 4) {
-                        const safeAnswer = escapeAnswer(q.a);
-                        html += `${q.q1} ... <span class="answer-box" onclick="sendAnswer('${safeAnswer}')">${q.a}</span>`;
+                        html += `${q.q1} ... <strong style="color:var(--correct-color); font-size: 1.2em;">${q.a}</strong>`;
                     }
                     else if (activeRound === 5) {
-                        const safeS = escapeAnswer(q.vraag1_seizoen); const safeA = escapeAnswer(q.vraag2_aflevering); const safeZ = escapeAnswer(q.vraag3_zinEind);
-                        const keywordsHtml = q.vraag4_keywords.map(k => `<span class="clickable-keyword" onclick="sendAnswer('${escapeAnswer(k)}')">${k}</span>`).join(' ');
-                        html += `<strong>Fragment: </strong> ${q.videoBron}<br><span style="font-size:0.9em; color:#aaa;">Seizoen:</span> <span class="answer-box" onclick="sendAnswer('${safeS}')">${q.vraag1_seizoen}</span><br><span style="font-size:0.9em; color:#aaa;">Aflevering:</span> <span class="answer-box" onclick="sendAnswer('${safeA}')">${q.vraag2_aflevering}</span><br><span style="font-size:0.9em; color:#aaa;">Zin: "${q.vraag3_zinBegin}"</span> → <span class="answer-box" onclick="sendAnswer('${safeZ}')">${q.vraag3_zinEind}</span><br><span style="font-size:0.9em; color:#aaa;">Trefwoorden:</span> ${keywordsHtml}`;
+                        const keywordsHtml = q.vraag4_keywords.map(k => `<span style="color:var(--correct-color); font-weight:bold;">${k}</span>`).join(' & ');
+                        html += `<strong style="color:#fff;">Beeldfragment (Antwoorden):</strong><br>
+                                 <span style="color:#aaa;">Seizoen:</span> <span style="color:var(--correct-color); font-weight:bold;">${q.vraag1_seizoen}</span><br>
+                                 <span style="color:#aaa;">Aflevering:</span> <span style="color:var(--correct-color); font-weight:bold;">${q.vraag2_aflevering}</span><br>
+                                 <span style="color:#aaa;">Zin: "${q.vraag3_zinBegin}"</span> → <span style="color:var(--correct-color); font-weight:bold; font-size: 1.1em;">${q.vraag3_zinEind}</span><br>
+                                 <span style="color:#aaa;">Trefwoorden:</span> ${keywordsHtml}`;
                     }
                     else if (activeRound === 6) {
-                        const keywordsHtml = q.keywords.map(k => { const word = k.word ? k.word : k; return `<span class="clickable-keyword" onclick="sendAnswer('${escapeAnswer(word)}')">${word}</span>`; }).join(' ');
-                        html += `<strong>${q.subject}</strong><br><div style="margin-top:5px;">${keywordsHtml}</div>`;
+                        const keywordsHtml = q.keywords.map(k => { const word = k.word ? k.word : k; return `<span style="display:inline-block; border:1px solid #aaa; padding:2px 8px; margin:2px; border-radius:4px; color:var(--correct-color); font-weight:bold;">${word}</span>`; }).join(' ');
+                        html += `<strong style="font-size:1.1em; color:#fff;">${q.subject}</strong><br><div style="margin-top:8px;">${keywordsHtml}</div>`;
                     }
                     html += `</li>`;
                 }
