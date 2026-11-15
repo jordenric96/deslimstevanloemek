@@ -28,7 +28,7 @@ const RONDE5_DATA = {
 
            {
             videoBron: "fragmenten/fragment4.mp4", 
-            vraag1_seizoen: "Seizoen ",
+            vraag1_seizoen: "Seizoen 4",
             vraag2_aflevering: "Radiosterren",
             vraag3_zinEind: "Ja, de smalle is weer aan't prutsen",
             vraag4_keywords: ["Een uur zendtijd vrijgekomen", "Carmen, Bieke, Oscar, DDT doen mee"]
