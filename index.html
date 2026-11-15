@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Trivial time - Quiz</title>
-
     <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@600;700&family=Open+Sans:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="stijl.css">
 </head>
@@ -20,8 +19,8 @@
     <div id="setup-screen" class="visible">
         <h2>Spelers Instellen</h2>
         <div class="setup-input-row">
-            <label for="num-players">Aantal spelers (1-6):</label>
-            <input type="number" id="num-players" min="1" max="6" value="4" onchange="updatePlayerInputs()">
+            <label for="num-players">Aantal spelers (1-10):</label>
+            <input type="number" id="num-players" min="1" max="10" value="4" onchange="updatePlayerInputs()">
         </div>
         <div id="player-name-inputs"></div>
         <button id="start-quiz-btn" onclick="initializeGame(1)">Start Quiz</button>
@@ -51,17 +50,15 @@
                 <ul id="geheugen-board"></ul>
             </div>
 
-            <div id="finale-display-area" style="display: none;">
-                <h3 id="finale-subject"></h3>
-                <div id="finale-keywords-container"></div>
-            </div>
-            
-            <!-- NIEUW: Beeldronde Display Area -->
             <div id="beeld-display-area" style="display: none;">
                 <h3 id="beeld-subject" style="color: var(--primary-accent); margin-bottom: 20px;">Kijk naar het fragment!</h3>
                 <div id="beeld-tasks-container" style="display: grid; gap: 15px; text-align: left; font-size: 1.1em;">
-                    <!-- Wordt dynamisch ingevuld -->
                 </div>
+            </div>
+
+            <div id="finale-display-area" style="display: none;">
+                <h3 id="finale-subject"></h3>
+                <div id="finale-keywords-container"></div>
             </div>
 
             <div class="controls-r2-input-group">
@@ -75,7 +72,7 @@
             <button id="start-round-2" style="display: none;">Start Ronde 2: Puzzel</button>
             <button id="start-round-3" style="display: none;">Start Ronde 3: Open Deur</button>
             <button id="start-round-4" style="display: none;">Start Ronde 4: Geheugen</button>
-            <button id="start-round-6" style="display: none;">Start Ronde 6: Beeldfragmenten</button>
+            <button id="start-round-5" style="display: none;">Start Ronde 5: Beeldfragmenten</button>
             <button id="start-finale" style="display: none;">START DE FINALE</button>
 
             <button id="next-puzzle" style="display: none;">Volgende Puzzel</button>
@@ -115,16 +112,13 @@
     <script>
     let quizData = {};
 
-    // CONFIGURATIE & SPEL LOGICA
     const SIMILARITY_THRESHOLD = 0.80;
     const R1_BONUS_SECONDS = 20; 
     const R2_R3_R4_BONUS_SECONDS = 40; 
     const R5_OPPONENT_PENALTY_SECONDS = 20; 
     
-    // Levenshtein / Similarity functies
     function levenshteinDistance(s1, s2) {
-        s1 = s1.toLowerCase().trim().replace(/\s/g, "");
-        s2 = s2.toLowerCase().trim().replace(/\s/g, "");
+        s1 = s1.toLowerCase().trim().replace(/\s/g, ""); s2 = s2.toLowerCase().trim().replace(/\s/g, "");
         const costs = new Array();
         for (let i = 0; i <= s1.length; i++) {
             let lastValue = i;
@@ -132,255 +126,140 @@
                 if (i === 0) costs[j] = j;
                 else if (j > 0) {
                     let newValue = costs[j - 1];
-                    if (s1.charAt(i - 1) !== s2.charAt(j - 1))
-                        newValue = Math.min(Math.min(newValue, lastValue), costs[j]) + 1;
-                    costs[j - 1] = lastValue;
-                    lastValue = newValue;
+                    if (s1.charAt(i - 1) !== s2.charAt(j - 1)) newValue = Math.min(Math.min(newValue, lastValue), costs[j]) + 1;
+                    costs[j - 1] = lastValue; lastValue = newValue;
                 }
             }
             if (i > 0) costs[s2.length] = lastValue;
         }
         return costs[s2.length];
     }
-
     function stringSimilarity(s1, s2) {
         if (s1.length === 0 && s2.length === 0) return 1.0;
-        const longer = s1.length > s2.length ? s1 : s2;
-        const shorter = s1.length > s2.length ? s2 : s1;
-        const longerLength = longer.length;
-        if (longerLength === 0) return 1.0;
+        const longer = s1.length > s2.length ? s1 : s2; const shorter = s1.length > s2.length ? s2 : s1;
+        const longerLength = longer.length; if (longerLength === 0) return 1.0;
         return (longerLength - levenshteinDistance(longer, shorter)) / parseFloat(longerLength);
     }
 
-    // Variabelen
-    let players = [];
-    let isGameOver = false;
-    let finalists = [];
-    let activeFinalistIndex = 0;
-    let currentRound = 0;
-    let currentQuestionIndex = 0;
-    let activePlayerIndex = 0;
-    let timerInterval = null;
-    let isTimerRunning = false;
-    let timerPlayerIndex = null;
-    let currentSetAttempts = [];
-    let currentQuestionAttempts = [];
+    let players = [], isGameOver = false, finalists = [], activeFinalistIndex = 0, currentRound = 0, currentQuestionIndex = 0;
+    let activePlayerIndex = 0, timerInterval = null, isTimerRunning = false, timerPlayerIndex = null, currentSetAttempts = [], currentQuestionAttempts = [];
 
-    const setupScreen = document.getElementById('setup-screen');
-    const playerNameInputs = document.getElementById('player-name-inputs');
-    const numPlayersInput = document.getElementById('num-players');
-    const playerContainer = document.getElementById('player-container');
-    const gameBoard = document.getElementById('game-board');
-    const roundTitle = document.getElementById('round-title');
-    const questionText = document.getElementById('question-text');
-    const questionCounter = document.getElementById('question-counter');
-    const questionIdElement = document.getElementById('question-id');
-    const puzzleIdsElement = document.getElementById('puzzle-ids');
-    const inputAnswer = document.getElementById('answer-input');
-    const btnCheckAnswer = document.getElementById('check-answer');
+    const setupScreen = document.getElementById('setup-screen'), playerNameInputs = document.getElementById('player-name-inputs');
+    const numPlayersInput = document.getElementById('num-players'), playerContainer = document.getElementById('player-container');
+    const gameBoard = document.getElementById('game-board'), roundTitle = document.getElementById('round-title');
+    const questionText = document.getElementById('question-text'), questionCounter = document.getElementById('question-counter');
+    const questionIdElement = document.getElementById('question-id'), puzzleIdsElement = document.getElementById('puzzle-ids');
+    const inputAnswer = document.getElementById('answer-input'), btnCheckAnswer = document.getElementById('check-answer');
     
-    // UI Elements
-    const opendeurDisplayArea = document.getElementById('opendeur-display-area');
-    const opendeurSubject = document.getElementById('opendeur-subject');
+    const opendeurDisplayArea = document.getElementById('opendeur-display-area'), opendeurSubject = document.getElementById('opendeur-subject');
     const geheugenBoard = document.getElementById('geheugen-board');
 
-    // DOM Buttons
-    const btnNextPuzzle = document.getElementById('next-puzzle');
-    const btnShowPuzzleAnswers = document.getElementById('show-puzzle-answers');
-    const btnNextOpenDeur = document.getElementById('next-opendeur');
-    const btnShowOpenDeurAnswers = document.getElementById('show-opendeur-answers');
-    const btnNextGeheugenSpeler = document.getElementById('next-geheugen-speler');
-    const btnShowGeheugenAnswers = document.getElementById('show-geheugen-answers');
-    const btnStartRound4 = document.getElementById('start-round-4');
-    const btnStartRound6 = document.getElementById('start-round-6');
-    const btnStartFinale = document.getElementById('start-finale');
+    const btnNextPuzzle = document.getElementById('next-puzzle'), btnShowPuzzleAnswers = document.getElementById('show-puzzle-answers');
+    const btnNextOpenDeur = document.getElementById('next-opendeur'), btnShowOpenDeurAnswers = document.getElementById('show-opendeur-answers');
+    const btnNextGeheugenSpeler = document.getElementById('next-geheugen-speler'), btnShowGeheugenAnswers = document.getElementById('show-geheugen-answers');
+    const btnStartRound4 = document.getElementById('start-round-4'), btnStartRound5 = document.getElementById('start-round-5'), btnStartFinale = document.getElementById('start-finale');
+    const btnNextBeeld = document.getElementById('next-beeld'), btnShowBeeld = document.getElementById('show-beeld-answers');
 
     function showFinaleWinner(winnerPlayer) {
-        stopTimer();
-        isGameOver = true;
+        stopTimer(); isGameOver = true;
         document.getElementById('game-over-text').textContent = winnerPlayer.name;
         document.getElementById('game-over-overlay').style.display = 'flex';
     }
 
     function showBonusFeedback(playerIndex, amount) {
-        const playerCard = document.querySelector(`.player-card[data-player-index="${playerIndex}"]`);
-        if (!playerCard) return;
-        const feedbackEl = playerCard.querySelector('.bonus-feedback');
-        if (!feedbackEl) return;
-        feedbackEl.style.transition = 'none';
-        feedbackEl.style.opacity = '0';
-        feedbackEl.style.transform = 'translate(-50%, -50%)'; 
+        const playerCard = document.querySelector(`.player-card[data-player-index="${playerIndex}"]`); if (!playerCard) return;
+        const feedbackEl = playerCard.querySelector('.bonus-feedback'); if (!feedbackEl) return;
+        feedbackEl.style.transition = 'none'; feedbackEl.style.opacity = '0'; feedbackEl.style.transform = 'translate(-50%, -50%)'; 
         void feedbackEl.offsetWidth; 
         feedbackEl.textContent = `${amount > 0 ? '+' : ''}${amount}`;
-        if (amount > 0) {
-            feedbackEl.style.color = 'var(--correct-color)';
-            playerCard.classList.add('time-gain-flash');
-        } else {
-            feedbackEl.style.color = 'var(--wrong-color)';
-            playerCard.classList.add('time-loss-flash'); 
-        }
-        setTimeout(() => {
-            feedbackEl.style.transition = 'transform 1s ease-out, opacity 1s ease-out';
-            feedbackEl.style.opacity = '1';
-            feedbackEl.style.transform = 'translate(-50%, -150%)'; 
-        }, 50);
-        setTimeout(() => {
-            feedbackEl.style.opacity = '0';
-            feedbackEl.style.transform = 'translate(-50%, -50%)'; 
-            playerCard.classList.remove('time-gain-flash');
-            playerCard.classList.remove('time-loss-flash');
-        }, 2000); 
+        if (amount > 0) { feedbackEl.style.color = 'var(--correct-color)'; playerCard.classList.add('time-gain-flash'); } 
+        else { feedbackEl.style.color = 'var(--wrong-color)'; playerCard.classList.add('time-loss-flash'); }
+        setTimeout(() => { feedbackEl.style.transition = 'transform 1s ease-out, opacity 1s ease-out'; feedbackEl.style.opacity = '1'; feedbackEl.style.transform = 'translate(-50%, -150%)'; }, 50);
+        setTimeout(() => { feedbackEl.style.opacity = '0'; feedbackEl.style.transform = 'translate(-50%, -50%)'; playerCard.classList.remove('time-gain-flash', 'time-loss-flash'); }, 2000); 
     }
 
     function updatePlayerInputs() {
-        let num = parseInt(numPlayersInput.value);
-        num = Math.max(1, Math.min(6, num));
-        numPlayersInput.value = num;
+        let num = parseInt(numPlayersInput.value); num = Math.max(1, Math.min(10, num)); numPlayersInput.value = num;
         playerNameInputs.innerHTML = "";
         for (let i = 0; i < num; i++) {
-            const row = document.createElement('div');
-            row.className = 'setup-input-row';
-            const defaultValue = (i < 4) ? `Speler ${i + 1}` : '';
-            row.innerHTML = `
-                <label>Speler ${i + 1}:</label>
-                <input type="text" id="player-name-${i}" placeholder="Naam speler ${i + 1}" value="${defaultValue}">
-            `;
+            const row = document.createElement('div'); row.className = 'setup-input-row';
+            row.innerHTML = `<label>Speler ${i + 1}:</label><input type="text" id="player-name-${i}" placeholder="Naam speler ${i + 1}" value="${i < 4 ? 'Speler '+(i+1) : ''}">`;
             playerNameInputs.appendChild(row);
         }
     }
 
     function initializeGame(startRound = 1) {
-        if (!window.ThemeManager) {
-            alert("ThemeManager is niet gedefinieerd!"); return;
-        }
-
-        // Pak altijd het KAMPIOENEN thema
+        if (!window.ThemeManager) { alert("ThemeManager is niet gedefinieerd!"); return; }
         quizData = window.ThemeManager.getTheme('KAMPIOENEN');
         
-        // Formatteer de data zodat er een 'found' en 'id' key aanhangt voor de check logica
         quizData.ronde1_pool = quizData.ronde1_pool.map((q, i) => ({ ...q, id: i + 1 }));
         quizData.ronde2_answer_pool = quizData.ronde2_answer_pool.map((q, i) => ({ ...q, id: i + 1 }));
-        quizData.ronde3_openDeur = quizData.ronde3_openDeur.map((q, i) => ({
-            ...q, id: i + 1, keywords: q.keywords.map(w => ({ word: w, found: false }))
-        }));
+        quizData.ronde3_openDeur = quizData.ronde3_openDeur.map((q, i) => ({ ...q, id: i + 1, keywords: q.keywords.map(w => ({ word: w, found: false })) }));
         quizData.ronde4_geheugen = quizData.ronde4_geheugen.map((q, i) => ({ ...q, id: i + 1, found: false }));
-        quizData.ronde5_finale = quizData.ronde5_finale.map((q, i) => ({
-            ...q, id: i + 1, keywords: q.keywords.map(w => ({ word: w, found: false }))
-        }));
-        quizData.ronde6_beeld = quizData.ronde6_beeld.map((q, i) => ({
-            ...q, id: i + 1,
-            ans_seizoen: { word: q.vraag1_seizoen, found: false, label: "Seizoen" },
-            ans_aflevering: { word: q.vraag2_aflevering, found: false, label: "Aflevering" },
-            ans_zin: { word: q.vraag3_zinEind, found: false, label: `Zin: "${q.vraag3_zinBegin}"` },
-            ans_kw1: { word: q.vraag4_keywords[0], found: false, label: "Trefwoord 1" },
-            ans_kw2: { word: q.vraag4_keywords[1], found: false, label: "Trefwoord 2" }
-        }));
+        quizData.ronde5_beeld = quizData.ronde5_beeld.map((q, i) => ({ ...q, id: i + 1, ans_seizoen: { word: q.vraag1_seizoen, found: false, label: "Seizoen" }, ans_aflevering: { word: q.vraag2_aflevering, found: false, label: "Aflevering" }, ans_zin: { word: q.vraag3_zinEind, found: false, label: `Zin: "${q.vraag3_zinBegin}"` }, ans_kw1: { word: q.vraag4_keywords[0], found: false, label: "Trefwoord 1" }, ans_kw2: { word: q.vraag4_keywords[1], found: false, label: "Trefwoord 2" } }));
+        quizData.ronde6_finale = quizData.ronde6_finale.map((q, i) => ({ ...q, id: i + 1, keywords: q.keywords.map(w => ({ word: w, found: false })) }));
 
         players = [];
-        const numPlayers = parseInt(numPlayersInput.value);
-        const inputElements = playerNameInputs.querySelectorAll('input[type="text"]');
+        const numPlayers = parseInt(numPlayersInput.value); const inputElements = playerNameInputs.querySelectorAll('input[type="text"]');
         let allNamesValid = true;
-
         for (let i = 0; i < numPlayers; i++) {
             const name = inputElements[i] ? inputElements[i].value.trim() : '';
-            if (i < 2 && !name) { allNamesValid = false; } 
-            else if (name) {
-                players.push({ name: name, seconds: 60, originalIndex: i });
-            }
+            if (i < 2 && !name) allNamesValid = false; 
+            else if (name) players.push({ name: name, seconds: 60, originalIndex: i });
         }
 
         if (allNamesValid && players.length >= 2) {
-            setupScreen.style.display = 'none';
-            playerContainer.style.display = 'grid';
-            gameBoard.style.display = 'block';
-            activePlayerIndex = players[0].originalIndex;
-            renderPlayers();
-            startGameR1();
-        } else {
-            alert("Minimaal 2 spelers nodig.");
-        }
+            setupScreen.style.display = 'none'; playerContainer.style.display = 'grid'; gameBoard.style.display = 'block';
+            activePlayerIndex = players[0].originalIndex; renderPlayers(); startGameR1();
+        } else alert("Minimaal 2 spelers nodig.");
     }
 
-    window.addEventListener('load', () => {
-        updatePlayerInputs();
-        setupScreen.classList.add('visible');
-    });
+    window.addEventListener('load', () => { updatePlayerInputs(); setupScreen.classList.add('visible'); });
 
-    // Helper functies (Shuffle, Rendering, Timer etc)
     function shuffleArray(array) {
-        for (let i = array.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [array[i], array[j]] = [array[j], array[i]];
-        }
+        for (let i = array.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [array[i], array[j]] = [array[j], array[i]]; }
         return array;
     }
 
     function getNextStartingPlayerIndex(round) {
         let eligiblePlayers = players.filter(p => p.seconds > 0);
-        if (eligiblePlayers.length === 0) {
-            const lowestScorePlayer = players.sort((a, b) => a.seconds - b.seconds)[0];
-            return lowestScorePlayer ? lowestScorePlayer.originalIndex : 0;
-        }
+        if (eligiblePlayers.length === 0) return (players.sort((a, b) => a.seconds - b.seconds)[0]?.originalIndex || 0);
         eligiblePlayers.sort((a, b) => a.seconds - b.seconds);
         return eligiblePlayers[0].originalIndex;
     }
 
     function getNextPlayerForSet(currentIndex, attemptsArray) {
-        const playerCount = players.length;
-        let startIndex = players.findIndex(p => p.originalIndex === currentIndex);
+        const playerCount = players.length; let startIndex = players.findIndex(p => p.originalIndex === currentIndex);
         for (let i = 1; i <= playerCount; i++) { 
-            const nextPlayerArrayIndex = (startIndex + i) % playerCount;
-            const nextPlayer = players[nextPlayerArrayIndex];
-            if (nextPlayer.seconds > 0 && !attemptsArray.includes(nextPlayer.originalIndex)) {
-                return nextPlayer.originalIndex;
-            }
+            const nextPlayer = players[(startIndex + i) % playerCount];
+            if (nextPlayer.seconds > 0 && !attemptsArray.includes(nextPlayer.originalIndex)) return nextPlayer.originalIndex;
         }
         return -1; 
     }
 
     function renderPlayers() {
         playerContainer.innerHTML = "";
-        const playersToShow = (currentRound === 5) ? finalists.map(f => f.player) : players;
+        const playersToShow = (currentRound === 6) ? finalists.map(f => f.player) : players;
         playersToShow.forEach((player, index) => {
-            const playerObj = (currentRound === 5) ? finalists[index].player : player;
+            const playerObj = (currentRound === 6) ? finalists[index].player : player;
             const originalIndex = playerObj.originalIndex !== undefined ? playerObj.originalIndex : index;
             
-            const card = document.createElement('div');
-            card.className = 'player-card';
-            card.dataset.playerIndex = originalIndex;
-
+            const card = document.createElement('div'); card.className = 'player-card'; card.dataset.playerIndex = originalIndex;
             if (originalIndex === activePlayerIndex) card.classList.add('active');
-            if (currentRound === 5 && originalIndex === activePlayerIndex) card.classList.add('final-player');
-            else if (currentRound === 5) card.classList.add('opponent-player');
+            if (currentRound === 6 && originalIndex === activePlayerIndex) card.classList.add('final-player');
+            else if (currentRound === 6) card.classList.add('opponent-player');
 
-            let timerButtonSymbol = '►';
-            let timerButtonClass = 'player-timer-btn';
-            if (isTimerRunning && timerPlayerIndex === originalIndex) {
-                timerButtonSymbol = '❚❚';
-                timerButtonClass += ' running';
-            }
-
-            card.innerHTML = `
-                <div class="player-name">${player.name}</div>
-                <div class="player-seconds">${player.seconds}</div>
-                <button class="${timerButtonClass}" data-player-index="${originalIndex}" style="position: absolute; top: 5px; right: 5px;">${timerButtonSymbol}</button>
-                <div class="bonus-feedback"></div>
-            `;
+            let timerButtonSymbol = '►', timerButtonClass = 'player-timer-btn';
+            if (isTimerRunning && timerPlayerIndex === originalIndex) { timerButtonSymbol = '❚❚'; timerButtonClass += ' running'; }
+            card.innerHTML = `<div class="player-name">${player.name}</div><div class="player-seconds">${player.seconds}</div><button class="${timerButtonClass}" data-player-index="${originalIndex}" style="position: absolute; top: 5px; right: 5px;">${timerButtonSymbol}</button><div class="bonus-feedback"></div>`;
             playerContainer.appendChild(card);
         });
     }
 
-    function formatAndDisplayIDs(idArray) {
-        const idString = idArray.join(',');
-        puzzleIdsElement.innerHTML = `ID's voor GM: <span id="ids-to-copy">${idString}</span>`;
-        puzzleIdsElement.style.display = 'flex';
-    }
-
+    function formatAndDisplayIDs(idArray) { puzzleIdsElement.innerHTML = `ID's voor GM: <span id="ids-to-copy">${idArray.join(',')}</span>`; puzzleIdsElement.style.display = 'flex'; }
     function showFeedback(isCorrect) {
         const className = isCorrect ? 'correct-feedback' : 'wrong-feedback';
-        inputAnswer.classList.remove('correct-feedback', 'wrong-feedback');
-        inputAnswer.classList.add(className);
-        inputAnswer.focus();
+        inputAnswer.classList.remove('correct-feedback', 'wrong-feedback'); inputAnswer.classList.add(className); inputAnswer.focus();
         setTimeout(() => { inputAnswer.classList.remove(className); inputAnswer.focus(); }, 1500);
     }
 
@@ -391,10 +270,9 @@
         
         isTimerRunning = true; timerPlayerIndex = playerIndex;
         
-        // Verwijder blur indien nodig
         if (currentRound === 3) opendeurSubject.classList.remove('blurred-subject');
         if (currentRound === 4) geheugenBoard.classList.remove('blurred-board');
-        if (currentRound === 5) document.getElementById('finale-subject').classList.remove('blurred-subject');
+        if (currentRound === 6) document.getElementById('finale-subject').classList.remove('blurred-subject');
         
         inputAnswer.disabled = false; inputAnswer.focus();
 
@@ -403,10 +281,10 @@
             p.seconds--;
             if (p.seconds <= 0) {
                 p.seconds = 0; stopTimer();
-                if (currentRound === 5) {
+                if (currentRound === 6) {
                     const winnerPlayer = finalists.map(f => f.player).find(w => w.originalIndex !== p.originalIndex);
                     if (winnerPlayer) showFinaleWinner(winnerPlayer);
-                } else if (currentRound >= 2 && currentRound <= 6) {
+                } else if (currentRound >= 2 && currentRound <= 5) {
                     pasDeBeurt();
                 }
             }
@@ -416,14 +294,10 @@
     }
 
     function stopTimer() {
-        document.body.classList.add('timer-stopped');
-        clearInterval(timerInterval);
-        isTimerRunning = false; timerInterval = null;
-        inputAnswer.disabled = true;
-        
+        document.body.classList.add('timer-stopped'); clearInterval(timerInterval);
+        isTimerRunning = false; timerInterval = null; inputAnswer.disabled = true;
         if (currentRound === 4 && !geheugenBoard.classList.contains('answers-shown')) geheugenBoard.classList.add('blurred-board');
-        if (currentRound === 5 && document.getElementById('btn-finale-next').style.display === 'none') document.getElementById('finale-subject').classList.add('blurred-subject');
-
+        if (currentRound === 6 && document.getElementById('btn-finale-next').style.display === 'none') document.getElementById('finale-subject').classList.add('blurred-subject');
         renderPlayers();
     }
 
@@ -431,10 +305,10 @@
         if (isGameOver) return;
         let player = players.find(p => p.originalIndex === clickedIndex);
         if (!player || player.seconds <= 0) return;
-        if (currentRound >= 2 && currentRound <= 6 && currentSetAttempts.includes(clickedIndex)) return;
+        if (currentRound >= 2 && currentRound <= 5 && currentSetAttempts.includes(clickedIndex)) return;
 
         activePlayerIndex = clickedIndex;
-        if (currentRound === 5) activeFinalistIndex = finalists.findIndex(f => f.player.originalIndex === clickedIndex);
+        if (currentRound === 6) activeFinalistIndex = finalists.findIndex(f => f.player.originalIndex === clickedIndex);
 
         if (!isTimerRunning) startTimer(clickedIndex);
         else if (timerPlayerIndex === clickedIndex) { stopTimer(); if(currentRound >= 2) pasDeBeurt(); }
@@ -442,32 +316,26 @@
     }
 
     function updateSeconds(playerIndex, amount) {
-        let player = players.find(p => p.originalIndex === playerIndex);
-        if (!player) return;
-        player.seconds += amount;
-        if (player.seconds < 0) player.seconds = 0;
-        renderPlayers();
+        let player = players.find(p => p.originalIndex === playerIndex); if (!player) return;
+        player.seconds += amount; if (player.seconds < 0) player.seconds = 0; renderPlayers();
     }
 
     function pasDeBeurt() {
-        const previousPlayerIndex = timerPlayerIndex;
-        stopTimer();
-
+        const previousPlayerIndex = timerPlayerIndex; stopTimer();
         if (currentRound === 1) {
             let idx = players.findIndex(p => p.originalIndex === activePlayerIndex);
             activePlayerIndex = players[(idx + 1) % players.length].originalIndex;
-        } else if (currentRound >= 2 && currentRound <= 4 || currentRound === 6) {
+        } else if (currentRound >= 2 && currentRound <= 5) {
             if (previousPlayerIndex !== null && !currentSetAttempts.includes(previousPlayerIndex)) currentSetAttempts.push(previousPlayerIndex);
             const nextPlayer = getNextPlayerForSet(activePlayerIndex, currentSetAttempts);
-            if (nextPlayer !== -1) {
-                activePlayerIndex = nextPlayer;
-            } else {
+            if (nextPlayer !== -1) { activePlayerIndex = nextPlayer; } 
+            else {
                 if (currentRound === 2) showPuzzleAnswers(); 
                 else if (currentRound === 3) showOpenDeurAnswers(); 
                 else if (currentRound === 4) showMemoryAnswers(); 
-                else if (currentRound === 6) showBeeldAnswers();
+                else if (currentRound === 5) showBeeldAnswers();
             }
-        } else if (currentRound === 5) {
+        } else if (currentRound === 6) {
             activeFinalistIndex = (activeFinalistIndex + 1) % finalists.length;
             activePlayerIndex = finalists[activeFinalistIndex].player.originalIndex;
         }
@@ -480,400 +348,213 @@
         inputAnswer.style.display = 'none'; btnCheckAnswer.style.display = 'none'; questionCounter.style.display = 'none';
     }
 
-
-    // ==========================================================
-    // RONDE 1 (Algemene Kennis)
-    // ==========================================================
+    // --- RONDE 1 ---
     let activeRound1Questions = [];
     function startGameR1() {
-        currentRound = 1; currentQuestionIndex = 0;
-        roundTitle.textContent = "Ronde 1: Algemene Kennis"; 
+        currentRound = 1; currentQuestionIndex = 0; roundTitle.textContent = "Ronde 1: Algemene Kennis"; 
         activeRound1Questions = shuffleArray([...quizData.ronde1_pool]).slice(0, 12);
-        hideAllGameAreas();
-        questionText.style.display = 'block'; questionCounter.style.display = 'block'; questionIdElement.style.display = 'block';
+        hideAllGameAreas(); questionText.style.display = 'block'; questionCounter.style.display = 'block'; questionIdElement.style.display = 'block';
         inputAnswer.style.display = 'inline-block'; btnCheckAnswer.style.display = 'inline-block';
         stopTimer(); displayQuestionR1(); formatAndDisplayIDs(activeRound1Questions.map(q => q.id));
     }
-
     function displayQuestionR1() {
         if (currentQuestionIndex < activeRound1Questions.length) {
-            currentQuestionAttempts = [];
-            const q = activeRound1Questions[currentQuestionIndex];
-            questionText.textContent = q.q;
-            questionIdElement.textContent = `Vraag-ID: #${q.id}`;
+            currentQuestionAttempts = []; const q = activeRound1Questions[currentQuestionIndex];
+            questionText.textContent = q.q; questionIdElement.textContent = `Vraag-ID: #${q.id}`;
             questionCounter.innerHTML = `Vraag ${currentQuestionIndex + 1} / ${activeRound1Questions.length}`;
-            inputAnswer.value = ""; inputAnswer.focus();
-            timerPlayerIndex = activePlayerIndex; renderPlayers();
+            inputAnswer.value = ""; inputAnswer.focus(); timerPlayerIndex = activePlayerIndex; renderPlayers();
         } else {
             hideAllGameAreas(); questionText.style.display = 'block'; questionText.textContent = "Einde van Ronde 1.";
             document.getElementById('start-round-2').style.display = 'inline-block';
         }
     }
-
     function checkRound1Answer() {
-        const q = activeRound1Questions[currentQuestionIndex];
-        const isCorrect = (stringSimilarity(q.a, inputAnswer.value) >= SIMILARITY_THRESHOLD);
+        const q = activeRound1Questions[currentQuestionIndex]; const isCorrect = (stringSimilarity(q.a, inputAnswer.value) >= SIMILARITY_THRESHOLD);
         stopTimer(); inputAnswer.value = "";
-        
         if (isCorrect) {
             showFeedback(true); updateSeconds(activePlayerIndex, R1_BONUS_SECONDS); showBonusFeedback(activePlayerIndex, R1_BONUS_SECONDS);
             setTimeout(() => { currentQuestionIndex++; displayQuestionR1(); }, 2000);
         } else {
-            showFeedback(false);
-            if (!currentQuestionAttempts.includes(activePlayerIndex)) currentQuestionAttempts.push(activePlayerIndex);
-            
-            let nextFound = false;
-            let currentIdx = players.findIndex(p => p.originalIndex === activePlayerIndex);
+            showFeedback(false); if (!currentQuestionAttempts.includes(activePlayerIndex)) currentQuestionAttempts.push(activePlayerIndex);
+            let nextFound = false; let currentIdx = players.findIndex(p => p.originalIndex === activePlayerIndex);
             for (let i = 1; i <= players.length; i++) {
                 let candidate = players[(currentIdx + i) % players.length];
-                if (!currentQuestionAttempts.includes(candidate.originalIndex) && candidate.seconds > 0) {
-                    activePlayerIndex = candidate.originalIndex; nextFound = true; break;
-                }
+                if (!currentQuestionAttempts.includes(candidate.originalIndex) && candidate.seconds > 0) { activePlayerIndex = candidate.originalIndex; nextFound = true; break; }
             }
             if (nextFound) {
                 questionText.textContent = `${players.find(p => p.originalIndex === activePlayerIndex).name} is aan de beurt.`;
                 setTimeout(() => { questionText.textContent = q.q; renderPlayers(); inputAnswer.focus(); }, 1500);
             } else {
-                questionText.textContent = `Niemand wist het. Antwoord: ${q.a}`;
-                inputAnswer.style.display = 'none'; btnCheckAnswer.style.display = 'none';
-                setTimeout(() => {
-                    currentQuestionIndex++;
-                    activePlayerIndex = players[(players.findIndex(p => p.originalIndex === activePlayerIndex) + 1) % players.length].originalIndex;
-                    displayQuestionR1(); 
+                questionText.textContent = `Niemand wist het. Antwoord: ${q.a}`; inputAnswer.style.display = 'none'; btnCheckAnswer.style.display = 'none';
+                setTimeout(() => { currentQuestionIndex++; activePlayerIndex = players[(players.findIndex(p => p.originalIndex === activePlayerIndex) + 1) % players.length].originalIndex; displayQuestionR1(); 
                     if(currentQuestionIndex < activeRound1Questions.length) { inputAnswer.style.display = 'inline-block'; btnCheckAnswer.style.display = 'inline-block'; }
                 }, 3000);
             }
         }
     }
 
-
-    // ==========================================================
-    // RONDE 2 (Puzzel) - Code beknopt gehouden voor limieten
-    // ==========================================================
+    // --- RONDE 2 ---
     let activeRound2Puzzles = [], currentPuzzleSet = null, currentR2SetCount = 0;
     function setupRound2() {
-        currentRound = 2; currentR2SetCount = 0; activePlayerIndex = getNextStartingPlayerIndex(2);
-        roundTitle.textContent = `Ronde 2: De Puzzel`; 
-        const fullPool = shuffleArray([...quizData.ronde2_answer_pool]);
-        activeRound2Puzzles = [];
-        for (let i = 0; i < players.length; i++) {
-            activeRound2Puzzles.push(fullPool.slice(i * 3, (i + 1) * 3).map((p, j) => ({
-                ...p, found: false, color: `color-${(j % 3) + 1}`, clues: p.clues.map(c => ({ text: c, color: `color-${(j % 3) + 1}` }))
-            })));
-        }
+        currentRound = 2; currentR2SetCount = 0; activePlayerIndex = getNextStartingPlayerIndex(2); roundTitle.textContent = `Ronde 2: De Puzzel`; 
+        const fullPool = shuffleArray([...quizData.ronde2_answer_pool]); activeRound2Puzzles = [];
+        for (let i = 0; i < players.length; i++) { activeRound2Puzzles.push(fullPool.slice(i * 3, (i + 1) * 3).map((p, j) => ({ ...p, found: false, color: `color-${(j % 3) + 1}`, clues: p.clues.map(c => ({ text: c, color: `color-${(j % 3) + 1}` })) }))); }
         hideAllGameAreas(); document.getElementById('puzzle-display-area').style.display = 'flex';
-        questionText.style.display = 'block'; questionCounter.style.display = 'block'; btnShowPuzzleAnswers.style.display = 'inline-block';
-        loadNewPuzzle();
+        questionText.style.display = 'block'; questionCounter.style.display = 'block'; btnShowPuzzleAnswers.style.display = 'inline-block'; loadNewPuzzle();
     }
-
     function loadNewPuzzle() {
-        if (currentR2SetCount >= players.length) {
-            hideAllGameAreas(); questionText.style.display = 'block'; questionText.textContent = "Einde van Ronde 2.";
-            document.getElementById('start-round-3').style.display = 'inline-block'; return;
-        }
-        activePlayerIndex = getNextStartingPlayerIndex(2); currentSetAttempts = []; 
-        currentPuzzleSet = activeRound2Puzzles[currentR2SetCount];
-        questionCounter.innerHTML = `Puzzel ${currentR2SetCount + 1} / ${players.length}`;
-        formatAndDisplayIDs(currentPuzzleSet.map(p => p.id));
-        
-        let allClues = [];
-        currentPuzzleSet.forEach(p => { p.clues.forEach(clue => { allClues.push({ text: clue.text, answer: p.answer, color: clue.color, isFound: p.found }); }); });
-        shuffleArray(allClues);
-
+        if (currentR2SetCount >= players.length) { hideAllGameAreas(); questionText.style.display = 'block'; questionText.textContent = "Einde van Ronde 2."; document.getElementById('start-round-3').style.display = 'inline-block'; return; }
+        activePlayerIndex = getNextStartingPlayerIndex(2); currentSetAttempts = []; currentPuzzleSet = activeRound2Puzzles[currentR2SetCount];
+        questionCounter.innerHTML = `Puzzel ${currentR2SetCount + 1} / ${players.length}`; formatAndDisplayIDs(currentPuzzleSet.map(p => p.id));
+        let allClues = []; currentPuzzleSet.forEach(p => { p.clues.forEach(c => { allClues.push({ text: c.text, answer: p.answer, color: c.color, isFound: p.found }); }); }); shuffleArray(allClues);
         document.getElementById('puzzle-answers-container').innerHTML = currentPuzzleSet.map(p => `<div class="puzzle-answer ${p.found ? 'found '+p.color : ''}">${p.found ? p.answer : '???'}</div>`).join('');
         document.getElementById('puzzle-clues-container').innerHTML = allClues.map(c => `<div class="puzzle-clue ${c.isFound ? 'found '+c.color : ''}" data-answer="${c.answer.toLowerCase()}">${c.text}</div>`).join('');
-
-        btnNextPuzzle.style.display = 'none'; btnShowPuzzleAnswers.style.display = 'inline-block';
-        btnCheckAnswer.style.display = 'inline-block'; inputAnswer.style.display = 'inline-block';
-        inputAnswer.disabled = true; stopTimer(); inputAnswer.value = '';
+        btnNextPuzzle.style.display = 'none'; btnShowPuzzleAnswers.style.display = 'inline-block'; btnCheckAnswer.style.display = 'inline-block'; inputAnswer.style.display = 'inline-block'; inputAnswer.disabled = true; stopTimer(); inputAnswer.value = '';
     }
-
     function checkRound2Answer() {
-        const userAnswer = inputAnswer.value;
-        const foundItem = currentPuzzleSet.find(p => !p.found && stringSimilarity(p.answer, userAnswer) >= SIMILARITY_THRESHOLD);
+        const foundItem = currentPuzzleSet.find(p => !p.found && stringSimilarity(p.answer, inputAnswer.value) >= SIMILARITY_THRESHOLD);
         if (foundItem) {
-            showFeedback(true); foundItem.found = true;
-            updateSeconds(activePlayerIndex, R2_R3_R4_BONUS_SECONDS); showBonusFeedback(activePlayerIndex, R2_R3_R4_BONUS_SECONDS);
-            currentSetAttempts = []; 
-            // Update UI
+            showFeedback(true); foundItem.found = true; updateSeconds(activePlayerIndex, R2_R3_R4_BONUS_SECONDS); showBonusFeedback(activePlayerIndex, R2_R3_R4_BONUS_SECONDS); currentSetAttempts = []; 
             document.getElementById('puzzle-answers-container').innerHTML = currentPuzzleSet.map(p => `<div class="puzzle-answer ${p.found ? 'found '+p.color : ''}">${p.found ? p.answer : '???'}</div>`).join('');
-            Array.from(document.getElementById('puzzle-clues-container').children).forEach(el => {
-                if(el.dataset.answer === foundItem.answer.toLowerCase()) el.className = `puzzle-clue found ${foundItem.color}`;
-            });
-            if (currentPuzzleSet.every(p => p.found)) {
-                stopTimer(); btnShowPuzzleAnswers.style.display = 'none'; btnCheckAnswer.style.display = 'none'; inputAnswer.style.display = 'none';
-                btnNextPuzzle.style.display = 'inline-block'; currentSetAttempts = players.map(p => p.originalIndex); activePlayerIndex = getNextStartingPlayerIndex(2);
-            } else { setTimeout(() => { if (!isTimerRunning) startTimer(activePlayerIndex); }, 50); }
-        } else {
-            showFeedback(false); setTimeout(() => { if (!isTimerRunning) startTimer(activePlayerIndex); }, 1000);
-        }
+            Array.from(document.getElementById('puzzle-clues-container').children).forEach(el => { if(el.dataset.answer === foundItem.answer.toLowerCase()) el.className = `puzzle-clue found ${foundItem.color}`; });
+            if (currentPuzzleSet.every(p => p.found)) { stopTimer(); btnShowPuzzleAnswers.style.display = 'none'; btnCheckAnswer.style.display = 'none'; inputAnswer.style.display = 'none'; btnNextPuzzle.style.display = 'inline-block'; currentSetAttempts = players.map(p => p.originalIndex); activePlayerIndex = getNextStartingPlayerIndex(2); } else { setTimeout(() => { if (!isTimerRunning) startTimer(activePlayerIndex); }, 50); }
+        } else { showFeedback(false); setTimeout(() => { if (!isTimerRunning) startTimer(activePlayerIndex); }, 1000); }
         inputAnswer.value = '';
     }
-
     function showPuzzleAnswers() { currentPuzzleSet.forEach(p => p.found = true); checkRound2Answer(); }
 
-
-    // ==========================================================
-    // RONDE 3 (Open Deur)
-    // ==========================================================
+    // --- RONDE 3 ---
     let activeOpenDeurQuestions = [], currentOpenDeurIndex = 0;
     function setupRound3() {
-        currentRound = 3; currentOpenDeurIndex = 0; activePlayerIndex = getNextStartingPlayerIndex(3);
-        roundTitle.textContent = `Ronde 3: Open Deur`; 
+        currentRound = 3; currentOpenDeurIndex = 0; activePlayerIndex = getNextStartingPlayerIndex(3); roundTitle.textContent = `Ronde 3: Open Deur`; 
         activeOpenDeurQuestions = shuffleArray([...quizData.ronde3_openDeur]).slice(0, players.length);
-        hideAllGameAreas(); opendeurDisplayArea.style.display = 'block'; questionText.style.display = 'block'; questionCounter.style.display = 'block'; 
-        inputAnswer.style.display = 'inline-block'; btnCheckAnswer.style.display = 'inline-block';
-        loadOpenDeur();
+        hideAllGameAreas(); opendeurDisplayArea.style.display = 'block'; questionText.style.display = 'block'; questionCounter.style.display = 'block'; inputAnswer.style.display = 'inline-block'; btnCheckAnswer.style.display = 'inline-block'; loadOpenDeur();
     }
-
     function loadOpenDeur() {
-        if (currentOpenDeurIndex >= players.length) {
-            hideAllGameAreas(); questionText.style.display = 'block'; questionText.textContent = "Einde van Ronde 3.";
-            btnStartRound4.style.display = 'inline-block'; return;
-        }
-        activePlayerIndex = getNextStartingPlayerIndex(3); currentSetAttempts = []; 
-        let activeOD = activeOpenDeurQuestions[currentOpenDeurIndex];
-        questionCounter.innerHTML = `Vraag ${currentOpenDeurIndex + 1} / ${players.length}`;
-        opendeurSubject.textContent = activeOD.subject; opendeurSubject.classList.add('blurred-subject');
-        formatAndDisplayIDs([activeOD.id]);
-        
+        if (currentOpenDeurIndex >= players.length) { hideAllGameAreas(); questionText.style.display = 'block'; questionText.textContent = "Einde van Ronde 3."; btnStartRound4.style.display = 'inline-block'; return; }
+        activePlayerIndex = getNextStartingPlayerIndex(3); currentSetAttempts = []; let activeOD = activeOpenDeurQuestions[currentOpenDeurIndex];
+        questionCounter.innerHTML = `Vraag ${currentOpenDeurIndex + 1} / ${players.length}`; opendeurSubject.textContent = activeOD.subject; opendeurSubject.classList.add('blurred-subject'); formatAndDisplayIDs([activeOD.id]);
         document.getElementById('opendeur-keywords-container').innerHTML = activeOD.keywords.map(k => `<div class="opendeur-keyword ${k.found ? 'found' : ''}">${k.found ? k.word : '???'}</div>`).join('');
-        
-        btnNextOpenDeur.style.display = 'none'; btnShowOpenDeurAnswers.style.display = 'inline-block';
-        inputAnswer.style.display = 'inline-block'; btnCheckAnswer.style.display = 'inline-block';
-        inputAnswer.disabled = true; stopTimer(); inputAnswer.value = "";
+        btnNextOpenDeur.style.display = 'none'; btnShowOpenDeurAnswers.style.display = 'inline-block'; inputAnswer.style.display = 'inline-block'; btnCheckAnswer.style.display = 'inline-block'; inputAnswer.disabled = true; stopTimer(); inputAnswer.value = "";
     }
-
     function checkRound3Answer() {
-        let activeOD = activeOpenDeurQuestions[currentOpenDeurIndex];
-        const foundItem = activeOD.keywords.find(k => !k.found && stringSimilarity(k.word, inputAnswer.value) >= SIMILARITY_THRESHOLD);
+        let activeOD = activeOpenDeurQuestions[currentOpenDeurIndex]; const foundItem = activeOD.keywords.find(k => !k.found && stringSimilarity(k.word, inputAnswer.value) >= SIMILARITY_THRESHOLD);
         if (foundItem) {
-            showFeedback(true); foundItem.found = true;
-            updateSeconds(activePlayerIndex, R2_R3_R4_BONUS_SECONDS); showBonusFeedback(activePlayerIndex, R2_R3_R4_BONUS_SECONDS);
-            currentSetAttempts = []; opendeurSubject.classList.remove('blurred-subject');
+            showFeedback(true); foundItem.found = true; updateSeconds(activePlayerIndex, R2_R3_R4_BONUS_SECONDS); showBonusFeedback(activePlayerIndex, R2_R3_R4_BONUS_SECONDS); currentSetAttempts = []; opendeurSubject.classList.remove('blurred-subject');
             document.getElementById('opendeur-keywords-container').innerHTML = activeOD.keywords.map(k => `<div class="opendeur-keyword ${k.found ? 'found' : ''}">${k.found ? k.word : '???'}</div>`).join('');
-            if (activeOD.keywords.every(k => k.found)) {
-                stopTimer(); btnCheckAnswer.style.display = 'none'; inputAnswer.style.display = 'none'; btnShowOpenDeurAnswers.style.display='none';
-                btnNextOpenDeur.style.display = 'inline-block'; currentSetAttempts = players.map(p => p.originalIndex); activePlayerIndex = getNextStartingPlayerIndex(3);
-            } else { setTimeout(() => { if (!isTimerRunning) startTimer(activePlayerIndex); }, 50); }
+            if (activeOD.keywords.every(k => k.found)) { stopTimer(); btnCheckAnswer.style.display = 'none'; inputAnswer.style.display = 'none'; btnShowOpenDeurAnswers.style.display='none'; btnNextOpenDeur.style.display = 'inline-block'; currentSetAttempts = players.map(p => p.originalIndex); activePlayerIndex = getNextStartingPlayerIndex(3); } else { setTimeout(() => { if (!isTimerRunning) startTimer(activePlayerIndex); }, 50); }
         } else { showFeedback(false); setTimeout(() => { if (!isTimerRunning) startTimer(activePlayerIndex); }, 1000); }
         inputAnswer.value = "";
     }
     function showOpenDeurAnswers() { activeOpenDeurQuestions[currentOpenDeurIndex].keywords.forEach(k => k.found = true); checkRound3Answer(); }
 
-
-    // ==========================================================
-    // RONDE 4 (Geheugen)
-    // ==========================================================
+    // --- RONDE 4 ---
     let activeRound4Questions = [], currentMemoryList = 0;
     function setupRound4() {
-        currentRound = 4; currentMemoryList = 0; activePlayerIndex = getNextStartingPlayerIndex(4);
-        roundTitle.textContent = `Ronde 4: Het Geheugen`; 
+        currentRound = 4; currentMemoryList = 0; activePlayerIndex = getNextStartingPlayerIndex(4); roundTitle.textContent = `Ronde 4: Het Geheugen`; 
         quizData.ronde4_geheugen = shuffleArray(quizData.ronde4_geheugen);
-        hideAllGameAreas(); geheugenDisplayArea.style.display = 'block'; questionText.style.display = 'block'; questionCounter.style.display = 'block'; 
-        questionIdElement.style.display = 'block'; inputAnswer.style.display = 'inline-block'; btnCheckAnswer.style.display = 'inline-block';
-        loadMemoryQuestion();
+        hideAllGameAreas(); geheugenDisplayArea.style.display = 'block'; questionText.style.display = 'block'; questionCounter.style.display = 'block'; questionIdElement.style.display = 'block'; inputAnswer.style.display = 'inline-block'; btnCheckAnswer.style.display = 'inline-block'; loadMemoryQuestion();
     }
-
     function loadMemoryQuestion() {
-        if (currentMemoryList >= players.length) {
-            hideAllGameAreas(); questionText.style.display = 'block'; questionText.textContent = "Einde van Ronde 4!";
-            btnStartRound6.style.display = 'inline-block'; return; // Gaat naar R6 ipv R5!
-        }
-        activePlayerIndex = getNextStartingPlayerIndex(4); currentSetAttempts = []; 
-        activeRound4Questions = quizData.ronde4_geheugen.slice(currentMemoryList*6, (currentMemoryList+1)*6);
-        
-        geheugenBoard.classList.remove('answers-shown'); geheugenBoard.classList.add('blurred-board');
-        questionCounter.innerHTML = `Beurt ${currentMemoryList + 1} / ${players.length}`;
-        formatAndDisplayIDs(activeRound4Questions.map(q => q.id));
-
-        const renderMem = () => geheugenBoard.innerHTML = activeRound4Questions.map((q,i) => `<li class="geheugen-item ${q.found ? 'found' : ''}"><span>${i+1}. <strong>${q.q1}</strong>...</span><span class="geheugen-antwoord">${q.found ? q.a : '...?'}</span></li>`).join('');
-        renderMem(); window.renderMemUI = renderMem;
-
-        btnShowGeheugenAnswers.style.display = 'inline-block'; btnNextGeheugenSpeler.style.display = 'none';
-        inputAnswer.style.display = 'inline-block'; btnCheckAnswer.style.display = 'inline-block';
-        inputAnswer.disabled = true; stopTimer(); inputAnswer.value = "";
+        if (currentMemoryList >= players.length) { hideAllGameAreas(); questionText.style.display = 'block'; questionText.textContent = "Einde van Ronde 4!"; btnStartRound5.style.display = 'inline-block'; return; }
+        activePlayerIndex = getNextStartingPlayerIndex(4); currentSetAttempts = []; activeRound4Questions = quizData.ronde4_geheugen.slice(currentMemoryList*6, (currentMemoryList+1)*6);
+        geheugenBoard.classList.remove('answers-shown'); geheugenBoard.classList.add('blurred-board'); questionCounter.innerHTML = `Beurt ${currentMemoryList + 1} / ${players.length}`; formatAndDisplayIDs(activeRound4Questions.map(q => q.id));
+        const renderMem = () => geheugenBoard.innerHTML = activeRound4Questions.map((q,i) => `<li class="geheugen-item ${q.found ? 'found' : ''}"><span>${i+1}. <strong>${q.q1}</strong>...</span><span class="geheugen-antwoord">${q.found ? q.a : '...?'}</span></li>`).join(''); renderMem(); window.renderMemUI = renderMem;
+        btnShowGeheugenAnswers.style.display = 'inline-block'; btnNextGeheugenSpeler.style.display = 'none'; inputAnswer.style.display = 'inline-block'; btnCheckAnswer.style.display = 'inline-block'; inputAnswer.disabled = true; stopTimer(); inputAnswer.value = "";
     }
-
     function checkRound4Answer() {
         const foundItem = activeRound4Questions.find(q => !q.found && stringSimilarity(q.a, inputAnswer.value) >= SIMILARITY_THRESHOLD);
         if (foundItem) {
-            showFeedback(true); foundItem.found = true;
-            updateSeconds(activePlayerIndex, R2_R3_R4_BONUS_SECONDS); showBonusFeedback(activePlayerIndex, R2_R3_R4_BONUS_SECONDS);
-            currentSetAttempts = []; window.renderMemUI();
-            if (activeRound4Questions.every(q => q.found)) {
-                stopTimer(); btnCheckAnswer.style.display = 'none'; inputAnswer.style.display = 'none'; btnShowGeheugenAnswers.style.display='none';
-                btnNextGeheugenSpeler.style.display = 'inline-block'; currentSetAttempts = players.map(p => p.originalIndex); activePlayerIndex = getNextStartingPlayerIndex(4);
-            } else { setTimeout(() => { if (!isTimerRunning) startTimer(activePlayerIndex); }, 50); }
+            showFeedback(true); foundItem.found = true; updateSeconds(activePlayerIndex, R2_R3_R4_BONUS_SECONDS); showBonusFeedback(activePlayerIndex, R2_R3_R4_BONUS_SECONDS); currentSetAttempts = []; window.renderMemUI();
+            if (activeRound4Questions.every(q => q.found)) { stopTimer(); btnCheckAnswer.style.display = 'none'; inputAnswer.style.display = 'none'; btnShowGeheugenAnswers.style.display='none'; btnNextGeheugenSpeler.style.display = 'inline-block'; currentSetAttempts = players.map(p => p.originalIndex); activePlayerIndex = getNextStartingPlayerIndex(4); } else { setTimeout(() => { if (!isTimerRunning) startTimer(activePlayerIndex); }, 50); }
         } else { showFeedback(false); setTimeout(() => { if (!isTimerRunning) startTimer(activePlayerIndex); }, 1000); }
         inputAnswer.value = "";
     }
     function showMemoryAnswers() { activeRound4Questions.forEach(q => q.found = true); geheugenBoard.classList.add('answers-shown'); geheugenBoard.classList.remove('blurred-board'); checkRound4Answer(); }
 
-
-    // ==========================================================
-    // RONDE 6 (Beeldronde) - NIEUW!
-    // ==========================================================
+    // --- RONDE 5 (Beeldronde) ---
     let activeBeeldQuestions = [], currentBeeldIndex = 0;
-    const btnNextBeeld = document.getElementById('next-beeld');
-    const btnShowBeeld = document.getElementById('show-beeld-answers');
-
-    function setupRound6() {
-        currentRound = 6; currentBeeldIndex = 0; activePlayerIndex = getNextStartingPlayerIndex(6);
-        roundTitle.textContent = `Ronde 6: De Beeldronde`; 
-        activeBeeldQuestions = shuffleArray([...quizData.ronde6_beeld]).slice(0, players.length);
-        
-        hideAllGameAreas(); document.getElementById('beeld-display-area').style.display = 'block';
-        questionText.style.display = 'block'; questionCounter.style.display = 'block';
-        inputAnswer.style.display = 'inline-block'; btnCheckAnswer.style.display = 'inline-block';
-        
-        loadBeeldVraag();
+    function setupRound5() {
+        currentRound = 5; currentBeeldIndex = 0; activePlayerIndex = getNextStartingPlayerIndex(5); roundTitle.textContent = `Ronde 5: De Beeldronde`; 
+        activeBeeldQuestions = shuffleArray([...quizData.ronde5_beeld]).slice(0, players.length);
+        hideAllGameAreas(); document.getElementById('beeld-display-area').style.display = 'block'; questionText.style.display = 'block'; questionCounter.style.display = 'block'; inputAnswer.style.display = 'inline-block'; btnCheckAnswer.style.display = 'inline-block'; loadBeeldVraag();
     }
-
     function loadBeeldVraag() {
-        if (currentBeeldIndex >= activeBeeldQuestions.length || currentBeeldIndex >= players.length) {
-            hideAllGameAreas(); questionText.style.display = 'block'; questionText.textContent = "Einde van de Beeldronde!";
-            btnStartFinale.style.display = 'inline-block'; return; // Naar de finale
-        }
-        activePlayerIndex = getNextStartingPlayerIndex(6); currentSetAttempts = []; 
-        let q = activeBeeldQuestions[currentBeeldIndex];
-        questionCounter.innerHTML = `Fragment ${currentBeeldIndex + 1} / ${players.length}`;
-        formatAndDisplayIDs([q.id]);
-        
-        renderBeeldUI();
-
-        btnNextBeeld.style.display = 'none'; btnShowBeeld.style.display = 'inline-block';
-        inputAnswer.style.display = 'inline-block'; btnCheckAnswer.style.display = 'inline-block';
-        inputAnswer.disabled = true; stopTimer(); inputAnswer.value = "";
+        if (currentBeeldIndex >= activeBeeldQuestions.length || currentBeeldIndex >= players.length) { hideAllGameAreas(); questionText.style.display = 'block'; questionText.textContent = "Einde van de Beeldronde!"; btnStartFinale.style.display = 'inline-block'; return; }
+        activePlayerIndex = getNextStartingPlayerIndex(5); currentSetAttempts = []; let q = activeBeeldQuestions[currentBeeldIndex];
+        questionCounter.innerHTML = `Fragment ${currentBeeldIndex + 1} / ${players.length}`; formatAndDisplayIDs([q.id]); renderBeeldUI();
+        btnNextBeeld.style.display = 'none'; btnShowBeeld.style.display = 'inline-block'; inputAnswer.style.display = 'inline-block'; btnCheckAnswer.style.display = 'inline-block'; inputAnswer.disabled = true; stopTimer(); inputAnswer.value = "";
     }
-
     function renderBeeldUI() {
-        let q = activeBeeldQuestions[currentBeeldIndex];
-        const container = document.getElementById('beeld-tasks-container');
+        let q = activeBeeldQuestions[currentBeeldIndex]; const container = document.getElementById('beeld-tasks-container');
         const tasks = [q.ans_seizoen, q.ans_aflevering, q.ans_zin, q.ans_kw1, q.ans_kw2];
-        
-        container.innerHTML = tasks.map(t => {
-            const displayWord = t.found ? t.word : '???';
-            const colorClass = t.found ? 'color: var(--correct-color);' : 'color: var(--text-muted);';
-            return `<div><strong style="color: white; width:150px; display:inline-block;">${t.label}:</strong> <span style="${colorClass}">${displayWord}</span></div>`;
-        }).join('');
+        container.innerHTML = tasks.map(t => { const displayWord = t.found ? t.word : '???'; const colorClass = t.found ? 'color: var(--correct-color);' : 'color: var(--text-muted);'; return `<div><strong style="color: white; width:150px; display:inline-block;">${t.label}:</strong> <span style="${colorClass}">${displayWord}</span></div>`; }).join('');
     }
-
-    function checkRound6Answer() {
-        let q = activeBeeldQuestions[currentBeeldIndex];
-        const tasks = [q.ans_seizoen, q.ans_aflevering, q.ans_zin, q.ans_kw1, q.ans_kw2];
-        
+    function checkRound5Answer() {
+        let q = activeBeeldQuestions[currentBeeldIndex]; const tasks = [q.ans_seizoen, q.ans_aflevering, q.ans_zin, q.ans_kw1, q.ans_kw2];
         const foundItem = tasks.find(t => !t.found && stringSimilarity(t.word, inputAnswer.value) >= SIMILARITY_THRESHOLD);
         if (foundItem) {
-            showFeedback(true); foundItem.found = true;
-            updateSeconds(activePlayerIndex, R2_R3_R4_BONUS_SECONDS); showBonusFeedback(activePlayerIndex, R2_R3_R4_BONUS_SECONDS);
-            currentSetAttempts = []; renderBeeldUI();
-            if (tasks.every(t => t.found)) {
-                stopTimer(); btnCheckAnswer.style.display = 'none'; inputAnswer.style.display = 'none'; btnShowBeeld.style.display='none';
-                btnNextBeeld.style.display = 'inline-block'; currentSetAttempts = players.map(p => p.originalIndex); activePlayerIndex = getNextStartingPlayerIndex(6);
-            } else { setTimeout(() => { if (!isTimerRunning) startTimer(activePlayerIndex); }, 50); }
+            showFeedback(true); foundItem.found = true; updateSeconds(activePlayerIndex, R2_R3_R4_BONUS_SECONDS); showBonusFeedback(activePlayerIndex, R2_R3_R4_BONUS_SECONDS); currentSetAttempts = []; renderBeeldUI();
+            if (tasks.every(t => t.found)) { stopTimer(); btnCheckAnswer.style.display = 'none'; inputAnswer.style.display = 'none'; btnShowBeeld.style.display='none'; btnNextBeeld.style.display = 'inline-block'; currentSetAttempts = players.map(p => p.originalIndex); activePlayerIndex = getNextStartingPlayerIndex(5); } else { setTimeout(() => { if (!isTimerRunning) startTimer(activePlayerIndex); }, 50); }
         } else { showFeedback(false); setTimeout(() => { if (!isTimerRunning) startTimer(activePlayerIndex); }, 1000); }
         inputAnswer.value = "";
     }
-    
-    function showBeeldAnswers() {
-        let q = activeBeeldQuestions[currentBeeldIndex];
-        [q.ans_seizoen, q.ans_aflevering, q.ans_zin, q.ans_kw1, q.ans_kw2].forEach(t => t.found = true);
-        checkRound6Answer(); 
-    }
+    function showBeeldAnswers() { let q = activeBeeldQuestions[currentBeeldIndex]; [q.ans_seizoen, q.ans_aflevering, q.ans_zin, q.ans_kw1, q.ans_kw2].forEach(t => t.found = true); checkRound5Answer(); }
 
-
-    // ==========================================================
-    // RONDE 5 (Finale)
-    // ==========================================================
+    // --- RONDE 6 (Finale) ---
     let activeFinaleQuestions = [], currentFinaleQuestionIndex = 0;
     function setupFinale() {
-        currentRound = 5; currentFinaleQuestionIndex = 0; roundTitle.textContent = "Ronde 5: De Finale"; 
-        const topTwoPlayers = [...players].sort((a, b) => b.seconds - a.seconds).slice(0, 2);
-        finalists = players.filter(p => topTwoPlayers.some(topP => topP.originalIndex === p.originalIndex)).map(p => ({ player: p, originalIndex: p.originalIndex }));
-        activeFinaleQuestions = shuffleArray([...quizData.ronde5_finale]);
-        const lowestScorePlayer = finalists.sort((a, b) => a.player.seconds - b.player.seconds)[0];
-        activePlayerIndex = lowestScorePlayer.player.originalIndex; activeFinalistIndex = finalists.findIndex(f => f.player.originalIndex === activePlayerIndex);
-
-        hideAllGameAreas(); document.getElementById('finale-display-area').style.display = 'block';
-        questionText.style.display = 'block'; questionCounter.style.display = 'block'; 
-        inputAnswer.style.display = 'inline-block'; btnCheckAnswer.style.display = 'inline-block';
-        loadFinaleQuestion();
+        currentRound = 6; currentFinaleQuestionIndex = 0; roundTitle.textContent = "Ronde 6: De Finale"; 
+        const topTwoPlayers = [...players].sort((a, b) => b.seconds - a.seconds).slice(0, 2); finalists = players.filter(p => topTwoPlayers.some(topP => topP.originalIndex === p.originalIndex)).map(p => ({ player: p, originalIndex: p.originalIndex }));
+        activeFinaleQuestions = shuffleArray([...quizData.ronde6_finale]);
+        const lowestScorePlayer = finalists.sort((a, b) => a.player.seconds - b.player.seconds)[0]; activePlayerIndex = lowestScorePlayer.player.originalIndex; activeFinalistIndex = finalists.findIndex(f => f.player.originalIndex === activePlayerIndex);
+        hideAllGameAreas(); document.getElementById('finale-display-area').style.display = 'block'; questionText.style.display = 'block'; questionCounter.style.display = 'block'; inputAnswer.style.display = 'inline-block'; btnCheckAnswer.style.display = 'inline-block'; loadFinaleQuestion();
     }
-
     function loadFinaleQuestion() {
-        let q = activeFinaleQuestions[currentFinaleQuestionIndex];
-        document.getElementById('finale-subject').textContent = q.subject;
-        document.getElementById('finale-subject').classList.add('blurred-subject');
-        questionCounter.innerHTML = `FINALE / Aan de beurt: ${finalists[activeFinalistIndex].player.name}`;
-        formatAndDisplayIDs([q.id]);
-
+        let q = activeFinaleQuestions[currentFinaleQuestionIndex]; document.getElementById('finale-subject').textContent = q.subject; document.getElementById('finale-subject').classList.add('blurred-subject');
+        questionCounter.innerHTML = `FINALE / Aan de beurt: ${finalists[activeFinalistIndex].player.name}`; formatAndDisplayIDs([q.id]);
         document.getElementById('finale-keywords-container').innerHTML = q.keywords.map(k => `<div class="finale-keyword" data-word="${k.word}">???</div>`).join('');
-        
-        document.getElementById('btn-finale-show').style.display = 'inline-block'; document.getElementById('btn-finale-next').style.display = 'none';
-        btnCheckAnswer.style.display = 'inline-block'; inputAnswer.style.display = 'inline-block';
-        inputAnswer.disabled = true; stopTimer(); inputAnswer.value = '';
+        document.getElementById('btn-finale-show').style.display = 'inline-block'; document.getElementById('btn-finale-next').style.display = 'none'; btnCheckAnswer.style.display = 'inline-block'; inputAnswer.style.display = 'inline-block'; inputAnswer.disabled = true; stopTimer(); inputAnswer.value = '';
     }
-
     function checkFinaleAnswer() {
-        let q = activeFinaleQuestions[currentFinaleQuestionIndex];
-        const foundItem = q.keywords.find(k => !k.found && stringSimilarity(k.word, inputAnswer.value) >= SIMILARITY_THRESHOLD);
+        let q = activeFinaleQuestions[currentFinaleQuestionIndex]; const foundItem = q.keywords.find(k => !k.found && stringSimilarity(k.word, inputAnswer.value) >= SIMILARITY_THRESHOLD);
         if (foundItem) {
             showFeedback(true); foundItem.found = true;
             const opponent = players.find(p => p.originalIndex !== activePlayerIndex && finalists.some(f => f.player.originalIndex === p.originalIndex));
             if (opponent) { showBonusFeedback(opponent.originalIndex, -R5_OPPONENT_PENALTY_SECONDS); updateSeconds(opponent.originalIndex, -R5_OPPONENT_PENALTY_SECONDS); }
-
             document.getElementById('finale-subject').classList.remove('blurred-subject');
-            const kwEls = document.getElementById('finale-keywords-container').querySelectorAll('.finale-keyword');
-            const el = Array.from(kwEls).find(e => e.dataset.word === foundItem.word);
-            if (el) { el.classList.add('found'); el.textContent = foundItem.word; }
-
-            if (q.keywords.every(k => k.found)) {
-                document.getElementById('btn-finale-next').style.display = 'inline-block'; btnCheckAnswer.style.display = 'none';
-                inputAnswer.style.display = 'none'; document.getElementById('btn-finale-show').style.display = 'none'; stopTimer();
-            } else { setTimeout(() => { if (!isTimerRunning && !isGameOver) startTimer(activePlayerIndex); }, 50); }
+            const kwEls = document.getElementById('finale-keywords-container').querySelectorAll('.finale-keyword'); const el = Array.from(kwEls).find(e => e.dataset.word === foundItem.word); if (el) { el.classList.add('found'); el.textContent = foundItem.word; }
+            if (q.keywords.every(k => k.found)) { document.getElementById('btn-finale-next').style.display = 'inline-block'; btnCheckAnswer.style.display = 'none'; inputAnswer.style.display = 'none'; document.getElementById('btn-finale-show').style.display = 'none'; stopTimer(); } else { setTimeout(() => { if (!isTimerRunning && !isGameOver) startTimer(activePlayerIndex); }, 50); }
         } else { showFeedback(false); setTimeout(() => { if (!isTimerRunning) startTimer(activePlayerIndex); }, 50); }
         inputAnswer.value = '';
     }
     
-    // Event Listeners
     playerContainer.addEventListener('click', (event) => {
         const card = event.target.closest('.player-card'); if (!card) return;
         const clickedIndex = parseInt(card.dataset.playerIndex);
-        if (currentRound === 1 || event.target.classList.contains('player-timer-btn') === false) { activePlayerIndex = clickedIndex; renderPlayers(); } 
-        else toggleTimer(clickedIndex);
+        if (currentRound === 1 || event.target.classList.contains('player-timer-btn') === false) { activePlayerIndex = clickedIndex; renderPlayers(); } else toggleTimer(clickedIndex);
     });
 
     btnCheckAnswer.addEventListener('click', () => {
         if(currentRound==1) checkRound1Answer(); else if(currentRound==2) checkRound2Answer(); else if(currentRound==3) checkRound3Answer();
-        else if(currentRound==4) checkRound4Answer(); else if(currentRound==5) checkFinaleAnswer(); else if(currentRound==6) checkRound6Answer();
+        else if(currentRound==4) checkRound4Answer(); else if(currentRound==5) checkRound5Answer(); else if(currentRound==6) checkFinaleAnswer();
     });
     inputAnswer.addEventListener('keyup', (e) => { if (e.key === 'Enter') { e.preventDefault(); btnCheckAnswer.click(); } });
 
-    document.getElementById('start-round-1').addEventListener('click', startGameR1);
-    document.getElementById('start-round-2').addEventListener('click', setupRound2);
-    document.getElementById('start-round-3').addEventListener('click', setupRound3);
-    document.getElementById('start-round-4').addEventListener('click', setupRound4);
-    document.getElementById('start-round-6').addEventListener('click', setupRound6);
-    document.getElementById('start-finale').addEventListener('click', setupFinale);
+    document.getElementById('start-round-1').addEventListener('click', startGameR1); document.getElementById('start-round-2').addEventListener('click', setupRound2);
+    document.getElementById('start-round-3').addEventListener('click', setupRound3); document.getElementById('start-round-4').addEventListener('click', setupRound4);
+    btnStartRound5.addEventListener('click', setupRound5); btnStartFinale.addEventListener('click', setupFinale);
     
-    document.getElementById('next-puzzle').addEventListener('click', () => { currentR2SetCount++; loadNewPuzzle(); });
-    document.getElementById('show-puzzle-answers').addEventListener('click', showPuzzleAnswers);
-    document.getElementById('next-opendeur').addEventListener('click', () => { currentOpenDeurIndex++; loadOpenDeur(); });
-    document.getElementById('show-opendeur-answers').addEventListener('click', showOpenDeurAnswers);
-    document.getElementById('next-geheugen-speler').addEventListener('click', () => { currentMemoryList++; loadMemoryQuestion(); });
-    document.getElementById('show-geheugen-answers').addEventListener('click', showMemoryAnswers);
-    btnNextBeeld.addEventListener('click', () => { currentBeeldIndex++; loadBeeldVraag(); });
-    btnShowBeeld.addEventListener('click', showBeeldAnswers);
-
-    document.getElementById('btn-finale-next').addEventListener('click', () => { currentFinaleQuestionIndex++; loadFinaleQuestion(); });
-    document.getElementById('btn-finale-show').addEventListener('click', () => { activeFinaleQuestions[currentFinaleQuestionIndex].keywords.forEach(k => k.found = true); checkFinaleAnswer(); });
+    document.getElementById('next-puzzle').addEventListener('click', () => { currentR2SetCount++; loadNewPuzzle(); }); document.getElementById('show-puzzle-answers').addEventListener('click', showPuzzleAnswers);
+    document.getElementById('next-opendeur').addEventListener('click', () => { currentOpenDeurIndex++; loadOpenDeur(); }); document.getElementById('show-opendeur-answers').addEventListener('click', showOpenDeurAnswers);
+    document.getElementById('next-geheugen-speler').addEventListener('click', () => { currentMemoryList++; loadMemoryQuestion(); }); document.getElementById('show-geheugen-answers').addEventListener('click', showMemoryAnswers);
+    btnNextBeeld.addEventListener('click', () => { currentBeeldIndex++; loadBeeldVraag(); }); btnShowBeeld.addEventListener('click', showBeeldAnswers);
+    document.getElementById('btn-finale-next').addEventListener('click', () => { currentFinaleQuestionIndex++; loadFinaleQuestion(); }); document.getElementById('btn-finale-show').addEventListener('click', () => { activeFinaleQuestions[currentFinaleQuestionIndex].keywords.forEach(k => k.found = true); checkFinaleAnswer(); });
 
     document.getElementById('wrong-answer').addEventListener('click', () => { updateSeconds(activePlayerIndex, -20); showBonusFeedback(activePlayerIndex, -20); });
     document.getElementById('add-seconds-10').addEventListener('click', () => { updateSeconds(activePlayerIndex, 10); showBonusFeedback(activePlayerIndex, 10); });
     document.getElementById('add-seconds-20').addEventListener('click', () => { updateSeconds(activePlayerIndex, 20); showBonusFeedback(activePlayerIndex, 20); });
 
-    // Remote Control
     const remoteChannel = new BroadcastChannel('trivial_time_channel');
     remoteChannel.onmessage = (event) => {
         if (!event.data) return;
@@ -881,7 +562,6 @@
         if (event.data.type === 'TRIGGER_FAIL') { inputAnswer.value = "###FAIL###"; btnCheckAnswer.click(); }
         if (event.data.type === 'TOGGLE_TIMER') toggleTimer(activePlayerIndex);
         if (event.data.type === 'SELECT_PLAYER') { activePlayerIndex = event.data.playerIndex; renderPlayers(); }
-        if (event.data.type === 'CHANGE_THEME') { quizData = window.ThemeManager.getTheme(event.data.theme); console.log("Thema geupdate naar", event.data.theme); }
     };
     </script>
 </body>
