@@ -15,7 +15,7 @@
         #dashboard-header { height: 70px; background: rgba(0,0,0,0.6); border-bottom: 2px solid var(--kamp-geel); display: flex; align-items: center; justify-content: space-between; padding: 0 20px; flex-shrink: 0; z-index: 10; }
         h1 { display: block !important; margin: 0; font-size: 1.8em; text-align: left; width: auto; color: var(--kamp-geel); }
         .round-controls { display: flex; gap: 8px; }
-        .round-controls button { margin: 0; padding: 10px 20px; font-size: 1em; height: 45px; display: block !important; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); }
+        .round-controls button { margin: 0; padding: 10px 15px; font-size: 0.95em; height: 45px; display: block !important; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); }
         .round-controls button.active-round { background: var(--kamp-geel); color: #000; box-shadow: 0 0 15px rgba(255,215,0,0.5); border: 1px solid #fff; font-weight: bold; }
         
         /* 3-KOLOMMEN LAYOUT */
@@ -29,19 +29,21 @@
         .sidebar-player { padding: 12px 15px; margin-bottom: 8px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; transition: 0.2s; }
         .sidebar-player:hover { filter: brightness(1.2); }
         
-        /* MIDDEN KOLOM: Actieve Speler Control */
-        #panel-center { background: rgba(11, 128, 67, 0.15); border: 3px solid var(--kamp-geel); align-items: center; justify-content: center; box-shadow: 0 0 30px rgba(255, 215, 0, 0.1); transition: 0.3s; }
-        #ap-name { font-size: 3.5em; font-family: 'Chakra Petch', sans-serif; margin: 0 0 10px 0; color: #fff; text-align: center; text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%; }
-        #ap-score { font-family: 'Chakra Petch', sans-serif; font-size: 8em; font-weight: bold; color: var(--kamp-geel); text-shadow: 0 5px 20px rgba(0,0,0,0.8); line-height: 1; margin-bottom: 30px; }
+        /* MIDDEN KOLOM: Actieve Speler (Groot & Centraal) */
+        #panel-center { background: rgba(11, 128, 67, 0.15); border: 3px solid var(--kamp-geel); align-items: center; justify-content: center; box-shadow: 0 0 30px rgba(255, 215, 0, 0.1); transition: 0.3s; padding: 20px; display: flex; flex-direction: column; }
         
-        .massive-btn { width: 85%; font-size: 1.8em; padding: 25px; border-radius: 12px; font-weight: bold; text-transform: uppercase; cursor: pointer; transition: 0.2s; border: none; box-shadow: 0 8px 20px rgba(0,0,0,0.4); margin-bottom: 15px; }
+        .active-player-info { text-align: center; width: 100%; margin-bottom: auto; margin-top: auto; }
+        #active-player-name { font-size: 4em; font-family: 'Chakra Petch', sans-serif; font-weight: 700; color: #fff; text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.1; margin-bottom: 10px; }
+        #active-player-score { font-family: 'Chakra Petch', sans-serif; font-size: 9em; font-weight: bold; color: var(--kamp-geel); text-shadow: 0 5px 25px rgba(0,0,0,0.8); line-height: 1; margin: 0; }
+        
+        .massive-btn { width: 100%; font-size: 1.6em; padding: 20px; border-radius: 12px; font-weight: bold; text-transform: uppercase; cursor: pointer; transition: 0.2s; border: none; box-shadow: 0 8px 20px rgba(0,0,0,0.4); margin-bottom: 12px; }
         .massive-btn:active { transform: scale(0.98); }
         
-        .time-adjust-row { display: flex; gap: 15px; width: 85%; margin-top: 10px; }
-        .time-adjust-row button { flex: 1; padding: 15px; font-size: 1.2em; border-radius: 8px; font-weight: bold; border: none; cursor: pointer; box-shadow: 0 5px 15px rgba(0,0,0,0.3); transition: 0.2s; }
+        .time-adjust-row { display: flex; gap: 12px; width: 100%; margin-top: 5px; }
+        .time-adjust-row button { flex: 1; padding: 15px; font-size: 1.3em; border-radius: 8px; font-weight: bold; border: none; cursor: pointer; box-shadow: 0 5px 15px rgba(0,0,0,0.3); transition: 0.2s; }
         .time-adjust-row button:active { transform: scale(0.95); }
 
-        /* RECHTER KOLOM: Antwoorden & Spelverloop */
+        /* RECHTER KOLOM: Spelverloop & Antwoorden */
         .game-flow-actions { display: flex; flex-direction: column; gap: 10px; margin-bottom: 15px; padding-bottom: 15px; border-bottom: 1px solid var(--border-col); }
         .game-flow-actions button { padding: 15px; font-size: 1.2em; border-radius: 8px; margin: 0; }
         .game-flow-row { display: flex; gap: 10px; }
@@ -51,7 +53,6 @@
         .list-item { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,215,0,0.3); margin-bottom: 10px; padding: 15px; border-radius: 8px; line-height: 1.5; font-size: 1.1em; }
         .list-item strong { color: var(--kamp-geel); }
         
-        /* Custom Scrollbars */
         ::-webkit-scrollbar { width: 8px; }
         ::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); }
         ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 4px; }
@@ -76,9 +77,9 @@
 
         <div class="round-controls">
             <button id="btn-round-1" data-round="1" class="active-round">R1</button>
-            <button id="btn-round-2" data-round="2">R2 (Puzzel)</button>
-            <button id="btn-round-3" data-round="3">R3 (Open Deur)</button>
-            <button id="btn-round-4" data-round="4">R4 (Geheugen)</button>
+            <button id="btn-round-2" data-round="2">R2</button>
+            <button id="btn-round-3" data-round="3">R3</button>
+            <button id="btn-round-4" data-round="4">R4</button>
             <button id="btn-round-5" data-round="5">R5 (Beeld)</button>
             <button id="btn-round-6" data-round="6">R6 (Finale)</button>
         </div>
@@ -89,18 +90,19 @@
         <!-- LINKS: Alle Spelers (Overzicht) -->
         <div class="panel">
             <h2>👥 Overzicht Spelers</h2>
-            <p style="font-size: 0.85em; color: var(--text-muted); text-align: center; margin-top: -10px; margin-bottom: 15px;">Klik op een speler om handmatig de beurt te geven.</p>
+            <p style="font-size: 0.85em; color: var(--text-muted); text-align: center; margin-top: -10px; margin-bottom: 15px;">Klik om beurt te geven.</p>
             <div id="live-players-container">
-                <p style="color: var(--text-muted); text-align: center; margin-top: 50px;">Wacht tot het spel gestart is op het Grote Scherm...</p>
+                <p style="color: var(--text-muted); text-align: center; margin-top: 50px;">Wacht tot het spel gestart is...</p>
             </div>
         </div>
 
-        <!-- MIDDEN: Actieve Speler (De Grote Knoppen) -->
+        <!-- MIDDEN: Actieve Speler (Groot & Centraal) -->
         <div class="panel" id="panel-center">
-            <h2 style="border: none; color: var(--kamp-groen); font-weight: bold; margin-bottom: 5px;">🎯 Actieve Speler</h2>
-            
-            <div id="active-player-name" id="ap-name">Niemand</div>
-            <div id="active-player-score" id="ap-score">0</div>
+            <div class="active-player-info">
+                <div style="font-size: 1em; color: var(--text-muted); font-weight: bold; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 5px;">🎯 Aan de beurt</div>
+                <div id="active-player-name">Niemand</div>
+                <div id="active-player-score">0</div>
+            </div>
             
             <button id="btn-massive-timer" class="massive-btn" style="background: var(--kamp-geel); color: #000;" onclick="toggleTimer(activePlayerIndex)">
                 ▶ START TIMER
@@ -117,7 +119,7 @@
             </div>
         </div>
 
-        <!-- RECHTS: Spelverloop & Antwoorden -->
+        <!-- RECHTER KOLOM: Spelverloop & Antwoorden -->
         <div class="panel">
             <h2>📝 Spelverloop & Antwoorden</h2>
             
@@ -145,14 +147,12 @@
         const buttons = document.querySelectorAll('.round-controls button');
         
         let activeRound = 1;
-        let activePlayerIndex = 0; // Wordt live overschreven door het hoofdscherm
+        let activePlayerIndex = 0;
 
-        // Helper Functies
         function selectPlayer(index) { channel.postMessage({ type: 'SELECT_PLAYER', playerIndex: index }); }
         function toggleTimer(index) { channel.postMessage({ type: 'TOGGLE_TIMER', playerIndex: index }); }
         function escapeAnswer(str) { if (!str) return ''; return str.replace(/'/g, "\\'"); }
 
-        // Ronde Selectie (Bovenaan)
         buttons.forEach(button => { 
             button.addEventListener('click', () => { 
                 buttons.forEach(btn => btn.classList.remove('active-round'));
@@ -161,10 +161,7 @@
             }); 
         });
 
-        // LUISTER NAAR HET HOOFDSCHERM
         channel.onmessage = (event) => {
-            
-            // 1. LIVE SPELERS UPDATE
             if (event.data.type === 'SYNC_PLAYERS') {
                 const container = document.getElementById('live-players-container');
                 container.innerHTML = '';
@@ -172,13 +169,11 @@
                 let activePlayerFound = null;
 
                 event.data.players.forEach(p => {
-                    // Update Active Player variabele
                     if (p.isActive) {
                         activePlayerFound = p;
                         activePlayerIndex = p.index;
                     }
 
-                    // Bouw zijbalk
                     const bgColor = p.isActive ? 'rgba(255,215,0,0.15)' : 'rgba(255,255,255,0.05)';
                     const borderStyle = p.isActive ? `2px solid var(--kamp-geel)` : `2px solid transparent`;
                     const textColor = p.isActive ? 'var(--kamp-geel)' : '#fff';
@@ -196,7 +191,6 @@
                     `;
                 });
 
-                // Update Centrale Grote Blok
                 if (activePlayerFound) {
                     document.getElementById('active-player-name').textContent = activePlayerFound.name;
                     document.getElementById('active-player-score').textContent = activePlayerFound.seconds;
@@ -224,7 +218,6 @@
                 }
             }
 
-            // 2. AUTOMATISCHE ANTWOORDEN TONEN
             if (event.data.type === 'SYNC_QUESTION') {
                 activeRound = event.data.round;
                 buttons.forEach(btn => btn.classList.remove('active-round'));
@@ -234,7 +227,6 @@
             }
         };
 
-        // ANTWOORDEN OPHALEN
         function lookupAnswers(ids) {
             if (!ids || ids.length === 0) return;
             const themeData = window.ThemeManager.getTheme("KAMPIOENEN");
