@@ -1,20 +1,18 @@
 /* =====================================================================
-   stijl.css - Trivial Time: F.C. DE KAMPIOENEN THEMA
+   stijl.css - Trivial Time: F.C. DE KAMPIOENEN (Single-Screen Editie)
    ===================================================================== */
 
 @import url('https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;600;700&family=Open+Sans:wght@400;600;700&display=swap');
 
 :root {
-    /* --- KAMPIOENEN PALET --- */
-    --kamp-groen: #0b8043;       /* Sportief grasgroen */
-    --kamp-donkergroen: #04361c; /* Diepgroen voor achtergronden */
-    --kamp-geel: #ffd700;        /* Kampioenen Goud/Geel */
-    --kamp-rood: #d92525;        /* Boma rood / Fout */
+    --kamp-groen: #0b8043;       
+    --kamp-donkergroen: #04361c; 
+    --kamp-geel: #ffd700;        
+    --kamp-rood: #d92525;        
     
-    /* --- SYSTEEM VARIABELEN --- */
-    --bg-dark: #0a1410;          /* Bijna zwart met een groene tint */
+    --bg-dark: #0a1410;          
     --bg-card: rgba(11, 128, 67, 0.15);
-    --border-col: rgba(255, 215, 0, 0.3); /* Gele borders */
+    --border-col: rgba(255, 215, 0, 0.3); 
     
     --primary-accent: var(--kamp-geel);
     --secondary-accent: var(--kamp-groen);
@@ -27,14 +25,15 @@
     --input-border-color: rgba(255, 215, 0, 0.4);
 }
 
-/* ================== BASIS LAYOUT ================== */
+/* ================== BASIS LAYOUT (VAST OP 1 SCHERM) ================== */
 body {
     background: radial-gradient(circle at top, var(--kamp-donkergroen) 0%, var(--bg-dark) 100%);
     color: var(--text-main);
     font-family: 'Open Sans', sans-serif;
     margin: 0;
     padding: 0;
-    min-height: 100vh;
+    height: 100vh; /* Zet vast op schermhoogte */
+    overflow: hidden; /* Blokkeer scrollen over de hele pagina */
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -48,15 +47,15 @@ h1, h2, h3, .player-name, .round-title {
 h1 {
     color: var(--kamp-geel);
     text-shadow: 0 4px 15px rgba(255, 215, 0, 0.4);
-    margin-top: 30px;
-    font-size: 3em;
+    margin: 10px 0; /* Marges verkleind */
+    font-size: 2.2em;
     letter-spacing: 2px;
 }
 
 h2 {
     color: #fff;
-    font-size: 1.8em;
-    margin-bottom: 10px;
+    font-size: 1.5em;
+    margin: 0 0 10px 0;
 }
 
 /* ================== SCHERMEN & CONTAINERS ================== */
@@ -65,319 +64,177 @@ h2 {
     border: 2px solid var(--border-col);
     border-radius: 12px;
     box-shadow: 0 10px 30px rgba(0,0,0,0.5), inset 0 0 20px rgba(11, 128, 67, 0.2);
-    padding: 40px;
-    width: 90%;
-    max-width: 1200px;
-    margin-top: 20px;
+    padding: 20px; /* Padding verkleind voor meer ruimte */
+    width: 95%;
+    max-width: 1300px;
     text-align: center;
     backdrop-filter: blur(10px);
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    margin-bottom: 15px;
+    max-height: 85vh; /* Zorg dat het kistje in het scherm past */
 }
 
-/* ================== SPELERS KAARTEN (BOVENAAN) ================== */
-#player-container {
+/* ================== COMPACT SETUP SCHERM ================== */
+#player-name-inputs {
     display: grid;
-    gap: 15px;
-    width: 90%;
-    max-width: 1200px;
-    margin: 20px auto;
+    grid-template-columns: 1fr 1fr; /* Verdeel 10 spelers in 2 kolommen */
+    gap: 10px 20px;
+    margin: 15px 0;
+    overflow-y: auto; /* Scrollen binnen dit vakje indien echt nodig op kleine schermen */
+    flex: 1;
+    align-content: start;
+}
+
+.setup-input-row {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 0;
+}
+
+.setup-input-row label {
+    font-size: 1em;
+    font-weight: bold;
+    min-width: 120px;
+    text-align: right;
+}
+
+#num-players { width: 100px; text-align: center; }
+
+/* ================== COMPACTE SPELERS KAARTEN ================== */
+#player-container {
+    display: flex;
+    flex-wrap: nowrap; /* Forceer 1 rij */
+    width: 95%;
+    max-width: 1300px;
+    margin: 5px auto 10px auto;
+    gap: 8px;
     justify-content: center;
 }
 
 .player-card {
     background: linear-gradient(145deg, rgba(11, 128, 67, 0.8), rgba(4, 54, 28, 0.9));
     border: 2px solid var(--border-col);
-    border-radius: 10px;
-    padding: 15px;
+    border-radius: 8px;
+    padding: 8px 5px;
     text-align: center;
     position: relative;
     transition: all 0.3s ease;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+    flex: 1; /* Laat kaarten evenredig krimpen of groeien */
+    min-width: 0;
 }
 
 .player-card.active {
     background: linear-gradient(145deg, var(--kamp-geel), #b39700);
     border-color: #fff;
     transform: scale(1.05);
-    box-shadow: 0 0 25px rgba(255, 215, 0, 0.6);
+    box-shadow: 0 0 15px rgba(255, 215, 0, 0.6);
+    z-index: 2;
 }
 
 .player-card.active .player-name, 
-.player-card.active .player-seconds {
-    color: #000;
-}
+.player-card.active .player-seconds { color: #000; }
 
 .player-name {
-    font-size: 1.2em;
+    font-size: 0.9em;
     font-weight: 700;
-    margin-bottom: 5px;
-    letter-spacing: 1px;
+    margin-bottom: 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis; /* Verbergt te lange namen met puntjes */
 }
 
 .player-seconds {
     font-family: 'Chakra Petch', sans-serif;
-    font-size: 2.2em;
+    font-size: 1.6em;
     font-weight: 700;
     color: var(--kamp-geel);
     text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
+    margin-top: -3px;
 }
 
 .player-timer-btn {
-    background: rgba(0, 0, 0, 0.4);
-    border: 1px solid rgba(255,255,255,0.3);
-    color: white;
-    cursor: pointer;
-    border-radius: 4px;
-    font-size: 0.8em;
-    padding: 3px 8px;
-    transition: 0.2s;
+    background: rgba(0, 0, 0, 0.4); border: 1px solid rgba(255,255,255,0.3); color: white;
+    cursor: pointer; border-radius: 4px; font-size: 0.7em; padding: 2px 6px; 
+    transition: 0.2s; position: absolute; top: 4px; right: 4px;
 }
-
-.player-timer-btn.running {
-    background: var(--kamp-rood);
-    border-color: #fff;
-    box-shadow: 0 0 10px var(--kamp-rood);
-}
+.player-timer-btn.running { background: var(--kamp-rood); border-color: #fff; box-shadow: 0 0 10px var(--kamp-rood); }
 
 /* ================== VRAAG GEBIED ================== */
 #question-area {
-    margin: 30px 0;
-    padding: 30px;
+    margin: 5px 0 15px 0;
+    padding: 15px 20px;
     background: rgba(0,0,0,0.4);
     border-radius: 8px;
     border-left: 5px solid var(--kamp-geel);
-}
-
-#question-text {
-    font-size: 2em;
-    font-weight: 600;
-    line-height: 1.3;
-    margin-bottom: 20px;
-}
-
-#question-counter {
-    color: var(--kamp-geel);
-    font-weight: bold;
-    font-size: 1.1em;
-}
-
-/* ================== RONDE 2: PUZZEL ================== */
-#puzzle-display-area {
+    flex: 1; /* Laat dit meegroeien in de beschikbare ruimte */
     display: flex;
     flex-direction: column;
-    gap: 20px;
-}
-
-#puzzle-answers-container {
-    display: flex;
     justify-content: center;
-    gap: 15px;
+    overflow-y: auto;
 }
 
-.puzzle-answer {
-    background: rgba(255,255,255,0.05);
-    border: 2px dashed rgba(255,255,255,0.2);
-    padding: 15px 30px;
-    font-size: 1.5em;
-    border-radius: 8px;
-    font-family: 'Chakra Petch', sans-serif;
-    text-transform: uppercase;
-    min-width: 150px;
-}
+#question-text { font-size: 1.6em; font-weight: 600; line-height: 1.2; margin: 0 0 10px 0; }
+#question-counter { color: var(--kamp-geel); font-weight: bold; font-size: 1em; margin: 0 0 5px 0; }
+#question-id, #puzzle-ids { font-size: 0.8em; color: #777; margin: 0; }
 
-#puzzle-clues-container {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 10px;
-    margin-top: 15px;
-}
+/* ================== RONDEN DETAILS (PUZZEL, WOORDEN, GEHEUGEN) ================== */
+#puzzle-display-area { display: flex; flex-direction: column; gap: 10px; }
+#puzzle-answers-container { display: flex; justify-content: center; gap: 10px; }
+.puzzle-answer { background: rgba(255,255,255,0.05); border: 2px dashed rgba(255,255,255,0.2); padding: 10px 20px; font-size: 1.2em; border-radius: 8px; font-family: 'Chakra Petch', sans-serif; text-transform: uppercase; min-width: 120px; }
+#puzzle-clues-container { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 5px; }
+.puzzle-clue { background: var(--bg-card); border: 1px solid rgba(255,255,255,0.1); padding: 10px; border-radius: 6px; font-size: 1em; font-weight: 600; transition: 0.3s; }
 
-.puzzle-clue {
-    background: var(--bg-card);
-    border: 1px solid rgba(255,255,255,0.1);
-    padding: 15px;
-    border-radius: 6px;
-    font-size: 1.1em;
-    font-weight: 600;
-    transition: 0.3s;
-}
+.found.color-1 { background: var(--kamp-geel); color: #000; border-color: #fff; box-shadow: 0 0 10px rgba(255, 215, 0, 0.5); }
+.found.color-2 { background: var(--kamp-groen); color: #fff; border-color: #fff; box-shadow: 0 0 10px rgba(11, 128, 67, 0.5); }
+.found.color-3 { background: #fff; color: #000; border-color: #ccc; box-shadow: 0 0 10px rgba(255, 255, 255, 0.5); }
 
-/* Gevonden kleuren */
-.found.color-1 { background: var(--kamp-geel); color: #000; border-color: #fff; box-shadow: 0 0 15px rgba(255, 215, 0, 0.5); }
-.found.color-2 { background: var(--kamp-groen); color: #fff; border-color: #fff; box-shadow: 0 0 15px rgba(11, 128, 67, 0.5); }
-.found.color-3 { background: #fff; color: #000; border-color: #ccc; box-shadow: 0 0 15px rgba(255, 255, 255, 0.5); }
+#opendeur-keywords-container, #finale-keywords-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin-top: 10px; }
+.opendeur-keyword, .finale-keyword { background: rgba(0,0,0,0.5); border: 2px solid rgba(255,255,255,0.1); padding: 15px; font-size: 1.2em; border-radius: 8px; font-family: 'Chakra Petch', sans-serif; text-transform: uppercase; transition: 0.3s; }
+.opendeur-keyword.found, .finale-keyword.found { background: var(--kamp-groen); border-color: var(--kamp-geel); color: white; box-shadow: 0 0 15px rgba(11, 128, 67, 0.6); transform: scale(1.02); }
 
-/* ================== RONDE 3, 5 & 6 (WOORDEN ZOEKEN) ================== */
-#opendeur-keywords-container, #finale-keywords-container {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 15px;
-    margin-top: 20px;
-}
+#geheugen-board { list-style: none; padding: 0; text-align: left; max-width: 800px; margin: 0 auto; width: 100%; }
+.geheugen-item { background: rgba(255,255,255,0.05); border-left: 4px solid var(--border-col); margin-bottom: 5px; padding: 10px 15px; font-size: 1.2em; display: flex; justify-content: space-between; border-radius: 4px; transition: 0.3s; }
+.geheugen-item.found { background: rgba(11, 128, 67, 0.2); border-left-color: var(--kamp-geel); }
+.geheugen-antwoord { color: var(--kamp-geel); font-family: 'Chakra Petch', sans-serif; font-weight: bold; }
 
-.opendeur-keyword, .finale-keyword {
-    background: rgba(0,0,0,0.5);
-    border: 2px solid rgba(255,255,255,0.1);
-    padding: 20px;
-    font-size: 1.4em;
-    border-radius: 8px;
-    font-family: 'Chakra Petch', sans-serif;
-    text-transform: uppercase;
-    transition: 0.3s;
-}
-
-.opendeur-keyword.found, .finale-keyword.found {
-    background: var(--kamp-groen);
-    border-color: var(--kamp-geel);
-    color: white;
-    box-shadow: 0 0 20px rgba(11, 128, 67, 0.6);
-    transform: scale(1.02);
-}
-
-/* ================== RONDE 4: GEHEUGEN ================== */
-#geheugen-board {
-    list-style: none;
-    padding: 0;
-    text-align: left;
-    max-width: 800px;
-    margin: 0 auto;
-}
-
-.geheugen-item {
-    background: rgba(255,255,255,0.05);
-    border-left: 4px solid var(--border-col);
-    margin-bottom: 10px;
-    padding: 15px 20px;
-    font-size: 1.4em;
-    display: flex;
-    justify-content: space-between;
-    border-radius: 4px;
-    transition: 0.3s;
-}
-
-.geheugen-item.found {
-    background: rgba(11, 128, 67, 0.2);
-    border-left-color: var(--kamp-geel);
-}
-
-.geheugen-antwoord {
-    color: var(--kamp-geel);
-    font-family: 'Chakra Petch', sans-serif;
-    font-weight: bold;
-}
-
-/* ================== BLUR EFFECTEN (Voor spelleider pauze) ================== */
-.blurred-subject, .blurred-board {
-    filter: blur(12px) opacity(0.5);
-    user-select: none;
-    transition: filter 0.5s ease, opacity 0.5s ease;
-}
+.blurred-subject, .blurred-board { filter: blur(12px) opacity(0.5); user-select: none; transition: filter 0.5s ease, opacity 0.5s ease; }
 
 /* ================== FORMULIEREN & KNOPPEN ================== */
 input[type="text"], input[type="number"] {
-    background: rgba(0, 0, 0, 0.5);
-    border: 2px solid var(--input-border-color);
-    color: white;
-    padding: 15px 20px;
-    font-size: 1.2em;
-    border-radius: 8px;
-    outline: none;
-    width: 60%;
-    max-width: 500px;
-    transition: 0.3s;
-    font-family: 'Open Sans', sans-serif;
+    background: rgba(0, 0, 0, 0.5); border: 2px solid var(--input-border-color); color: white;
+    padding: 8px 12px; font-size: 1em; border-radius: 8px; outline: none; width: 100%; transition: 0.3s; font-family: 'Open Sans', sans-serif;
 }
-
-input[type="text"]:focus {
-    border-color: var(--kamp-geel);
-    box-shadow: 0 0 15px rgba(255, 215, 0, 0.3);
-}
-
+input[type="text"]:focus, input[type="number"]:focus { border-color: var(--kamp-geel); box-shadow: 0 0 10px rgba(255, 215, 0, 0.3); }
 input.correct-feedback { background-color: rgba(34, 197, 94, 0.3) !important; border-color: #22c55e !important; }
 input.wrong-feedback { background-color: rgba(239, 68, 68, 0.3) !important; border-color: #ef4444 !important; }
 
 button {
-    background: var(--kamp-groen);
-    color: #fff;
-    border: 2px solid transparent;
-    padding: 12px 25px;
-    font-size: 1.1em;
-    font-weight: bold;
-    border-radius: 8px;
-    cursor: pointer;
-    font-family: 'Chakra Petch', sans-serif;
-    text-transform: uppercase;
-    transition: all 0.2s ease;
-    margin: 5px;
+    background: var(--kamp-groen); color: #fff; border: 2px solid transparent; padding: 10px 20px; font-size: 1em; font-weight: bold;
+    border-radius: 8px; cursor: pointer; font-family: 'Chakra Petch', sans-serif; text-transform: uppercase; transition: all 0.2s ease; margin: 3px;
 }
+button:hover { background: var(--kamp-geel); color: #000; box-shadow: 0 0 10px rgba(255, 215, 0, 0.5); }
+button:disabled { background: #333; color: #777; cursor: not-allowed; box-shadow: none; }
 
-button:hover {
-    background: var(--kamp-geel);
-    color: #000;
-    box-shadow: 0 0 15px rgba(255, 215, 0, 0.5);
-}
+.controls { margin-top: 10px; }
+hr { border-color: #333; margin: 15px 0; }
+.player-controls { margin-top: 5px; }
+.player-controls h3 { margin: 0 0 5px 0; font-size: 1em; }
+.player-controls p { margin: 0 0 10px 0; font-size: 0.85em; color: var(--text-muted); }
 
-button:disabled {
-    background: #333;
-    color: #777;
-    cursor: not-allowed;
-    box-shadow: none;
-}
-
-.controls, .player-controls { margin-top: 20px; }
-
-/* ================== ANIMATIES (Seconden erbij/eraf) ================== */
-.bonus-feedback {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    font-size: 2.5em;
-    font-weight: bold;
-    font-family: 'Chakra Petch', sans-serif;
-    opacity: 0;
-    pointer-events: none;
-    z-index: 10;
-    text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
-}
-
-@keyframes flash-green { 0% { box-shadow: 0 0 0px #22c55e; } 50% { box-shadow: 0 0 30px #22c55e; background-color: rgba(34, 197, 94, 0.4); } 100% { box-shadow: 0 0 0px #22c55e; } }
-@keyframes flash-red { 0% { box-shadow: 0 0 0px #ef4444; } 50% { box-shadow: 0 0 30px #ef4444; background-color: rgba(239, 68, 68, 0.4); } 100% { box-shadow: 0 0 0px #ef4444; } }
-
+/* ================== ANIMATIES ================== */
+.bonus-feedback { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 2em; font-weight: bold; font-family: 'Chakra Petch', sans-serif; opacity: 0; pointer-events: none; z-index: 10; text-shadow: 2px 2px 4px rgba(0,0,0,0.8); }
+@keyframes flash-green { 0% { box-shadow: 0 0 0px #22c55e; } 50% { box-shadow: 0 0 20px #22c55e; background-color: rgba(34, 197, 94, 0.4); } 100% { box-shadow: 0 0 0px #22c55e; } }
+@keyframes flash-red { 0% { box-shadow: 0 0 0px #ef4444; } 50% { box-shadow: 0 0 20px #ef4444; background-color: rgba(239, 68, 68, 0.4); } 100% { box-shadow: 0 0 0px #ef4444; } }
 .time-gain-flash { animation: flash-green 1s ease-out; }
 .time-loss-flash { animation: flash-red 1s ease-out; }
 
 /* ================== WINNAAR SCHERM ================== */
-#game-over-overlay {
-    position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-    background: rgba(4, 54, 28, 0.95);
-    display: none; flex-direction: column; justify-content: center; align-items: center;
-    z-index: 9999;
-}
-
+#game-over-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(4, 54, 28, 0.95); display: none; flex-direction: column; justify-content: center; align-items: center; z-index: 9999; }
 #game-over-overlay h2 { color: #fff; font-size: 2em; margin-bottom: 10px; }
 #game-over-overlay h1 { font-size: 6em; margin: 0; animation: pulse 2s infinite; text-shadow: 0 0 40px var(--kamp-geel); }
-
-@keyframes pulse {
-    0% { transform: scale(1); }
-    50% { transform: scale(1.05); }
-    100% { transform: scale(1); }
-}
-
-/* ================== SETUP SCREEN ROW ================== */
-.setup-input-row {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 15px;
-    margin-bottom: 15px;
-}
-
-.setup-input-row label {
-    font-size: 1.2em;
-    font-weight: bold;
-    min-width: 150px;
-    text-align: right;
-}
-
-/* Zorg dat kleine hints niet te veel afleiden */
-#question-id { font-size: 0.8em; color: #555; }
+@keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
