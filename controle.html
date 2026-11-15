@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GM Dashboard - Trivial Time</title>
+    <title>GM Dashboard - FC De Kampioenen</title>
     <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;600;700&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="stijl.css">
     
@@ -122,198 +122,87 @@
     <script>
         const channel = new BroadcastChannel('trivial_time_channel');
 
-        function sendAnswer(text) {
-            channel.postMessage({ type: 'FILL_ANSWER', answer: text });
-            showToast(`Gestuurd: "${text}"`);
-        }
-
-        function triggerFail() {
-            channel.postMessage({ type: 'TRIGGER_FAIL' });
-            showToast("❌ FOUT/PAS Signaal Verstuurd");
-        }
-
-        function selectPlayer(index) {
-            channel.postMessage({ type: 'SELECT_PLAYER', playerIndex: index });
-            showToast(`Speler ${index+1} Geselecteerd`);
-        }
-
-        function toggleTimer(index) {
-            channel.postMessage({ type: 'TOGGLE_TIMER', playerIndex: index });
-            showToast(`Timer Toggle Speler ${index+1}`);
-        }
+        function sendAnswer(text) { channel.postMessage({ type: 'FILL_ANSWER', answer: text }); showToast(`Gestuurd: "${text}"`); }
+        function triggerFail() { channel.postMessage({ type: 'TRIGGER_FAIL' }); showToast("❌ FOUT/PAS Signaal Verstuurd"); }
+        function selectPlayer(index) { channel.postMessage({ type: 'SELECT_PLAYER', playerIndex: index }); showToast(`Speler ${index+1} Geselecteerd`); }
+        function toggleTimer(index) { channel.postMessage({ type: 'TOGGLE_TIMER', playerIndex: index }); showToast(`Timer Toggle Speler ${index+1}`); }
 
         function showToast(msg) {
             const feedback = document.createElement('div');
-            feedback.textContent = msg;
-            feedback.style.position = 'fixed';
-            feedback.style.bottom = '20px';
-            feedback.style.right = '20px';
-            feedback.style.background = 'var(--primary-accent)';
-            feedback.style.color = '#000';
-            feedback.style.padding = '8px 15px';
-            feedback.style.borderRadius = '4px';
-            feedback.style.zIndex = '2000';
-            feedback.style.fontWeight = 'bold';
-            feedback.style.boxShadow = '0 4px 10px rgba(0,0,0,0.3)';
-            document.body.appendChild(feedback);
-            setTimeout(() => feedback.remove(), 1500);
+            feedback.textContent = msg; feedback.style.position = 'fixed'; feedback.style.bottom = '20px'; feedback.style.right = '20px';
+            feedback.style.background = 'var(--primary-accent)'; feedback.style.color = '#000'; feedback.style.padding = '8px 15px';
+            feedback.style.borderRadius = '4px'; feedback.style.zIndex = '2000'; feedback.style.fontWeight = 'bold'; feedback.style.boxShadow = '0 4px 10px rgba(0,0,0,0.3)';
+            document.body.appendChild(feedback); setTimeout(() => feedback.remove(), 1500);
         }
 
         document.getElementById('btn-trigger-fail').addEventListener('click', triggerFail);
 
-        const resultArea = document.getElementById('result-area');
-        const inputField = document.getElementById('question-id-input');
-        const lookupButton = document.getElementById('lookup-button');
-        const buttons = document.querySelectorAll('.round-controls button');
-        
-        const numPlayersInput = document.getElementById('num-players-input');
-        const generateInputsButton = document.getElementById('generate-inputs-button');
-        const playerNamesContainer = document.getElementById('player-names-container');
-        const savePlayersButton = document.getElementById('save-players-button');
-        const roundTrackerTable = document.getElementById('round-tracker-table');
-        const trackerTbody = document.getElementById('tracker-tbody');
-        const currentRoundNumber = document.getElementById('current-round-number');
+        const resultArea = document.getElementById('result-area'), inputField = document.getElementById('question-id-input'), lookupButton = document.getElementById('lookup-button'), buttons = document.querySelectorAll('.round-controls button');
+        const numPlayersInput = document.getElementById('num-players-input'), generateInputsButton = document.getElementById('generate-inputs-button');
+        const playerNamesContainer = document.getElementById('player-names-container'), savePlayersButton = document.getElementById('save-players-button');
+        const roundTrackerTable = document.getElementById('round-tracker-table'), trackerTbody = document.getElementById('tracker-tbody'), currentRoundNumber = document.getElementById('current-round-number');
 
         let activeRound = 1;
-        const STORAGE_PLAYERS_KEY = 'trivialTime_playerNames';
-        const STORAGE_TRACKER_KEY = 'trivialTime_roundTracker';
-        
-        let playerNames = []; 
-        let roundTracker = {}; 
+        const STORAGE_PLAYERS_KEY = 'trivialTime_playerNames', STORAGE_TRACKER_KEY = 'trivialTime_roundTracker';
+        let playerNames = [], roundTracker = {}; 
 
-        window.addEventListener('load', () => {
-            loadPlayerNames();
-            loadRoundTracker();
-            setActiveRound(1);
-        });
+        window.addEventListener('load', () => { loadPlayerNames(); loadRoundTracker(); setActiveRound(1); });
+        buttons.forEach(button => { button.addEventListener('click', () => { setActiveRound(button.dataset.round); }); });
+        lookupButton.addEventListener('click', lookupAnswers); inputField.addEventListener('keypress', (e) => { if (e.key === 'Enter') lookupAnswers(); });
         
-        buttons.forEach(button => {
-            button.addEventListener('click', () => {
-                setActiveRound(button.dataset.round);
-            });
-        });
-
-        lookupButton.addEventListener('click', lookupAnswers);
-        inputField.addEventListener('keypress', (e) => { if (e.key === 'Enter') lookupAnswers(); });
-        
-        generateInputsButton.addEventListener('click', () => {
-             const num = parseInt(numPlayersInput.value);
-             generatePlayerNameInputs(num);
-        });
+        generateInputsButton.addEventListener('click', () => { const num = parseInt(numPlayersInput.value); generatePlayerNameInputs(num); });
         savePlayersButton.addEventListener('click', savePlayerNames);
 
         function setActiveRound(round) {
             buttons.forEach(btn => btn.classList.remove('active-round'));
             document.getElementById(`btn-round-${round}`).classList.add('active-round');
-            activeRound = parseInt(round);
-            inputField.value = "";
+            activeRound = parseInt(round); inputField.value = "";
             resultArea.innerHTML = `<p style="color: var(--text-muted); opacity: 0.7;">Zoeken in Ronde ${activeRound}...</p>`;
-            currentRoundNumber.textContent = activeRound;
-            updateRoundTrackerTable();
+            currentRoundNumber.textContent = activeRound; updateRoundTrackerTable();
             
-            const hints = {
-                1: "Vraag ID's (bijv. 1,2,3)",
-                2: "Puzzel Set ID's (bijv. 1,2)",
-                3: "Vraag ID's (bijv. 5,6)",
-                4: "Zin ID's (bijv. 10,11,12)",
-                5: "Beeld Vraag ID's (bijv. 1)",
-                6: "Finale Vraag ID's (bijv. 1)"
-            };
-            inputField.placeholder = hints[activeRound] || "ID's...";
-            inputField.focus();
+            const hints = { 1: "Vraag ID's (1,2)", 2: "Puzzel Set ID's (1,2)", 3: "Vraag ID's (5,6)", 4: "Zin ID's (10,11)", 5: "Beeld Vraag ID's (1,2)", 6: "Finale Vraag ID's (1)" };
+            inputField.placeholder = hints[activeRound] || "ID's..."; inputField.focus();
         }
 
         function loadPlayerNames() {
             const stored = localStorage.getItem(STORAGE_PLAYERS_KEY);
-            if (stored) {
-                playerNames = JSON.parse(stored);
-                generatePlayerNameInputs(playerNames.length, playerNames);
-                numPlayersInput.value = playerNames.length;
-                updateRoundTrackerTable();
-            }
+            if (stored) { playerNames = JSON.parse(stored); generatePlayerNameInputs(playerNames.length, playerNames); numPlayersInput.value = playerNames.length; updateRoundTrackerTable(); }
         }
-        
-        function loadRoundTracker() {
-             const stored = localStorage.getItem(STORAGE_TRACKER_KEY);
-            if (stored) roundTracker = JSON.parse(stored);
-        }
+        function loadRoundTracker() { const stored = localStorage.getItem(STORAGE_TRACKER_KEY); if (stored) roundTracker = JSON.parse(stored); }
 
         function generatePlayerNameInputs(num, initialNames = []) {
             playerNamesContainer.innerHTML = '';
             for (let i = 0; i < num; i++) {
-                const name = initialNames[i] || `Speler ${i + 1}`;
-                const input = document.createElement('input');
-                input.type = 'text';
-                input.value = name;
-                input.placeholder = `Naam ${i+1}`;
-                playerNamesContainer.appendChild(input);
+                const name = initialNames[i] || `Speler ${i + 1}`; const input = document.createElement('input');
+                input.type = 'text'; input.value = name; input.placeholder = `Naam ${i+1}`; playerNamesContainer.appendChild(input);
             }
         }
         
         function savePlayerNames() {
-            const inputs = playerNamesContainer.querySelectorAll('input');
-            playerNames = Array.from(inputs).map(i => i.value.trim()).filter(n => n);
-            localStorage.setItem(STORAGE_PLAYERS_KEY, JSON.stringify(playerNames));
-            updateRoundTrackerTable();
-            
-            const originalText = savePlayersButton.textContent;
-            savePlayersButton.textContent = "✅ Opgeslagen";
-            setTimeout(() => savePlayersButton.textContent = originalText, 1500);
+            const inputs = playerNamesContainer.querySelectorAll('input'); playerNames = Array.from(inputs).map(i => i.value.trim()).filter(n => n);
+            localStorage.setItem(STORAGE_PLAYERS_KEY, JSON.stringify(playerNames)); updateRoundTrackerTable();
+            const originalText = savePlayersButton.textContent; savePlayersButton.textContent = "✅ Opgeslagen"; setTimeout(() => savePlayersButton.textContent = originalText, 1500);
         }
         
         function updateRoundTrackerTable() {
-            trackerTbody.innerHTML = '';
-            if (playerNames.length === 0) {
-                roundTrackerTable.style.display = 'none';
-                return;
-            }
-            roundTrackerTable.style.display = 'table';
-            
-            const roundKey = `ronde_${activeRound}`;
+            trackerTbody.innerHTML = ''; if (playerNames.length === 0) { roundTrackerTable.style.display = 'none'; return; }
+            roundTrackerTable.style.display = 'table'; const roundKey = `ronde_${activeRound}`;
             if (!roundTracker[roundKey]) roundTracker[roundKey] = {};
-
             playerNames.forEach((name, index) => {
                 if (!(name in roundTracker[roundKey])) roundTracker[roundKey][name] = false;
-                
-                const row = document.createElement('tr');
-                const isChecked = roundTracker[roundKey][name];
-                row.innerHTML = `
-                    <td>${name}</td>
-                    <td>
-                        <button class="player-action-btn btn-select-player" onclick="selectPlayer(${index})" title="Selecteer Speler">👆</button>
-                        <button class="player-action-btn btn-toggle-timer" onclick="toggleTimer(${index})" title="Start/Stop Timer">⏱️</button>
-                    </td>
-                    <td style="text-align: center;">
-                        <input type="checkbox" 
-                            style="transform: scale(1.2); accent-color: var(--primary-accent);"
-                            data-player="${name}" 
-                            ${isChecked ? 'checked' : ''}
-                            onchange="toggleTracker('${roundKey}', '${name}', this.checked)">
-                    </td>
-                `;
+                const row = document.createElement('tr'); const isChecked = roundTracker[roundKey][name];
+                row.innerHTML = `<td>${name}</td><td><button class="player-action-btn btn-select-player" onclick="selectPlayer(${index})" title="Selecteer Speler">👆</button><button class="player-action-btn btn-toggle-timer" onclick="toggleTimer(${index})" title="Start/Stop Timer">⏱️</button></td><td style="text-align: center;"><input type="checkbox" style="transform: scale(1.2); accent-color: var(--primary-accent);" data-player="${name}" ${isChecked ? 'checked' : ''} onchange="toggleTracker('${roundKey}', '${name}', this.checked)"></td>`;
                 trackerTbody.appendChild(row);
             });
         }
+        window.toggleTracker = function(roundKey, player, isChecked) { roundTracker[roundKey][player] = isChecked; localStorage.setItem(STORAGE_TRACKER_KEY, JSON.stringify(roundTracker)); };
 
-        window.toggleTracker = function(roundKey, player, isChecked) {
-            roundTracker[roundKey][player] = isChecked;
-            localStorage.setItem(STORAGE_TRACKER_KEY, JSON.stringify(roundTracker));
-        };
-
-        function escapeAnswer(str) {
-            if (!str) return '';
-            return str.replace(/'/g, "\\'");
-        }
+        function escapeAnswer(str) { if (!str) return ''; return str.replace(/'/g, "\\'"); }
 
         function lookupAnswers() {
-            const ids = inputField.value.split(',').map(s => parseInt(s.trim())).filter(n => !isNaN(n));
-            if (ids.length === 0) return;
-
+            const ids = inputField.value.split(',').map(s => parseInt(s.trim())).filter(n => !isNaN(n)); if (ids.length === 0) return;
             const themeData = window.ThemeManager.getTheme("KAMPIOENEN");
-            if (!themeData) {
-                resultArea.innerHTML = `<p style="color: var(--wrong-color)">Themadatas 'KAMPIOENEN' niet gevonden.</p>`;
-                return;
-            }
+            if (!themeData) { resultArea.innerHTML = `<p style="color: var(--wrong-color)">Themadatas 'KAMPIOENEN' niet gevonden.</p>`; return; }
 
             let pool;
             if (activeRound == 1) pool = themeData.ronde1_pool;
@@ -323,10 +212,7 @@
             else if (activeRound == 5) pool = themeData.ronde5_beeld;
             else if (activeRound == 6) pool = themeData.ronde6_finale;
 
-            if (!pool || pool.length === 0) {
-                resultArea.innerHTML = `<p style="color: var(--wrong-color)">Geen data beschikbaar voor deze ronde.</p>`;
-                return;
-            }
+            if (!pool || pool.length === 0) { resultArea.innerHTML = `<p style="color: var(--wrong-color)">Geen data beschikbaar voor deze ronde.</p>`; return; }
 
             let html = `<ul style="list-style: none; padding: 0;">`;
             ids.forEach(id => {
@@ -343,10 +229,7 @@
                         html += `<strong style="color:#fff;">${q.answer}</strong> <span class="answer-box" onclick="sendAnswer('${safeAnswer}')">📋</span><br><span style="font-size:0.9em; color:#aaa;">Hints: ${q.clues.join(' - ')}</span>`;
                     }
                     else if (activeRound === 3) {
-                        const keywordsHtml = q.keywords.map(k => {
-                            const word = k.word ? k.word : k;
-                            return `<span class="clickable-keyword" onclick="sendAnswer('${escapeAnswer(word)}')">${word}</span>`;
-                        }).join(' ');
+                        const keywordsHtml = q.keywords.map(k => { const word = k.word ? k.word : k; return `<span class="clickable-keyword" onclick="sendAnswer('${escapeAnswer(word)}')">${word}</span>`; }).join(' ');
                         html += `<strong>${q.subject}</strong><br><div style="margin-top:5px;">${keywordsHtml}</div>`;
                     }
                     else if (activeRound === 4) {
@@ -354,22 +237,12 @@
                         html += `${q.q1} ... <span class="answer-box" onclick="sendAnswer('${safeAnswer}')">${q.a}</span>`;
                     }
                     else if (activeRound === 5) {
-                        const safeS = escapeAnswer(q.vraag1_seizoen);
-                        const safeA = escapeAnswer(q.vraag2_aflevering);
-                        const safeZ = escapeAnswer(q.vraag3_zinEind);
+                        const safeS = escapeAnswer(q.vraag1_seizoen); const safeA = escapeAnswer(q.vraag2_aflevering); const safeZ = escapeAnswer(q.vraag3_zinEind);
                         const keywordsHtml = q.vraag4_keywords.map(k => `<span class="clickable-keyword" onclick="sendAnswer('${escapeAnswer(k)}')">${k}</span>`).join(' ');
-                        
-                        html += `<strong>Fragment: </strong> ${q.videoBron}<br>`;
-                        html += `<span style="font-size:0.9em; color:#aaa;">Seizoen:</span> <span class="answer-box" onclick="sendAnswer('${safeS}')">${q.vraag1_seizoen}</span><br>`;
-                        html += `<span style="font-size:0.9em; color:#aaa;">Aflevering:</span> <span class="answer-box" onclick="sendAnswer('${safeA}')">${q.vraag2_aflevering}</span><br>`;
-                        html += `<span style="font-size:0.9em; color:#aaa;">Zin: "${q.vraag3_zinBegin}"</span> → <span class="answer-box" onclick="sendAnswer('${safeZ}')">${q.vraag3_zinEind}</span><br>`;
-                        html += `<span style="font-size:0.9em; color:#aaa;">Trefwoorden:</span> ${keywordsHtml}`;
+                        html += `<strong>Fragment: </strong> ${q.videoBron}<br><span style="font-size:0.9em; color:#aaa;">Seizoen:</span> <span class="answer-box" onclick="sendAnswer('${safeS}')">${q.vraag1_seizoen}</span><br><span style="font-size:0.9em; color:#aaa;">Aflevering:</span> <span class="answer-box" onclick="sendAnswer('${safeA}')">${q.vraag2_aflevering}</span><br><span style="font-size:0.9em; color:#aaa;">Zin: "${q.vraag3_zinBegin}"</span> → <span class="answer-box" onclick="sendAnswer('${safeZ}')">${q.vraag3_zinEind}</span><br><span style="font-size:0.9em; color:#aaa;">Trefwoorden:</span> ${keywordsHtml}`;
                     }
                     else if (activeRound === 6) {
-                        const keywordsHtml = q.keywords.map(k => {
-                            const word = k.word ? k.word : k;
-                            return `<span class="clickable-keyword" onclick="sendAnswer('${escapeAnswer(word)}')">${word}</span>`;
-                        }).join(' ');
+                        const keywordsHtml = q.keywords.map(k => { const word = k.word ? k.word : k; return `<span class="clickable-keyword" onclick="sendAnswer('${escapeAnswer(word)}')">${word}</span>`; }).join(' ');
                         html += `<strong>${q.subject}</strong><br><div style="margin-top:5px;">${keywordsHtml}</div>`;
                     }
                     html += `</li>`;
