@@ -8,42 +8,24 @@
     <link rel="stylesheet" href="stijl.css">
     
     <style>
-        :root {
-            --panel-bg: rgba(15, 23, 42, 0.95);
-            --border-col: rgba(255, 255, 255, 0.15);
-        }
-
-        body {
-            margin: 0; padding: 0; height: 100vh; width: 100vw; overflow: hidden; 
-            display: flex; flex-direction: column; background: var(--bg-dark);
-            font-family: 'Open Sans', sans-serif; font-size: 14px; 
-        }
-
-        #dashboard-header {
-            height: 60px; background: var(--bg-card); border-bottom: 1px solid var(--border-col);
-            display: flex; align-items: center; justify-content: space-between; padding: 0 20px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.3); flex-shrink: 0; z-index: 10;
-        }
-
+        :root { --panel-bg: rgba(15, 23, 42, 0.95); --border-col: rgba(255, 255, 255, 0.15); }
+        body { margin: 0; padding: 0; height: 100vh; width: 100vw; overflow: hidden; display: flex; flex-direction: column; background: var(--bg-dark); font-family: 'Open Sans', sans-serif; font-size: 14px; }
+        #dashboard-header { height: 60px; background: var(--bg-card); border-bottom: 1px solid var(--border-col); display: flex; align-items: center; justify-content: space-between; padding: 0 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); flex-shrink: 0; z-index: 10; }
         h1 { display: block !important; margin: 0; font-size: 1.5em; text-align: left; width: auto; }
         .round-controls { display: flex; gap: 5px; }
         .round-controls button { margin: 0; padding: 5px 15px; font-size: 0.85em; height: 36px; }
         .round-controls button.active-round { background: var(--primary-accent); color: #000; box-shadow: 0 0 10px var(--primary-accent); border: 1px solid #fff; }
-        
         .global-actions { margin-left: 20px; }
         .btn-fail { background: linear-gradient(135deg, #ef4444, #991b1b) !important; color: white !important; border: 1px solid #ffaaaa !important; font-weight: bold; }
-
         #dashboard-main { flex: 1; display: grid; grid-template-columns: 400px 1fr; gap: 0; overflow: hidden; }
         .panel { padding: 15px; overflow-y: auto; display: flex; flex-direction: column; }
         .panel-left { background: rgba(0, 0, 0, 0.2); border-right: 1px solid var(--border-col); }
         .panel-right { background: transparent; padding: 0; display: flex; flex-direction: column; }
         h2 { font-size: 1.1em; margin-bottom: 10px; border-bottom: 1px solid var(--border-col); padding-bottom: 5px; color: var(--text-muted); text-transform: uppercase; }
-
         #player-config-bar { display: flex; gap: 5px; margin-bottom: 10px; }
         #player-names-container { display: grid; grid-template-columns: 1fr; gap: 5px; margin-bottom: 10px; }
         #player-names-container input { padding: 6px 10px; font-size: 0.9em; background: rgba(255,255,255,0.05); border: 1px solid var(--border-col); margin-top: 0; }
         #save-players-button { width: 100%; padding: 8px; margin-top: 0; font-size: 0.9em; }
-
         #round-tracker-table { width: 100%; border-collapse: collapse; font-size: 0.9em; margin-top: 10px; }
         #round-tracker-table th { text-align: left; padding: 5px; color: var(--primary-accent); font-size: 0.8em; text-transform: uppercase; }
         #round-tracker-table td { padding: 8px 5px; border-bottom: 1px solid rgba(255,255,255,0.05); vertical-align: middle; }
@@ -51,11 +33,9 @@
         .player-action-btn:hover { background: rgba(255,255,255,0.2); color: #fff; }
         .btn-select-player { color: var(--primary-accent); border-color: var(--primary-accent); }
         .btn-toggle-timer { color: var(--gold-color); border-color: var(--gold-color); }
-
         .search-strip { padding: 15px; background: rgba(255,255,255,0.02); border-bottom: 1px solid var(--border-col); display: flex; align-items: center; gap: 15px; flex-shrink: 0; }
         .search-strip input { margin: 0; width: 300px; padding: 8px 12px; font-size: 1em; }
         .search-strip button { margin: 0; height: 42px; padding: 0 25px; }
-
         #result-area { flex: 1; padding: 20px; overflow-y: auto; background: rgba(0,0,0,0.1); }
         .list-item { background: rgba(255,255,255,0.03); border: 1px solid var(--border-col); margin-bottom: 8px; padding: 10px 15px; border-radius: 4px; line-height: 1.5; }
         .list-item strong { color: var(--secondary-accent); }
@@ -63,7 +43,6 @@
         .answer-box:hover { background: var(--correct-color); color: #000; }
         .clickable-keyword { display: inline-block; margin: 2px 5px 2px 0; padding: 2px 6px; border: 1px dashed var(--text-muted); border-radius: 3px; cursor: pointer; font-size: 0.9em; }
         .clickable-keyword:hover { border-color: var(--correct-color); color: var(--correct-color); }
-
         ::-webkit-scrollbar { width: 8px; }
         ::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); }
         ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
@@ -72,7 +51,6 @@
 </head>
 <body>
     
-    <!-- LAAST ALLE DATA BESTANDEN IN -->
     <script src="quizdata_r1.js"></script>
     <script src="quizdata_r2.js"></script>
     <script src="quizdata_r3.js"></script>
@@ -95,8 +73,8 @@
             <button id="btn-round-2" data-round="2">R2</button>
             <button id="btn-round-3" data-round="3">R3</button>
             <button id="btn-round-4" data-round="4">R4</button>
-            <button id="btn-round-5" data-round="5">R5</button>
-            <button id="btn-round-6" data-round="6">R6 (Beeld)</button>
+            <button id="btn-round-5" data-round="5">R5 (Beeld)</button>
+            <button id="btn-round-6" data-round="6">R6 (Finale)</button>
         </div>
     </div>
     
@@ -105,7 +83,7 @@
             <h2>👥 Speler Controls</h2>
             <div id="player-config">
                 <div id="player-config-bar">
-                    <input type="number" id="num-players-input" value="4" min="2" max="6" style="width: 60px; text-align: center; margin:0;">
+                    <input type="number" id="num-players-input" value="4" min="2" max="10" style="width: 60px; text-align: center; margin:0;">
                     <button id="generate-inputs-button" style="margin:0; padding: 5px 10px;">Set</button>
                     <button id="save-players-button" style="background: var(--correct-color); margin:0; flex:1;">💾 Opslaan</button>
                 </div>
@@ -238,8 +216,8 @@
                 2: "Puzzel Set ID's (bijv. 1,2)",
                 3: "Vraag ID's (bijv. 5,6)",
                 4: "Zin ID's (bijv. 10,11,12)",
-                5: "Finale Vraag ID's (bijv. 1)",
-                6: "Beeld Vraag ID's (bijv. 1)"
+                5: "Beeld Vraag ID's (bijv. 1)",
+                6: "Finale Vraag ID's (bijv. 1)"
             };
             inputField.placeholder = hints[activeRound] || "ID's...";
             inputField.focus();
@@ -331,7 +309,6 @@
             const ids = inputField.value.split(',').map(s => parseInt(s.trim())).filter(n => !isNaN(n));
             if (ids.length === 0) return;
 
-            // Haal de KAMPIOENEN data op
             const themeData = window.ThemeManager.getTheme("KAMPIOENEN");
             if (!themeData) {
                 resultArea.innerHTML = `<p style="color: var(--wrong-color)">Themadatas 'KAMPIOENEN' niet gevonden.</p>`;
@@ -343,8 +320,8 @@
             else if (activeRound == 2) pool = themeData.ronde2_answer_pool;
             else if (activeRound == 3) pool = themeData.ronde3_openDeur;
             else if (activeRound == 4) pool = themeData.ronde4_geheugen;
-            else if (activeRound == 5) pool = themeData.ronde5_finale;
-            else if (activeRound == 6) pool = themeData.ronde6_beeld;
+            else if (activeRound == 5) pool = themeData.ronde5_beeld;
+            else if (activeRound == 6) pool = themeData.ronde6_finale;
 
             if (!pool || pool.length === 0) {
                 resultArea.innerHTML = `<p style="color: var(--wrong-color)">Geen data beschikbaar voor deze ronde.</p>`;
@@ -353,7 +330,7 @@
 
             let html = `<ul style="list-style: none; padding: 0;">`;
             ids.forEach(id => {
-                const q = pool[id - 1]; // Let op: ID's zijn 1-based in de input, 0-based in de array
+                const q = pool[id - 1]; 
                 if (q) {
                     html += `<li class="list-item"><strong style="color: var(--primary-accent); margin-right: 10px;">#${id}</strong> `;
                     
@@ -367,8 +344,8 @@
                     }
                     else if (activeRound === 3) {
                         const keywordsHtml = q.keywords.map(k => {
-                            const safeK = escapeAnswer(k.word ? k.word : k);
-                            return `<span class="clickable-keyword" onclick="sendAnswer('${safeK}')">${k.word ? k.word : k}</span>`;
+                            const word = k.word ? k.word : k;
+                            return `<span class="clickable-keyword" onclick="sendAnswer('${escapeAnswer(word)}')">${word}</span>`;
                         }).join(' ');
                         html += `<strong>${q.subject}</strong><br><div style="margin-top:5px;">${keywordsHtml}</div>`;
                     }
@@ -377,14 +354,6 @@
                         html += `${q.q1} ... <span class="answer-box" onclick="sendAnswer('${safeAnswer}')">${q.a}</span>`;
                     }
                     else if (activeRound === 5) {
-                        const keywordsHtml = q.keywords.map(k => {
-                            const safeK = escapeAnswer(k.word ? k.word : k);
-                            return `<span class="clickable-keyword" onclick="sendAnswer('${safeK}')">${k.word ? k.word : k}</span>`;
-                        }).join(' ');
-                        html += `<strong>${q.subject}</strong><br><div style="margin-top:5px;">${keywordsHtml}</div>`;
-                    }
-                    else if (activeRound === 6) {
-                        // De nieuwe beeldronde layout
                         const safeS = escapeAnswer(q.vraag1_seizoen);
                         const safeA = escapeAnswer(q.vraag2_aflevering);
                         const safeZ = escapeAnswer(q.vraag3_zinEind);
@@ -395,6 +364,13 @@
                         html += `<span style="font-size:0.9em; color:#aaa;">Aflevering:</span> <span class="answer-box" onclick="sendAnswer('${safeA}')">${q.vraag2_aflevering}</span><br>`;
                         html += `<span style="font-size:0.9em; color:#aaa;">Zin: "${q.vraag3_zinBegin}"</span> → <span class="answer-box" onclick="sendAnswer('${safeZ}')">${q.vraag3_zinEind}</span><br>`;
                         html += `<span style="font-size:0.9em; color:#aaa;">Trefwoorden:</span> ${keywordsHtml}`;
+                    }
+                    else if (activeRound === 6) {
+                        const keywordsHtml = q.keywords.map(k => {
+                            const word = k.word ? k.word : k;
+                            return `<span class="clickable-keyword" onclick="sendAnswer('${escapeAnswer(word)}')">${word}</span>`;
+                        }).join(' ');
+                        html += `<strong>${q.subject}</strong><br><div style="margin-top:5px;">${keywordsHtml}</div>`;
                     }
                     html += `</li>`;
                 }
