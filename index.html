@@ -133,7 +133,7 @@
     let players = [], isGameOver = false, finalists = [], activeFinalistIndex = 0, currentRound = 0, currentQuestionIndex = 0;
     let activePlayerIndex = 0, timerInterval = null, isTimerRunning = false, timerPlayerIndex = null, currentSetAttempts = [], currentQuestionAttempts = [];
     let startingPlayersThisRound = []; 
-    let playedVideos = []; // Houdt bij welke fragmenten in R5 al gekozen zijn
+    let playedVideos = []; 
 
     const setupScreen = document.getElementById('setup-screen'), playerNameInputs = document.getElementById('player-name-inputs');
     const numPlayersInput = document.getElementById('num-players'), playerContainer = document.getElementById('player-container');
@@ -378,13 +378,11 @@
             
             const nextPlayer = getNextPlayerForSet(activePlayerIndex, currentSetAttempts);
             if (nextPlayer !== -1) { 
-                // Er is nog iemand die mag raden!
                 activePlayerIndex = nextPlayer; 
                 renderPlayers();
                 // AUTO START TIMER VOOR DE VOLGENDE!
                 setTimeout(() => { startTimer(activePlayerIndex); }, 200); 
             } else {
-                // Iedereen is geweest.
                 renderPlayers();
                 if (currentRound === 5) {
                     returnToVideoGrid();
@@ -564,7 +562,7 @@
     function setupRound5() {
         currentRound = 5; currentBeeldIndex = -1; startingPlayersThisRound = []; playedVideos = [];
         activePlayerIndex = getNextStartingPlayerIndex(5); roundTitle.textContent = `Ronde 5: De Beeldronde`; 
-        activeBeeldQuestions = shuffleArray([...quizData.ronde5_beeld]).slice(0, players.length);
+        activeBeeldQuestions = shuffleArray([...quizData.ronde5_beeld]).slice(0, players.length); // HIER ZAT DE FOUT IN DE VORIGE CODE
         
         hideAllGameAreas(); 
         document.getElementById('beeld-display-area').style.display = 'flex'; 
@@ -585,7 +583,7 @@
         questionCounter.innerHTML = `Aan de beurt: ${players.find(p=>p.originalIndex===activePlayerIndex).name}`;
         
         const grid = document.getElementById('beeld-grid');
-        grid.innerHTML = activeRound5Questions.map((q, i) => {
+        grid.innerHTML = activeBeeldQuestions.map((q, i) => { // GEFIXED!
             const isPlayed = playedVideos.includes(i);
             const opacity = isPlayed ? '0.3' : '1';
             const filter = isPlayed ? 'grayscale(100%)' : 'none';
@@ -617,7 +615,7 @@
     // EEN VIDEO SPELEN
     function loadBeeldVraag(index) {
         currentBeeldIndex = index;
-        currentSetAttempts = []; let q = activeRound5Questions[currentBeeldIndex];
+        currentSetAttempts = []; let q = activeBeeldQuestions[currentBeeldIndex]; // GEFIXED!
         startingPlayersThisRound.push(activePlayerIndex); 
         
         questionText.textContent = "Kijk naar het fragment!";
@@ -644,7 +642,6 @@
             
             questionText.textContent = "Wat weet je nog?";
             
-            // Nu pas de antwoorden sturen naar GM dashboard
             channel.postMessage({ type: 'SYNC_QUESTION', round: 5, ids: [q.id] });
         };
 
@@ -652,7 +649,8 @@
     }
     
     function renderBeeldUI() {
-        let q = activeRound5Questions[currentBeeldIndex]; const container = document.getElementById('beeld-tasks-container');
+        let q = activeBeeldQuestions[currentBeeldIndex]; // GEFIXED!
+        const container = document.getElementById('beeld-tasks-container');
         const tasks = [q.ans_seizoen, q.ans_aflevering, q.ans_zin, q.ans_kw1, q.ans_kw2];
         
         container.innerHTML = tasks.map(t => { 
@@ -664,15 +662,16 @@
     }
     
     function checkRound5Answer() {
-        let q = activeRound5Questions[currentBeeldIndex]; const tasks = [q.ans_seizoen, q.ans_aflevering, q.ans_zin, q.ans_kw1, q.ans_kw2];
+        let q = activeBeeldQuestions[currentBeeldIndex]; // GEFIXED!
+        const tasks = [q.ans_seizoen, q.ans_aflevering, q.ans_zin, q.ans_kw1, q.ans_kw2];
         const foundItem = tasks.find(t => !t.found && stringSimilarity(t.word, inputAnswer.value) >= SIMILARITY_THRESHOLD);
+        
         if (foundItem) {
             showFeedback(true); foundItem.found = true; updateSeconds(activePlayerIndex, R2_R3_R4_BONUS_SECONDS); showBonusFeedback(activePlayerIndex, R2_R3_R4_BONUS_SECONDS); currentSetAttempts = []; renderBeeldUI();
             if (tasks.every(t => t.found)) { 
                 document.getElementById('beeld-tasks-container').classList.add('answers-shown');
                 document.getElementById('beeld-tasks-container').classList.remove('blurred-board');
                 stopTimer(); currentSetAttempts = players.map(p => p.originalIndex); activePlayerIndex = getNextStartingPlayerIndex(5); 
-                // Terug naar overzicht na kleine vertraging
                 setTimeout(() => { returnToVideoGrid(); }, 3000);
             } else { setTimeout(() => { if (!isTimerRunning) startTimer(activePlayerIndex); }, 50); }
         } else { 
@@ -680,8 +679,10 @@
         }
         inputAnswer.value = "";
     }
+    
     function showBeeldAnswers() { 
-        let q = activeRound5Questions[currentBeeldIndex]; [q.ans_seizoen, q.ans_aflevering, q.ans_zin, q.ans_kw1, q.ans_kw2].forEach(t => t.found = true); 
+        let q = activeBeeldQuestions[currentBeeldIndex]; // GEFIXED!
+        [q.ans_seizoen, q.ans_aflevering, q.ans_zin, q.ans_kw1, q.ans_kw2].forEach(t => t.found = true); 
         document.getElementById('beeld-tasks-container').classList.add('answers-shown');
         document.getElementById('beeld-tasks-container').classList.remove('blurred-board');
         checkRound5Answer(); 
@@ -719,10 +720,8 @@
     channel.onmessage = (event) => {
         if (!event.data) return;
         
-        // ANTWOORD VAN DASHBOARD
         if (event.data.type === 'FILL_ANSWER') { inputAnswer.value = event.data.answer; if(currentRound==1) checkRound1Answer(); else if(currentRound==2) checkRound2Answer(); else if(currentRound==3) checkRound3Answer(); else if(currentRound==4) checkRound4Answer(); else if(currentRound==5) checkRound5Answer(); else if(currentRound==6) checkFinaleAnswer(); }
         
-        // PAS/FOUT VAN DASHBOARD
         if (event.data.type === 'TRIGGER_FAIL') { 
             inputAnswer.value = "###FAIL###"; 
             if(currentRound==1) checkRound1Answer(); 
@@ -745,12 +744,10 @@
             if (event.data.round == 6) setupFinale();
         }
 
-        // R5 SPECIFIEK: START EEN GESELECTEERDE VIDEO
         if (event.data.type === 'SELECT_VIDEO') {
             if (currentRound === 5) loadBeeldVraag(event.data.index);
         }
         
-        // R5 SPECIFIEK: SPEEL VIDEO AF
         if (event.data.type === 'PLAY_VIDEO') {
             if (currentRound === 5) {
                 const vp = document.getElementById('beeld-video-player');
