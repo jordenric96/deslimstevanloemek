@@ -53,16 +53,10 @@
 
             <!-- DE NIEUWE STIJL VOOR RONDE 5 -->
             <div id="beeld-display-area" style="display: none; width: 100%; flex-direction: column; align-items: center;">
-                
-                <!-- Videomuur -->
                 <div id="beeld-grid" style="display: flex; gap: 20px; justify-content: center; flex-wrap: wrap; width: 90%; margin-top: 20px;"></div>
-                
-                <!-- Video Speler -->
                 <div id="beeld-player-container" style="display: none; width: 100%; max-width: 1000px; margin: 0 auto;">
                     <video id="beeld-video-player" style="width: 100%; border: 4px solid var(--kamp-geel); border-radius: 12px; box-shadow: 0 15px 40px rgba(0,0,0,0.9); background: #000;"></video>
                 </div>
-                
-                <!-- Trefwoorden (Verschijnen pas na de video) -->
                 <div id="beeld-tasks-container" style="display: none; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; width: 95%; margin-top: 20px;"></div>
             </div>
 
@@ -87,7 +81,6 @@
         </div>
     </div>
 
-    <!-- INLADEN VAN DATA SCRIPTS -->
     <script src="quizdata_r1.js"></script>
     <script src="quizdata_r2.js"></script>
     <script src="quizdata_r3.js"></script>
@@ -181,21 +174,21 @@
         quizData.ronde1_pool = (quizData.ronde1_pool || []).map((q, i) => ({ ...q, id: i + 1 }));
         quizData.ronde2_answer_pool = (quizData.ronde2_answer_pool || []).map((q, i) => ({ ...q, id: i + 1 }));
         quizData.ronde3_openDeur = (quizData.ronde3_openDeur || []).map((q, i) => ({ 
-            ...q, id: i + 1, keywords: (q.keywords || []).map(w => ({ word: w, found: false })) 
+            ...q, id: i + 1, keywords: (q.keywords || []).map(w => ({ word: w, found: false, missed: false })) 
         }));
-        quizData.ronde4_geheugen = (quizData.ronde4_geheugen || []).map((q, i) => ({ ...q, id: i + 1, found: false }));
+        quizData.ronde4_geheugen = (quizData.ronde4_geheugen || []).map((q, i) => ({ ...q, id: i + 1, found: false, missed: false }));
         
         quizData.ronde5_beeld = (quizData.ronde5_beeld || []).map((q, i) => ({ 
             ...q, id: i + 1, 
-            ans_seizoen: { word: q.vraag1_seizoen || "?", found: false, label: "Seizoen" }, 
-            ans_aflevering: { word: q.vraag2_aflevering || "?", found: false, label: "Aflevering" }, 
-            ans_zin: { word: q.vraag3_zinEind || "?", found: false, label: `Zin: "${q.vraag3_zinBegin || "..."}"` }, 
-            ans_kw1: { word: (q.vraag4_keywords && q.vraag4_keywords[0]) ? q.vraag4_keywords[0] : "?", found: false, label: "Trefwoord 1" }, 
-            ans_kw2: { word: (q.vraag4_keywords && q.vraag4_keywords[1]) ? q.vraag4_keywords[1] : "?", found: false, label: "Trefwoord 2" } 
+            ans_seizoen: { word: q.vraag1_seizoen || "?", found: false, missed: false, label: "Seizoen" }, 
+            ans_aflevering: { word: q.vraag2_aflevering || "?", found: false, missed: false, label: "Aflevering" }, 
+            ans_zin: { word: q.vraag3_zinEind || "?", found: false, missed: false, label: `Zin: "${q.vraag3_zinBegin || "..."}"` }, 
+            ans_kw1: { word: (q.vraag4_keywords && q.vraag4_keywords[0]) ? q.vraag4_keywords[0] : "?", found: false, missed: false, label: "Trefwoord 1" }, 
+            ans_kw2: { word: (q.vraag4_keywords && q.vraag4_keywords[1]) ? q.vraag4_keywords[1] : "?", found: false, missed: false, label: "Trefwoord 2" } 
         }));
 
         quizData.ronde6_finale = (quizData.ronde6_finale || []).map((q, i) => ({ 
-            ...q, id: i + 1, keywords: (q.keywords || []).map(w => ({ word: w, found: false })) 
+            ...q, id: i + 1, keywords: (q.keywords || []).map(w => ({ word: w, found: false, missed: false })) 
         }));
 
         players = [];
@@ -299,7 +292,6 @@
         
         isTimerRunning = true; timerPlayerIndex = playerIndex;
         
-        // MAAK RONDES HELDER ZODRA TIMER START
         if (currentRound === 2) document.getElementById('puzzle-clues-container').classList.remove('blurred-board');
         if (currentRound === 3) opendeurSubject.classList.remove('blurred-subject');
         if (currentRound === 4) geheugenBoard.classList.remove('blurred-board');
@@ -380,13 +372,11 @@
             if (nextPlayer !== -1) { 
                 activePlayerIndex = nextPlayer; 
                 renderPlayers();
-                // AUTO START TIMER VOOR DE VOLGENDE!
                 setTimeout(() => { startTimer(activePlayerIndex); }, 200); 
             } else {
                 renderPlayers();
-                if (currentRound === 5) {
-                    returnToVideoGrid();
-                } else if (currentRound === 2) { showPuzzleAnswers(); }
+                if (currentRound === 5) { showBeeldAnswers(); }
+                else if (currentRound === 2) { showPuzzleAnswers(); }
                 else if (currentRound === 3) { showOpenDeurAnswers(); }
                 else if (currentRound === 4) { showMemoryAnswers(); }
             }
@@ -454,7 +444,7 @@
     function setupRound2() {
         currentRound = 2; currentR2SetCount = 0; startingPlayersThisRound = []; activePlayerIndex = getNextStartingPlayerIndex(2); roundTitle.textContent = `Ronde 2: De Puzzel`; 
         const fullPool = shuffleArray([...quizData.ronde2_answer_pool]); activeRound2Puzzles = [];
-        for (let i = 0; i < players.length; i++) { activeRound2Puzzles.push(fullPool.slice(i * 3, (i + 1) * 3).map((p, j) => ({ ...p, found: false, color: `color-${(j % 3) + 1}`, clues: p.clues.map(c => ({ text: c, color: `color-${(j % 3) + 1}` })) }))); }
+        for (let i = 0; i < players.length; i++) { activeRound2Puzzles.push(fullPool.slice(i * 3, (i + 1) * 3).map((p, j) => ({ ...p, found: false, missed: false, color: `color-${(j % 3) + 1}`, clues: p.clues.map(c => ({ text: c, color: `color-${(j % 3) + 1}` })) }))); }
         hideAllGameAreas(); document.getElementById('puzzle-display-area').style.display = 'flex';
         questionText.style.display = 'block'; questionCounter.style.display = 'block'; loadNewPuzzle();
     }
@@ -466,9 +456,10 @@
         questionCounter.innerHTML = `Puzzel ${currentR2SetCount + 1} / ${players.length}`; 
         channel.postMessage({ type: 'SYNC_QUESTION', round: 2, ids: currentPuzzleSet.map(p => p.id) });
         
-        let allClues = []; currentPuzzleSet.forEach(p => { p.clues.forEach(c => { allClues.push({ text: c.text, answer: p.answer, color: c.color, isFound: p.found }); }); }); shuffleArray(allClues);
-        document.getElementById('puzzle-answers-container').innerHTML = currentPuzzleSet.map(p => `<div class="puzzle-answer ${p.found ? 'found '+p.color : ''}">${p.found ? p.answer : '???'}</div>`).join('');
-        document.getElementById('puzzle-clues-container').innerHTML = allClues.map(c => `<div class="puzzle-clue ${c.isFound ? 'found '+c.color : ''}" data-answer="${c.answer.toLowerCase()}">${c.text}</div>`).join('');
+        let allClues = []; currentPuzzleSet.forEach(p => { p.clues.forEach(c => { allClues.push({ text: c.text, answer: p.answer, color: c.color, isFound: p.found, missed: p.missed }); }); }); shuffleArray(allClues);
+        
+        document.getElementById('puzzle-answers-container').innerHTML = currentPuzzleSet.map(p => `<div class="puzzle-answer">${'???'}</div>`).join('');
+        document.getElementById('puzzle-clues-container').innerHTML = allClues.map(c => `<div class="puzzle-clue" data-answer="${c.answer.toLowerCase()}">${c.text}</div>`).join('');
         
         document.getElementById('puzzle-clues-container').classList.remove('answers-shown');
         document.getElementById('puzzle-clues-container').classList.add('blurred-board');
@@ -479,7 +470,7 @@
         const foundItem = currentPuzzleSet.find(p => !p.found && stringSimilarity(p.answer, inputAnswer.value) >= SIMILARITY_THRESHOLD);
         if (foundItem) {
             showFeedback(true); foundItem.found = true; updateSeconds(activePlayerIndex, R2_R3_R4_BONUS_SECONDS); showBonusFeedback(activePlayerIndex, R2_R3_R4_BONUS_SECONDS); currentSetAttempts = []; 
-            document.getElementById('puzzle-answers-container').innerHTML = currentPuzzleSet.map(p => `<div class="puzzle-answer ${p.found ? 'found '+p.color : ''}">${p.found ? p.answer : '???'}</div>`).join('');
+            document.getElementById('puzzle-answers-container').innerHTML = currentPuzzleSet.map(p => `<div class="puzzle-answer ${p.found && !p.missed ? 'found '+p.color : ''} ${p.missed ? 'missed' : ''}">${p.found ? p.answer : '???'}</div>`).join('');
             Array.from(document.getElementById('puzzle-clues-container').children).forEach(el => { if(el.dataset.answer === foundItem.answer.toLowerCase()) el.className = `puzzle-clue found ${foundItem.color}`; });
             if (currentPuzzleSet.every(p => p.found)) { 
                 document.getElementById('puzzle-clues-container').classList.add('answers-shown');
@@ -492,10 +483,19 @@
         inputAnswer.value = '';
     }
     function showPuzzleAnswers() { 
-        currentPuzzleSet.forEach(p => p.found = true); 
+        currentPuzzleSet.forEach(p => { if(!p.found) { p.found = true; p.missed = true; } }); 
+        
+        document.getElementById('puzzle-answers-container').innerHTML = currentPuzzleSet.map(p => `<div class="puzzle-answer ${p.missed ? 'missed' : 'found '+p.color}">${p.answer}</div>`).join('');
+        Array.from(document.getElementById('puzzle-clues-container').children).forEach(el => { 
+            const ansStr = el.dataset.answer;
+            const p = currentPuzzleSet.find(x => x.answer.toLowerCase() === ansStr);
+            if(p && p.found && !p.missed) el.className = `puzzle-clue found ${p.color}`;
+            if(p && p.missed) el.className = `puzzle-clue missed`;
+        });
+
         document.getElementById('puzzle-clues-container').classList.add('answers-shown');
         document.getElementById('puzzle-clues-container').classList.remove('blurred-board');
-        checkRound2Answer(); 
+        stopTimer(); currentSetAttempts = players.map(p => p.originalIndex); activePlayerIndex = getNextStartingPlayerIndex(2); 
     }
 
     // --- RONDE 3 ---
@@ -512,21 +512,27 @@
         
         questionCounter.innerHTML = `Vraag ${currentOpenDeurIndex + 1} / ${players.length}`; opendeurSubject.textContent = activeOD.subject; opendeurSubject.classList.add('blurred-subject'); 
         channel.postMessage({ type: 'SYNC_QUESTION', round: 3, ids: [activeOD.id] });
-        document.getElementById('opendeur-keywords-container').innerHTML = activeOD.keywords.map(k => `<div class="opendeur-keyword ${k.found ? 'found' : ''}">${k.found ? k.word : '???'}</div>`).join('');
+        document.getElementById('opendeur-keywords-container').innerHTML = activeOD.keywords.map(k => `<div class="opendeur-keyword ${k.found && !k.missed ? 'found' : ''} ${k.missed ? 'missed' : ''}">${k.found ? k.word : '???'}</div>`).join('');
         stopTimer(); inputAnswer.value = "";
     }
     function checkRound3Answer() {
         let activeOD = activeOpenDeurQuestions[currentOpenDeurIndex]; const foundItem = activeOD.keywords.find(k => !k.found && stringSimilarity(k.word, inputAnswer.value) >= SIMILARITY_THRESHOLD);
         if (foundItem) {
             showFeedback(true); foundItem.found = true; updateSeconds(activePlayerIndex, R2_R3_R4_BONUS_SECONDS); showBonusFeedback(activePlayerIndex, R2_R3_R4_BONUS_SECONDS); currentSetAttempts = []; opendeurSubject.classList.remove('blurred-subject');
-            document.getElementById('opendeur-keywords-container').innerHTML = activeOD.keywords.map(k => `<div class="opendeur-keyword ${k.found ? 'found' : ''}">${k.found ? k.word : '???'}</div>`).join('');
+            document.getElementById('opendeur-keywords-container').innerHTML = activeOD.keywords.map(k => `<div class="opendeur-keyword ${k.found && !k.missed ? 'found' : ''} ${k.missed ? 'missed' : ''}">${k.found ? k.word : '???'}</div>`).join('');
             if (activeOD.keywords.every(k => k.found)) { stopTimer(); currentSetAttempts = players.map(p => p.originalIndex); activePlayerIndex = getNextStartingPlayerIndex(3); } else { setTimeout(() => { if (!isTimerRunning) startTimer(activePlayerIndex); }, 50); }
         } else { 
             showFeedback(false); inputAnswer.value = ''; pasDeBeurt(); 
         }
         inputAnswer.value = "";
     }
-    function showOpenDeurAnswers() { activeOpenDeurQuestions[currentOpenDeurIndex].keywords.forEach(k => k.found = true); checkRound3Answer(); }
+    function showOpenDeurAnswers() { 
+        let activeOD = activeOpenDeurQuestions[currentOpenDeurIndex];
+        activeOD.keywords.forEach(k => { if(!k.found) { k.found = true; k.missed = true; } }); 
+        document.getElementById('opendeur-keywords-container').innerHTML = activeOD.keywords.map(k => `<div class="opendeur-keyword ${k.found && !k.missed ? 'found' : ''} ${k.missed ? 'missed' : ''}">${k.word}</div>`).join('');
+        opendeurSubject.classList.remove('blurred-subject');
+        stopTimer(); currentSetAttempts = players.map(p => p.originalIndex); activePlayerIndex = getNextStartingPlayerIndex(3);
+    }
 
     // --- RONDE 4 ---
     let activeRound4Questions = [], currentMemoryList = 0;
@@ -542,7 +548,9 @@
         
         geheugenBoard.classList.remove('answers-shown'); geheugenBoard.classList.add('blurred-board'); questionCounter.innerHTML = `Beurt ${currentMemoryList + 1} / ${players.length}`; 
         channel.postMessage({ type: 'SYNC_QUESTION', round: 4, ids: activeRound4Questions.map(q => q.id) });
-        const renderMem = () => geheugenBoard.innerHTML = activeRound4Questions.map((q,i) => `<li class="geheugen-item ${q.found ? 'found' : ''}"><span>${i+1}. <strong>${q.q1}</strong>...</span><span class="geheugen-antwoord">${q.found ? q.a : '...?'}</span></li>`).join(''); renderMem(); window.renderMemUI = renderMem;
+        
+        const renderMem = () => geheugenBoard.innerHTML = activeRound4Questions.map((q,i) => `<li class="geheugen-item ${q.found && !q.missed ? 'found' : ''} ${q.missed ? 'missed' : ''}"><span>${i+1}. <strong>${q.q1}</strong>...</span><span class="geheugen-antwoord">${q.found ? q.a : '...?'}</span></li>`).join(''); 
+        renderMem(); window.renderMemUI = renderMem;
         stopTimer(); inputAnswer.value = "";
     }
     function checkRound4Answer() {
@@ -555,14 +563,19 @@
         }
         inputAnswer.value = "";
     }
-    function showMemoryAnswers() { activeRound4Questions.forEach(q => q.found = true); geheugenBoard.classList.add('answers-shown'); geheugenBoard.classList.remove('blurred-board'); checkRound4Answer(); }
+    function showMemoryAnswers() { 
+        activeRound4Questions.forEach(q => { if(!q.found) { q.found = true; q.missed = true; } }); 
+        geheugenBoard.classList.add('answers-shown'); geheugenBoard.classList.remove('blurred-board'); 
+        window.renderMemUI();
+        stopTimer(); currentSetAttempts = players.map(p => p.originalIndex); activePlayerIndex = getNextStartingPlayerIndex(4);
+    }
 
     // --- RONDE 5 (Beeldronde) ---
     let activeBeeldQuestions = [], currentBeeldIndex = -1;
     function setupRound5() {
         currentRound = 5; currentBeeldIndex = -1; startingPlayersThisRound = []; playedVideos = [];
         activePlayerIndex = getNextStartingPlayerIndex(5); roundTitle.textContent = `Ronde 5: De Beeldronde`; 
-        activeBeeldQuestions = shuffleArray([...quizData.ronde5_beeld]).slice(0, players.length); // HIER ZAT DE FOUT IN DE VORIGE CODE
+        activeBeeldQuestions = shuffleArray([...quizData.ronde5_beeld]).slice(0, players.length); 
         
         hideAllGameAreas(); 
         document.getElementById('beeld-display-area').style.display = 'flex'; 
@@ -572,7 +585,6 @@
         renderVideoGrid();
     }
     
-    // DE NIEUWE VIDEOMUUR
     function renderVideoGrid() {
         if (playedVideos.length >= players.length) {
             hideAllGameAreas(); questionText.style.display = 'block'; questionText.textContent = "Einde van de Beeldronde!"; return;
@@ -583,7 +595,7 @@
         questionCounter.innerHTML = `Aan de beurt: ${players.find(p=>p.originalIndex===activePlayerIndex).name}`;
         
         const grid = document.getElementById('beeld-grid');
-        grid.innerHTML = activeBeeldQuestions.map((q, i) => { // GEFIXED!
+        grid.innerHTML = activeBeeldQuestions.map((q, i) => { 
             const isPlayed = playedVideos.includes(i);
             const opacity = isPlayed ? '0.3' : '1';
             const filter = isPlayed ? 'grayscale(100%)' : 'none';
@@ -602,7 +614,6 @@
         channel.postMessage({ type: 'SYNC_R5_GRID', total: players.length, played: playedVideos });
     }
 
-    // TERUG NAAR VIDEOMUUR
     function returnToVideoGrid() {
         if(currentBeeldIndex !== -1 && !playedVideos.includes(currentBeeldIndex)) {
             playedVideos.push(currentBeeldIndex);
@@ -612,10 +623,9 @@
         renderVideoGrid();
     }
 
-    // EEN VIDEO SPELEN
     function loadBeeldVraag(index) {
         currentBeeldIndex = index;
-        currentSetAttempts = []; let q = activeBeeldQuestions[currentBeeldIndex]; // GEFIXED!
+        currentSetAttempts = []; let q = activeBeeldQuestions[currentBeeldIndex];
         startingPlayersThisRound.push(activePlayerIndex); 
         
         questionText.textContent = "Kijk naar het fragment!";
@@ -630,7 +640,6 @@
         videoContainer.style.display = 'block';
         videoPlayer.src = q.videoBron;
         
-        // Zodra video eindigt: verberg en toon de vakjes (troebel)
         videoPlayer.onended = () => {
             videoContainer.style.display = 'none';
             renderBeeldUI();
@@ -641,7 +650,6 @@
             tasksContainer.classList.remove('answers-shown');
             
             questionText.textContent = "Wat weet je nog?";
-            
             channel.postMessage({ type: 'SYNC_QUESTION', round: 5, ids: [q.id] });
         };
 
@@ -649,20 +657,24 @@
     }
     
     function renderBeeldUI() {
-        let q = activeBeeldQuestions[currentBeeldIndex]; // GEFIXED!
+        let q = activeBeeldQuestions[currentBeeldIndex]; 
         const container = document.getElementById('beeld-tasks-container');
         const tasks = [q.ans_seizoen, q.ans_aflevering, q.ans_zin, q.ans_kw1, q.ans_kw2];
         
         container.innerHTML = tasks.map(t => { 
-            return `<div class="opendeur-keyword ${t.found ? 'found' : ''}" style="text-align: center; padding: 15px;">
-                <div style="font-size:0.6em; color:var(--kamp-geel); margin-bottom:5px;">${t.label}</div>
+            let classNames = "opendeur-keyword";
+            if(t.found && !t.missed) classNames += " found";
+            if(t.missed) classNames += " missed";
+            
+            return `<div class="${classNames}" style="text-align: center; padding: 15px;">
+                <div style="font-size:0.6em; color: ${t.missed ? '#fff' : 'var(--kamp-geel)'}; margin-bottom:5px;">${t.label}</div>
                 ${t.found ? t.word : '???'}
             </div>`; 
         }).join('');
     }
     
     function checkRound5Answer() {
-        let q = activeBeeldQuestions[currentBeeldIndex]; // GEFIXED!
+        let q = activeBeeldQuestions[currentBeeldIndex]; 
         const tasks = [q.ans_seizoen, q.ans_aflevering, q.ans_zin, q.ans_kw1, q.ans_kw2];
         const foundItem = tasks.find(t => !t.found && stringSimilarity(t.word, inputAnswer.value) >= SIMILARITY_THRESHOLD);
         
@@ -681,11 +693,15 @@
     }
     
     function showBeeldAnswers() { 
-        let q = activeBeeldQuestions[currentBeeldIndex]; // GEFIXED!
-        [q.ans_seizoen, q.ans_aflevering, q.ans_zin, q.ans_kw1, q.ans_kw2].forEach(t => t.found = true); 
+        let q = activeBeeldQuestions[currentBeeldIndex]; 
+        [q.ans_seizoen, q.ans_aflevering, q.ans_zin, q.ans_kw1, q.ans_kw2].forEach(t => { if(!t.found){ t.found = true; t.missed = true; } }); 
         document.getElementById('beeld-tasks-container').classList.add('answers-shown');
         document.getElementById('beeld-tasks-container').classList.remove('blurred-board');
-        checkRound5Answer(); 
+        renderBeeldUI();
+        
+        stopTimer(); currentSetAttempts = players.map(p => p.originalIndex); activePlayerIndex = getNextStartingPlayerIndex(5); 
+        // 4 seconden wachten om gemiste (rode) antwoorden te tonen, daarna naar grid
+        setTimeout(() => { returnToVideoGrid(); }, 4000);
     }
 
     // --- RONDE 6 (Finale) ---
@@ -701,7 +717,7 @@
         let q = activeFinaleQuestions[currentFinaleQuestionIndex]; document.getElementById('finale-subject').textContent = q.subject; document.getElementById('finale-subject').classList.add('blurred-subject');
         questionCounter.innerHTML = `FINALE / Aan de beurt: ${finalists[activeFinalistIndex].player.name}`;
         channel.postMessage({ type: 'SYNC_QUESTION', round: 6, ids: [q.id] });
-        document.getElementById('finale-keywords-container').innerHTML = q.keywords.map(k => `<div class="finale-keyword" data-word="${k.word}">???</div>`).join('');
+        document.getElementById('finale-keywords-container').innerHTML = q.keywords.map(k => `<div class="finale-keyword ${k.found && !k.missed ? 'found' : ''} ${k.missed ? 'missed' : ''}" data-word="${k.word}">${k.found ? k.word : '???'}</div>`).join('');
         stopTimer(); inputAnswer.value = '';
     }
     function checkFinaleAnswer() {
@@ -715,6 +731,13 @@
             if (q.keywords.every(k => k.found)) { stopTimer(); } else { setTimeout(() => { if (!isTimerRunning && !isGameOver) startTimer(activePlayerIndex); }, 50); }
         } else { showFeedback(false); setTimeout(() => { if (!isTimerRunning) startTimer(activePlayerIndex); }, 50); }
         inputAnswer.value = '';
+    }
+    function showFinaleAnswers() {
+        let q = activeFinaleQuestions[currentFinaleQuestionIndex];
+        q.keywords.forEach(k => { if(!k.found) { k.found = true; k.missed = true; } });
+        document.getElementById('finale-keywords-container').innerHTML = q.keywords.map(k => `<div class="finale-keyword ${k.found && !k.missed ? 'found' : ''} ${k.missed ? 'missed' : ''}" data-word="${k.word}">${k.word}</div>`).join('');
+        document.getElementById('finale-subject').classList.remove('blurred-subject');
+        stopTimer();
     }
 
     channel.onmessage = (event) => {
@@ -768,7 +791,7 @@
             if(currentRound==3) showOpenDeurAnswers();
             if(currentRound==4) showMemoryAnswers();
             if(currentRound==5) showBeeldAnswers();
-            if(currentRound==6) { activeFinaleQuestions[currentFinaleQuestionIndex].keywords.forEach(k => k.found = true); checkFinaleAnswer(); }
+            if(currentRound==6) showFinaleAnswers();
         }
         if (event.data.type === 'ADJUST_TIME') {
             updateSeconds(activePlayerIndex, event.data.amount);
