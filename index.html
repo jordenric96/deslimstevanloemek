@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FC De Kampioenen Quiz</title>
+
     <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@600;700&family=Open+Sans:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="stijl.css">
 </head>
@@ -14,12 +15,12 @@
         <h1 id="game-over-text">WINNAAR!</h1>
     </div>
 
-    <h1>F.C. De Kampioenen quiz</h1>
+    <h1>F.C. De Kampioenen Quiz</h1>
 
     <div id="setup-screen" class="visible">
         <h2>Spelers Instellen</h2>
         <div class="setup-input-row">
-            <label for="num-players">Aantal spelers:</label>
+            <label for="num-players">Aantal spelers (1-10):</label>
             <input type="number" id="num-players" min="1" max="10" value="4" onchange="updatePlayerInputs()">
         </div>
         <div id="player-name-inputs"></div>
@@ -89,7 +90,7 @@
             <button id="btn-finale-next" style="display: none;">Volgende Vraag</button>
         </div>
 
-        <hr style="margin-top: 30px; border-color: #555;">
+        <hr style="margin-top: 30px; border-color: #333;">
 
         <div class="player-controls">
             <h3>Spelmeester Controles</h3>
@@ -134,6 +135,7 @@
         }
         return costs[s2.length];
     }
+    
     function stringSimilarity(s1, s2) {
         if (s1.length === 0 && s2.length === 0) return 1.0;
         const longer = s1.length > s2.length ? s1 : s2; const shorter = s1.length > s2.length ? s2 : s1;
@@ -189,19 +191,45 @@
     }
 
     function initializeGame(startRound = 1) {
-        if (!window.ThemeManager) { alert("ThemeManager is niet gedefinieerd!"); return; }
+        if (!window.ThemeManager) { 
+            alert("Systeemfout: ThemeManager is niet geladen. Controleer of quizdata_loader.js goed gekoppeld is."); 
+            return; 
+        }
+        
         quizData = window.ThemeManager.getTheme('KAMPIOENEN');
         
-        quizData.ronde1_pool = quizData.ronde1_pool.map((q, i) => ({ ...q, id: i + 1 }));
-        quizData.ronde2_answer_pool = quizData.ronde2_answer_pool.map((q, i) => ({ ...q, id: i + 1 }));
-        quizData.ronde3_openDeur = quizData.ronde3_openDeur.map((q, i) => ({ ...q, id: i + 1, keywords: q.keywords.map(w => ({ word: w, found: false })) }));
-        quizData.ronde4_geheugen = quizData.ronde4_geheugen.map((q, i) => ({ ...q, id: i + 1, found: false }));
-        quizData.ronde5_beeld = quizData.ronde5_beeld.map((q, i) => ({ ...q, id: i + 1, ans_seizoen: { word: q.vraag1_seizoen, found: false, label: "Seizoen" }, ans_aflevering: { word: q.vraag2_aflevering, found: false, label: "Aflevering" }, ans_zin: { word: q.vraag3_zinEind, found: false, label: `Zin: "${q.vraag3_zinBegin}"` }, ans_kw1: { word: q.vraag4_keywords[0], found: false, label: "Trefwoord 1" }, ans_kw2: { word: q.vraag4_keywords[1], found: false, label: "Trefwoord 2" } }));
-        quizData.ronde6_finale = quizData.ronde6_finale.map((q, i) => ({ ...q, id: i + 1, keywords: q.keywords.map(w => ({ word: w, found: false })) }));
+        if (!quizData) {
+            alert("Oeps! Het thema 'KAMPIOENEN' is niet gevonden. Waarschijnlijk staat er een typfout (zoals een ontbrekende komma of aanhalingsteken) in één van je quizdata bestanden.");
+            return;
+        }
+
+        quizData.ronde1_pool = (quizData.ronde1_pool || []).map((q, i) => ({ ...q, id: i + 1 }));
+        quizData.ronde2_answer_pool = (quizData.ronde2_answer_pool || []).map((q, i) => ({ ...q, id: i + 1 }));
+        
+        quizData.ronde3_openDeur = (quizData.ronde3_openDeur || []).map((q, i) => ({ 
+            ...q, id: i + 1, keywords: (q.keywords || []).map(w => ({ word: w, found: false })) 
+        }));
+        
+        quizData.ronde4_geheugen = (quizData.ronde4_geheugen || []).map((q, i) => ({ ...q, id: i + 1, found: false }));
+        
+        quizData.ronde5_beeld = (quizData.ronde5_beeld || []).map((q, i) => ({ 
+            ...q, id: i + 1, 
+            ans_seizoen: { word: q.vraag1_seizoen || "?", found: false, label: "Seizoen" }, 
+            ans_aflevering: { word: q.vraag2_aflevering || "?", found: false, label: "Aflevering" }, 
+            ans_zin: { word: q.vraag3_zinEind || "?", found: false, label: `Zin: "${q.vraag3_zinBegin || "..."}"` }, 
+            ans_kw1: { word: (q.vraag4_keywords && q.vraag4_keywords[0]) ? q.vraag4_keywords[0] : "?", found: false, label: "Trefwoord 1" }, 
+            ans_kw2: { word: (q.vraag4_keywords && q.vraag4_keywords[1]) ? q.vraag4_keywords[1] : "?", found: false, label: "Trefwoord 2" } 
+        }));
+
+        quizData.ronde6_finale = (quizData.ronde6_finale || []).map((q, i) => ({ 
+            ...q, id: i + 1, keywords: (q.keywords || []).map(w => ({ word: w, found: false })) 
+        }));
 
         players = [];
-        const numPlayers = parseInt(numPlayersInput.value); const inputElements = playerNameInputs.querySelectorAll('input[type="text"]');
+        const numPlayers = parseInt(numPlayersInput.value); 
+        const inputElements = playerNameInputs.querySelectorAll('input[type="text"]');
         let allNamesValid = true;
+
         for (let i = 0; i < numPlayers; i++) {
             const name = inputElements[i] ? inputElements[i].value.trim() : '';
             if (i < 2 && !name) allNamesValid = false; 
@@ -209,9 +237,15 @@
         }
 
         if (allNamesValid && players.length >= 2) {
-            setupScreen.style.display = 'none'; playerContainer.style.display = 'grid'; gameBoard.style.display = 'block';
-            activePlayerIndex = players[0].originalIndex; renderPlayers(); startGameR1();
-        } else alert("Minimaal 2 spelers nodig.");
+            setupScreen.style.display = 'none'; 
+            playerContainer.style.display = 'flex'; 
+            gameBoard.style.display = 'block';
+            activePlayerIndex = players[0].originalIndex; 
+            renderPlayers(); 
+            startGameR1();
+        } else {
+            alert("Zorg dat op z'n minst Speler 1 en Speler 2 een naam hebben ingevuld!");
+        }
     }
 
     window.addEventListener('load', () => { updatePlayerInputs(); setupScreen.classList.add('visible'); });
@@ -257,6 +291,7 @@
     }
 
     function formatAndDisplayIDs(idArray) { puzzleIdsElement.innerHTML = `ID's voor GM: <span id="ids-to-copy">${idArray.join(',')}</span>`; puzzleIdsElement.style.display = 'flex'; }
+    
     function showFeedback(isCorrect) {
         const className = isCorrect ? 'correct-feedback' : 'wrong-feedback';
         inputAnswer.classList.remove('correct-feedback', 'wrong-feedback'); inputAnswer.classList.add(className); inputAnswer.focus();
