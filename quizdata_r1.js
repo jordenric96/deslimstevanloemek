@@ -3,9 +3,7 @@
 const RONDE1_DATA = {
     "KAMPIOENEN": [
         // --- De Klassiekers ---
-       
-       
-        { q: "Welke acteur speelde al die jaren de rol van Xavier Waterslaeghers?", a: "Johny Voners" },        
+        { q: "Welke acteur speelde al die jaren de rol van Xavier Waterslaeghers?", a: "Johny Voners" },
         { q: "Wie neemt na het vertrek van Oscar de fakkel over als trainer van de ploeg?", a: "Pol De Tremmerie" },
         { q: "Welke adellijke gemeentearbeider steelt later in de reeks het hart van Pascale? (volledige naam)", a: "Maurice de Praetere" },
         { q: "Hoe heet de dochter van Marc en Bieke?", a: "Paulien" },
@@ -14,16 +12,17 @@ const RONDE1_DATA = {
         { q: "Wat was de militaire rang van Xavier in het leger?", a: "Sergeant" },
         { q: "Naar welk Afrikaans land trok Pol in het verleden als ontwikkelingshelper?", a: "Ouagadougou (Burkina Faso)" },
         { q: "Hoe heet de concurrerende voetbalploeg van burgemeester Freddy Van Overloop?", a: "F.C. De Stampers" },
-        In welke jaar werd de eerste aflevering van FC De Kampioenen uitgezonden? a: 1900
-        Hoe heet de zus van Fernand? a: Terese
-Hoe heet de overgrootvader van Boma? a: Melchior
-Wat was de voornaam van de dokter die de kampioenen moest goedkeuren, en die ook samen met Marc in de klas zat? a: Saskia
-Hoe heette het knuffelkonijntje van Boma? a: Zippy
-Hoe heette de hond van Ma DDT? a: Marcel
-Hoe heet de vader van Carmen: a: Jules
-op hoeveel plaatsen heeft Doortje gewoond in de serie? a: 4
-Hoeveel seizoenen zijn er? a: 21
-Hoe heet de vrouw voor wie Pico Doortje liet zitten? a: Ria De Stekker
-       
+        
+        // --- Nieuwe vragen ---
+        { q: "In welk jaar werd de eerste aflevering van FC De Kampioenen uitgezonden?", a: "1990" },
+        { q: "Hoe heet de zus van Fernand?", a: "Therese" },
+        { q: "Hoe heet de overgrootvader van Boma?", a: "Melchior" },
+        { q: "Wat was de voornaam van de dokter die de kampioenen moest goedkeuren, en die ook samen met Marc in de klas zat?", a: "Saskia" },
+        { q: "Hoe heette het knuffelkonijntje van Boma?", a: "Zippy" },
+        { q: "Hoe heette de hond van Ma DDT?", a: "Marcel" },
+        { q: "Hoe heet de vader van Carmen?", a: "Jules" },
+        { q: "Op hoeveel plaatsen heeft Doortje gewoond in de serie?", a: "4" },
+        { q: "Hoeveel seizoenen zijn er in totaal gemaakt?", a: "21" },
+        { q: "Hoe heet de vrouw voor wie Pico Doortje liet zitten?", a: "Ria De Stekker" }
     ]
 };
