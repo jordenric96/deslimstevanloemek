@@ -17,5 +17,13 @@ const RONDE5_DATA = {
             vraag3_zinEind: "Zijn ze kapot",
             vraag4_keywords: ["Geld ophalen", "Jean-Marie Pfaff"]
         },
+
+         {
+            videoBron: "fragmenten/fragment3.mp4", 
+            vraag1_seizoen: "Seizoen 3",
+            vraag2_aflevering: "De haptonoom",
+            vraag3_zinEind: "Ja, de kampioenen moet ge vooral psychologisch aanpakken",
+            vraag4_keywords: ["Dokter Anders", "De vrouwen willen zijn aandacht"]
+        },
        
 };
