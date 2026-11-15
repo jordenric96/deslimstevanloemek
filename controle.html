@@ -34,8 +34,7 @@
         .btn-select-player { color: var(--primary-accent); border-color: var(--primary-accent); }
         .btn-toggle-timer { color: var(--gold-color); border-color: var(--gold-color); }
         .search-strip { padding: 15px; background: rgba(255,255,255,0.02); border-bottom: 1px solid var(--border-col); display: flex; align-items: center; gap: 15px; flex-shrink: 0; }
-        .search-strip input { margin: 0; width: 300px; padding: 8px 12px; font-size: 1em; }
-        .search-strip button { margin: 0; height: 42px; padding: 0 25px; }
+        .search-strip input { margin: 0; width: 300px; padding: 8px 12px; font-size: 1em; opacity: 0.5; } /* Iets transparanter want het is nu automatisch */
         #result-area { flex: 1; padding: 20px; overflow-y: auto; background: rgba(0,0,0,0.1); }
         .list-item { background: rgba(255,255,255,0.03); border: 1px solid var(--border-col); margin-bottom: 8px; padding: 10px 15px; border-radius: 4px; line-height: 1.5; }
         .list-item strong { color: var(--secondary-accent); }
@@ -105,12 +104,10 @@
 
         <div class="panel panel-right">
             <div class="search-strip">
-                <h3 id="input-label" style="margin:0; min-width: 100px; color: var(--primary-accent);">Zoek ID's:</h3>
-                <input type="text" id="question-id-input" placeholder="Bijv. 1, 2, 3" autocomplete="off">
-                <button id="lookup-button" style="background: var(--primary-accent); color: #000;">ZOEK & TOON</button>
+                <h3 id="input-label" style="margin:0; min-width: 100px; color: var(--primary-accent);">Actieve ID(s):</h3>
+                <input type="text" id="question-id-input" placeholder="Wacht op hoofdscherm..." autocomplete="off" disabled>
             </div>
             
-            <!-- BEDIEINGSKNOPPEN VOOR HOOFDSCHERM -->
             <div style="padding: 15px; background: rgba(255,255,255,0.05); display: flex; gap: 10px; border-bottom: 1px solid var(--border-col);">
                 <button onclick="channel.postMessage({ type: 'NEXT_QUESTION' })" style="background: var(--kamp-geel); color: #000; padding: 8px 15px; cursor: pointer; border-radius: 4px; border:none; font-weight:bold;">Volgende Vraag</button>
                 <button onclick="channel.postMessage({ type: 'SHOW_ANSWERS' })" style="background: var(--kamp-rood); color: #fff; padding: 8px 15px; cursor: pointer; border-radius: 4px; border:none; font-weight:bold;">Toon Antwoorden</button>
@@ -118,8 +115,7 @@
 
             <div id="result-area">
                 <div style="text-align: center; color: var(--text-muted); margin-top: 50px;">
-                    <p style="font-size: 1.2em;">Selecteer een ronde in de bovenbalk.</p>
-                    <p>Voer vraag ID's in en druk op ENTER.</p>
+                    <p style="font-size: 1.2em;">Zodra het spel start op het hoofdscherm, verschijnen de antwoorden hier automatisch!</p>
                 </div>
             </div>
         </div>
@@ -143,7 +139,7 @@
 
         document.getElementById('btn-trigger-fail').addEventListener('click', triggerFail);
 
-        const resultArea = document.getElementById('result-area'), inputField = document.getElementById('question-id-input'), lookupButton = document.getElementById('lookup-button'), buttons = document.querySelectorAll('.round-controls button');
+        const resultArea = document.getElementById('result-area'), inputField = document.getElementById('question-id-input'), buttons = document.querySelectorAll('.round-controls button');
         const numPlayersInput = document.getElementById('num-players-input'), generateInputsButton = document.getElementById('generate-inputs-button');
         const playerNamesContainer = document.getElementById('player-names-container'), savePlayersButton = document.getElementById('save-players-button');
         const roundTrackerTable = document.getElementById('round-tracker-table'), trackerTbody = document.getElementById('tracker-tbody'), currentRoundNumber = document.getElementById('current-round-number');
@@ -154,7 +150,6 @@
 
         window.addEventListener('load', () => { loadPlayerNames(); loadRoundTracker(); setActiveRound(1); });
         buttons.forEach(button => { button.addEventListener('click', () => { setActiveRound(button.dataset.round); }); });
-        lookupButton.addEventListener('click', lookupAnswers); inputField.addEventListener('keypress', (e) => { if (e.key === 'Enter') lookupAnswers(); });
         
         generateInputsButton.addEventListener('click', () => { const num = parseInt(numPlayersInput.value); generatePlayerNameInputs(num); });
         savePlayersButton.addEventListener('click', savePlayerNames);
@@ -162,12 +157,8 @@
         function setActiveRound(round) {
             buttons.forEach(btn => btn.classList.remove('active-round'));
             document.getElementById(`btn-round-${round}`).classList.add('active-round');
-            activeRound = parseInt(round); inputField.value = "";
-            resultArea.innerHTML = `<p style="color: var(--text-muted); opacity: 0.7;">Zoeken in Ronde ${activeRound}...</p>`;
+            activeRound = parseInt(round);
             currentRoundNumber.textContent = activeRound; updateRoundTrackerTable();
-            
-            const hints = { 1: "Vraag ID's (1,2)", 2: "Puzzel Set ID's (1,2)", 3: "Vraag ID's (5,6)", 4: "Zin ID's (10,11)", 5: "Beeld Vraag ID's (1,2)", 6: "Finale Vraag ID's (1)" };
-            inputField.placeholder = hints[activeRound] || "ID's..."; inputField.focus();
         }
 
         function loadPlayerNames() {
@@ -205,8 +196,17 @@
 
         function escapeAnswer(str) { if (!str) return ''; return str.replace(/'/g, "\\'"); }
 
-        function lookupAnswers() {
-            const ids = inputField.value.split(',').map(s => parseInt(s.trim())).filter(n => !isNaN(n)); if (ids.length === 0) return;
+        // LUISTERT NAAR DE NIEUWE AUTOMATISCHE SYNC!
+        channel.onmessage = (event) => {
+            if (event.data.type === 'SYNC_QUESTION') {
+                setActiveRound(event.data.round);
+                inputField.value = event.data.ids.join(', '); // Toon de ids enkel ter info
+                lookupAnswers(event.data.ids);
+            }
+        };
+
+        function lookupAnswers(ids) {
+            if (!ids || ids.length === 0) return;
             const themeData = window.ThemeManager.getTheme("KAMPIOENEN");
             if (!themeData) { resultArea.innerHTML = `<p style="color: var(--wrong-color)">Themadatas 'KAMPIOENEN' niet gevonden.</p>`; return; }
 
@@ -222,7 +222,7 @@
 
             let html = `<ul style="list-style: none; padding: 0;">`;
             ids.forEach(id => {
-                const q = pool[id - 1]; 
+                const q = pool.find(item => item.id === id) || pool[id - 1]; 
                 if (q) {
                     html += `<li class="list-item"><strong style="color: var(--primary-accent); margin-right: 10px;">#${id}</strong> `;
                     
