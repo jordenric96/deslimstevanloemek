@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FC De Kampioenen Quiz</title>
+
     <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@600;700&family=Open+Sans:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="stijl.css">
 </head>
@@ -30,8 +31,10 @@
 
     <div id="game-board" style="display: none;">
         <h2 id="round-title"></h2> <p id="question-counter"></p>
+        <p id="question-id"></p>
 
         <div id="question-area">
+            <p id="puzzle-ids"></p>
             <p id="question-text" style="display: none;">Vraagtekst</p>
 
             <div id="puzzle-display-area" style="display: none;">
@@ -58,6 +61,11 @@
                 <h3 id="finale-subject"></h3>
                 <div id="finale-keywords-container"></div>
             </div>
+
+            <div class="controls-r2-input-group">
+                <input type="text" id="answer-input" placeholder="Typ hier het antwoord in..." style="display: none;">
+                <button id="check-answer" style="display: none;">Check Antwoord</button>
+            </div>
         </div>
 
         <div class="controls">
@@ -80,6 +88,16 @@
 
             <button id="btn-finale-show" style="display: none;">Toon Antwoorden</button>
             <button id="btn-finale-next" style="display: none;">Volgende Vraag</button>
+        </div>
+
+        <hr style="margin-top: 30px; border-color: #333;">
+
+        <div class="player-controls">
+            <h3>Spelmeester Controles</h3>
+            <p>Klik op de **Spelerkaart** om de klok te starten/stoppen (R2-R6).</p>
+            <button id="wrong-answer">Fout Antwoord (-20 sec)</button>
+            <button id="add-seconds-10">+10 Seconden</button>
+            <button id="add-seconds-20">+20 Seconden</button>
         </div>
     </div>
 
@@ -133,6 +151,8 @@
     const numPlayersInput = document.getElementById('num-players'), playerContainer = document.getElementById('player-container');
     const gameBoard = document.getElementById('game-board'), roundTitle = document.getElementById('round-title');
     const questionText = document.getElementById('question-text'), questionCounter = document.getElementById('question-counter');
+    const questionIdElement = document.getElementById('question-id'), puzzleIdsElement = document.getElementById('puzzle-ids');
+    const inputAnswer = document.getElementById('answer-input'), btnCheckAnswer = document.getElementById('check-answer');
     
     const opendeurDisplayArea = document.getElementById('opendeur-display-area'), opendeurSubject = document.getElementById('opendeur-subject');
     const geheugenBoard = document.getElementById('geheugen-board');
@@ -142,10 +162,6 @@
     const btnNextGeheugenSpeler = document.getElementById('next-geheugen-speler'), btnShowGeheugenAnswers = document.getElementById('show-geheugen-answers');
     const btnStartRound4 = document.getElementById('start-round-4'), btnStartRound5 = document.getElementById('start-round-5'), btnStartFinale = document.getElementById('start-finale');
     const btnNextBeeld = document.getElementById('next-beeld'), btnShowBeeld = document.getElementById('show-beeld-answers');
-
-    // Dummy elements om oude logica te behouden zonder errors
-    const inputAnswer = document.createElement('input'); inputAnswer.type = "text"; 
-    const btnCheckAnswer = document.createElement('button');
 
     function showFinaleWinner(winnerPlayer) {
         stopTimer(); isGameOver = true;
@@ -176,14 +192,25 @@
     }
 
     function initializeGame(startRound = 1) {
-        if (!window.ThemeManager) { alert("Systeemfout: ThemeManager is niet geladen."); return; }
+        if (!window.ThemeManager) { 
+            alert("Systeemfout: ThemeManager is niet geladen. Controleer of quizdata_loader.js goed gekoppeld is."); 
+            return; 
+        }
+        
         quizData = window.ThemeManager.getTheme('KAMPIOENEN');
-        if (!quizData) { alert("Oeps! Het thema 'KAMPIOENEN' is niet gevonden in je databestanden."); return; }
+        
+        if (!quizData) {
+            alert("Oeps! Het thema 'KAMPIOENEN' is niet gevonden in je databestanden.");
+            return;
+        }
 
         quizData.ronde1_pool = (quizData.ronde1_pool || []).map((q, i) => ({ ...q, id: i + 1 }));
         quizData.ronde2_answer_pool = (quizData.ronde2_answer_pool || []).map((q, i) => ({ ...q, id: i + 1 }));
-        quizData.ronde3_openDeur = (quizData.ronde3_openDeur || []).map((q, i) => ({ ...q, id: i + 1, keywords: (q.keywords || []).map(w => ({ word: w, found: false })) }));
+        quizData.ronde3_openDeur = (quizData.ronde3_openDeur || []).map((q, i) => ({ 
+            ...q, id: i + 1, keywords: (q.keywords || []).map(w => ({ word: w, found: false })) 
+        }));
         quizData.ronde4_geheugen = (quizData.ronde4_geheugen || []).map((q, i) => ({ ...q, id: i + 1, found: false }));
+        
         quizData.ronde5_beeld = (quizData.ronde5_beeld || []).map((q, i) => ({ 
             ...q, id: i + 1, 
             ans_seizoen: { word: q.vraag1_seizoen || "?", found: false, label: "Seizoen" }, 
@@ -192,7 +219,10 @@
             ans_kw1: { word: (q.vraag4_keywords && q.vraag4_keywords[0]) ? q.vraag4_keywords[0] : "?", found: false, label: "Trefwoord 1" }, 
             ans_kw2: { word: (q.vraag4_keywords && q.vraag4_keywords[1]) ? q.vraag4_keywords[1] : "?", found: false, label: "Trefwoord 2" } 
         }));
-        quizData.ronde6_finale = (quizData.ronde6_finale || []).map((q, i) => ({ ...q, id: i + 1, keywords: (q.keywords || []).map(w => ({ word: w, found: false })) }));
+
+        quizData.ronde6_finale = (quizData.ronde6_finale || []).map((q, i) => ({ 
+            ...q, id: i + 1, keywords: (q.keywords || []).map(w => ({ word: w, found: false })) 
+        }));
 
         players = [];
         const numPlayers = parseInt(numPlayersInput.value); 
@@ -206,9 +236,15 @@
         }
 
         if (allNamesValid && players.length >= 2) {
-            setupScreen.style.display = 'none'; playerContainer.style.display = 'flex'; gameBoard.style.display = 'block';
-            activePlayerIndex = players[0].originalIndex; renderPlayers(); startGameR1();
-        } else { alert("Minimaal 2 spelers nodig."); }
+            setupScreen.style.display = 'none'; 
+            playerContainer.style.display = 'flex'; 
+            gameBoard.style.display = 'block';
+            activePlayerIndex = players[0].originalIndex; 
+            renderPlayers(); 
+            startGameR1();
+        } else {
+            alert("Minimaal 2 spelers nodig.");
+        }
     }
 
     window.addEventListener('load', () => { updatePlayerInputs(); setupScreen.classList.add('visible'); });
@@ -218,7 +254,6 @@
         return array;
     }
 
-    // Altijd laagste score begint de ronde
     function getNextStartingPlayerIndex(round) {
         let eligiblePlayers = players.filter(p => p.seconds > 0);
         if (eligiblePlayers.length === 0) return (players.sort((a, b) => a.seconds - b.seconds)[0]?.originalIndex || 0);
@@ -226,24 +261,25 @@
         return eligiblePlayers[0].originalIndex;
     }
 
-    // NIEUW: Bij een pasbeurt gaat de beurt naar de speler met de LAAGSTE score die nog niet geprobeerd heeft
     function getNextPlayerForSet(currentIndex, attemptsArray) {
         let eligible = players.filter(p => p.seconds > 0 && !attemptsArray.includes(p.originalIndex));
         if (eligible.length === 0) return -1;
-        eligible.sort((a, b) => a.seconds - b.seconds); // Sorteer op laagste score
+        eligible.sort((a, b) => a.seconds - b.seconds);
         return eligible[0].originalIndex; 
     }
 
     function renderPlayers() {
         playerContainer.innerHTML = "";
         const playersToShow = (currentRound === 6) ? finalists.map(f => f.player) : players;
+        
+        let syncData = [];
+
         playersToShow.forEach((player, index) => {
             const playerObj = (currentRound === 6) ? finalists[index].player : player;
             const originalIndex = playerObj.originalIndex !== undefined ? playerObj.originalIndex : index;
             
             const card = document.createElement('div'); card.className = 'player-card'; card.dataset.playerIndex = originalIndex;
             
-            // VISUAL: Maak speler grijs als hij de huidige vraag geprobeerd heeft en faalde
             if (currentRound >= 2 && currentRound <= 5 && currentSetAttempts.includes(originalIndex)) {
                 card.classList.add('attempted');
             } else if (originalIndex === activePlayerIndex) {
@@ -254,14 +290,32 @@
             else if (currentRound === 6) card.classList.add('opponent-player');
 
             let timerButtonSymbol = '►', timerButtonClass = 'player-timer-btn';
-            if (isTimerRunning && timerPlayerIndex === originalIndex) { timerButtonSymbol = '❚❚'; timerButtonClass += ' running'; }
+            let isRunning = false;
+            if (isTimerRunning && timerPlayerIndex === originalIndex) { 
+                timerButtonSymbol = '❚❚'; timerButtonClass += ' running'; 
+                isRunning = true;
+            }
             card.innerHTML = `<div class="player-name">${player.name}</div><div class="player-seconds">${player.seconds}</div><button class="${timerButtonClass}" data-player-index="${originalIndex}" style="position: absolute; top: 5px; right: 5px;">${timerButtonSymbol}</button><div class="bonus-feedback"></div>`;
             playerContainer.appendChild(card);
+
+            syncData.push({
+                index: originalIndex,
+                name: player.name,
+                seconds: player.seconds,
+                isActive: (originalIndex === activePlayerIndex),
+                isRunning: isRunning
+            });
         });
+
+        channel.postMessage({ type: 'SYNC_PLAYERS', players: syncData });
     }
 
+    function formatAndDisplayIDs(idArray) { puzzleIdsElement.innerHTML = `ID's voor GM: <span id="ids-to-copy">${idArray.join(',')}</span>`; puzzleIdsElement.style.display = 'flex'; }
+    
     function showFeedback(isCorrect) {
-        // Enkel visuele bevestiging indien gewenst
+        const className = isCorrect ? 'correct-feedback' : 'wrong-feedback';
+        inputAnswer.classList.remove('correct-feedback', 'wrong-feedback'); inputAnswer.classList.add(className); inputAnswer.focus();
+        setTimeout(() => { inputAnswer.classList.remove(className); inputAnswer.focus(); }, 1500);
     }
 
     function startTimer(playerIndex) {
@@ -275,6 +329,8 @@
         if (currentRound === 4) geheugenBoard.classList.remove('blurred-board');
         if (currentRound === 6) document.getElementById('finale-subject').classList.remove('blurred-subject');
         
+        inputAnswer.disabled = false; inputAnswer.focus();
+
         timerInterval = setInterval(() => {
             let p = players.find(x => x.originalIndex === timerPlayerIndex);
             p.seconds--;
@@ -294,7 +350,7 @@
 
     function stopTimer() {
         document.body.classList.add('timer-stopped'); clearInterval(timerInterval);
-        isTimerRunning = false; timerInterval = null; 
+        isTimerRunning = false; timerInterval = null; inputAnswer.disabled = true;
         if (currentRound === 4 && !geheugenBoard.classList.contains('answers-shown')) geheugenBoard.classList.add('blurred-board');
         if (currentRound === 6 && document.getElementById('btn-finale-next').style.display === 'none') document.getElementById('finale-subject').classList.add('blurred-subject');
         renderPlayers();
@@ -343,7 +399,9 @@
 
     function hideAllGameAreas() {
         document.querySelectorAll('#game-board > div[id$="-display-area"], .controls button').forEach(el => el.style.display = 'none');
-        questionText.style.display = 'none'; questionCounter.style.display = 'none';
+        questionText.style.display = 'none'; questionIdElement.style.display = 'none'; puzzleIdsElement.style.display = 'none';
+        inputAnswer.style.display = 'none'; btnCheckAnswer.style.display = 'none'; questionCounter.style.display = 'none';
+        
         const videoPlayer = document.getElementById('beeld-video-player');
         if (videoPlayer) { videoPlayer.pause(); videoPlayer.src = ""; }
     }
@@ -353,16 +411,16 @@
     function startGameR1() {
         currentRound = 1; currentQuestionIndex = 0; roundTitle.textContent = "Ronde 1: Algemene Kennis"; 
         activeRound1Questions = shuffleArray([...quizData.ronde1_pool]).slice(0, 12);
-        hideAllGameAreas(); questionText.style.display = 'block'; questionCounter.style.display = 'block'; 
-        stopTimer(); displayQuestionR1();
+        hideAllGameAreas(); questionText.style.display = 'block'; questionCounter.style.display = 'block'; questionIdElement.style.display = 'block';
+        inputAnswer.style.display = 'inline-block'; btnCheckAnswer.style.display = 'inline-block';
+        stopTimer(); displayQuestionR1(); formatAndDisplayIDs(activeRound1Questions.map(q => q.id));
     }
     function displayQuestionR1() {
         if (currentQuestionIndex < activeRound1Questions.length) {
             currentQuestionAttempts = []; const q = activeRound1Questions[currentQuestionIndex];
-            questionText.textContent = q.q; 
+            questionText.textContent = q.q; questionIdElement.textContent = `Vraag-ID: #${q.id}`;
             questionCounter.innerHTML = `Vraag ${currentQuestionIndex + 1} / ${activeRound1Questions.length}`;
-            timerPlayerIndex = activePlayerIndex; renderPlayers();
-            // SYNC MET DASHBOARD
+            inputAnswer.value = ""; inputAnswer.focus(); timerPlayerIndex = activePlayerIndex; renderPlayers();
             channel.postMessage({ type: 'SYNC_QUESTION', round: 1, ids: [q.id] });
         } else {
             hideAllGameAreas(); questionText.style.display = 'block'; questionText.textContent = "Einde van Ronde 1.";
@@ -371,7 +429,7 @@
     }
     function checkRound1Answer() {
         const q = activeRound1Questions[currentQuestionIndex]; const isCorrect = (stringSimilarity(q.a, inputAnswer.value) >= SIMILARITY_THRESHOLD);
-        stopTimer(); 
+        stopTimer(); inputAnswer.value = "";
         if (isCorrect) {
             showFeedback(true); updateSeconds(activePlayerIndex, R1_BONUS_SECONDS); showBonusFeedback(activePlayerIndex, R1_BONUS_SECONDS);
             setTimeout(() => { currentQuestionIndex++; displayQuestionR1(); }, 2000);
@@ -384,10 +442,11 @@
             }
             if (nextFound) {
                 questionText.textContent = `${players.find(p => p.originalIndex === activePlayerIndex).name} is aan de beurt.`;
-                setTimeout(() => { questionText.textContent = q.q; renderPlayers(); }, 1500);
+                setTimeout(() => { questionText.textContent = q.q; renderPlayers(); inputAnswer.focus(); }, 1500);
             } else {
-                questionText.textContent = `Niemand wist het. Antwoord: ${q.a}`; 
+                questionText.textContent = `Niemand wist het. Antwoord: ${q.a}`; inputAnswer.style.display = 'none'; btnCheckAnswer.style.display = 'none';
                 setTimeout(() => { currentQuestionIndex++; activePlayerIndex = players[(players.findIndex(p => p.originalIndex === activePlayerIndex) + 1) % players.length].originalIndex; displayQuestionR1(); 
+                    if(currentQuestionIndex < activeRound1Questions.length) { inputAnswer.style.display = 'inline-block'; btnCheckAnswer.style.display = 'inline-block'; }
                 }, 3000);
             }
         }
@@ -405,15 +464,12 @@
     function loadNewPuzzle() {
         if (currentR2SetCount >= players.length) { hideAllGameAreas(); questionText.style.display = 'block'; questionText.textContent = "Einde van Ronde 2."; document.getElementById('start-round-3').style.display = 'inline-block'; return; }
         activePlayerIndex = getNextStartingPlayerIndex(2); currentSetAttempts = []; currentPuzzleSet = activeRound2Puzzles[currentR2SetCount];
-        questionCounter.innerHTML = `Puzzel ${currentR2SetCount + 1} / ${players.length}`; 
-        
-        // SYNC MET DASHBOARD (Geeft de 3 puzzel-ID's door)
+        questionCounter.innerHTML = `Puzzel ${currentR2SetCount + 1} / ${players.length}`; formatAndDisplayIDs(currentPuzzleSet.map(p => p.id));
         channel.postMessage({ type: 'SYNC_QUESTION', round: 2, ids: currentPuzzleSet.map(p => p.id) });
-
         let allClues = []; currentPuzzleSet.forEach(p => { p.clues.forEach(c => { allClues.push({ text: c.text, answer: p.answer, color: c.color, isFound: p.found }); }); }); shuffleArray(allClues);
         document.getElementById('puzzle-answers-container').innerHTML = currentPuzzleSet.map(p => `<div class="puzzle-answer ${p.found ? 'found '+p.color : ''}">${p.found ? p.answer : '???'}</div>`).join('');
         document.getElementById('puzzle-clues-container').innerHTML = allClues.map(c => `<div class="puzzle-clue ${c.isFound ? 'found '+c.color : ''}" data-answer="${c.answer.toLowerCase()}">${c.text}</div>`).join('');
-        btnNextPuzzle.style.display = 'none'; btnShowPuzzleAnswers.style.display = 'inline-block'; stopTimer(); renderPlayers();
+        btnNextPuzzle.style.display = 'none'; btnShowPuzzleAnswers.style.display = 'inline-block'; btnCheckAnswer.style.display = 'inline-block'; inputAnswer.style.display = 'inline-block'; inputAnswer.disabled = true; stopTimer(); inputAnswer.value = '';
     }
     function checkRound2Answer() {
         const foundItem = currentPuzzleSet.find(p => !p.found && stringSimilarity(p.answer, inputAnswer.value) >= SIMILARITY_THRESHOLD);
@@ -421,8 +477,9 @@
             showFeedback(true); foundItem.found = true; updateSeconds(activePlayerIndex, R2_R3_R4_BONUS_SECONDS); showBonusFeedback(activePlayerIndex, R2_R3_R4_BONUS_SECONDS); currentSetAttempts = []; 
             document.getElementById('puzzle-answers-container').innerHTML = currentPuzzleSet.map(p => `<div class="puzzle-answer ${p.found ? 'found '+p.color : ''}">${p.found ? p.answer : '???'}</div>`).join('');
             Array.from(document.getElementById('puzzle-clues-container').children).forEach(el => { if(el.dataset.answer === foundItem.answer.toLowerCase()) el.className = `puzzle-clue found ${foundItem.color}`; });
-            if (currentPuzzleSet.every(p => p.found)) { stopTimer(); btnShowPuzzleAnswers.style.display = 'none'; btnNextPuzzle.style.display = 'inline-block'; currentSetAttempts = players.map(p => p.originalIndex); activePlayerIndex = getNextStartingPlayerIndex(2); } else { setTimeout(() => { if (!isTimerRunning) startTimer(activePlayerIndex); }, 50); }
+            if (currentPuzzleSet.every(p => p.found)) { stopTimer(); btnShowPuzzleAnswers.style.display = 'none'; btnCheckAnswer.style.display = 'none'; inputAnswer.style.display = 'none'; btnNextPuzzle.style.display = 'inline-block'; currentSetAttempts = players.map(p => p.originalIndex); activePlayerIndex = getNextStartingPlayerIndex(2); } else { setTimeout(() => { if (!isTimerRunning) startTimer(activePlayerIndex); }, 50); }
         } else { showFeedback(false); setTimeout(() => { if (!isTimerRunning) startTimer(activePlayerIndex); }, 1000); }
+        inputAnswer.value = '';
     }
     function showPuzzleAnswers() { currentPuzzleSet.forEach(p => p.found = true); checkRound2Answer(); }
 
@@ -431,26 +488,24 @@
     function setupRound3() {
         currentRound = 3; currentOpenDeurIndex = 0; activePlayerIndex = getNextStartingPlayerIndex(3); roundTitle.textContent = `Ronde 3: Open Deur`; 
         activeOpenDeurQuestions = shuffleArray([...quizData.ronde3_openDeur]).slice(0, players.length);
-        hideAllGameAreas(); opendeurDisplayArea.style.display = 'block'; questionText.style.display = 'block'; questionCounter.style.display = 'block'; loadOpenDeur();
+        hideAllGameAreas(); opendeurDisplayArea.style.display = 'block'; questionText.style.display = 'block'; questionCounter.style.display = 'block'; inputAnswer.style.display = 'inline-block'; btnCheckAnswer.style.display = 'inline-block'; loadOpenDeur();
     }
     function loadOpenDeur() {
         if (currentOpenDeurIndex >= players.length) { hideAllGameAreas(); questionText.style.display = 'block'; questionText.textContent = "Einde van Ronde 3."; btnStartRound4.style.display = 'inline-block'; return; }
         activePlayerIndex = getNextStartingPlayerIndex(3); currentSetAttempts = []; let activeOD = activeOpenDeurQuestions[currentOpenDeurIndex];
-        questionCounter.innerHTML = `Vraag ${currentOpenDeurIndex + 1} / ${players.length}`; opendeurSubject.textContent = activeOD.subject; opendeurSubject.classList.add('blurred-subject'); 
-        
-        // SYNC MET DASHBOARD
+        questionCounter.innerHTML = `Vraag ${currentOpenDeurIndex + 1} / ${players.length}`; opendeurSubject.textContent = activeOD.subject; opendeurSubject.classList.add('blurred-subject'); formatAndDisplayIDs([activeOD.id]);
         channel.postMessage({ type: 'SYNC_QUESTION', round: 3, ids: [activeOD.id] });
-
         document.getElementById('opendeur-keywords-container').innerHTML = activeOD.keywords.map(k => `<div class="opendeur-keyword ${k.found ? 'found' : ''}">${k.found ? k.word : '???'}</div>`).join('');
-        btnNextOpenDeur.style.display = 'none'; btnShowOpenDeurAnswers.style.display = 'inline-block'; stopTimer(); renderPlayers();
+        btnNextOpenDeur.style.display = 'none'; btnShowOpenDeurAnswers.style.display = 'inline-block'; inputAnswer.style.display = 'inline-block'; btnCheckAnswer.style.display = 'inline-block'; inputAnswer.disabled = true; stopTimer(); inputAnswer.value = "";
     }
     function checkRound3Answer() {
         let activeOD = activeOpenDeurQuestions[currentOpenDeurIndex]; const foundItem = activeOD.keywords.find(k => !k.found && stringSimilarity(k.word, inputAnswer.value) >= SIMILARITY_THRESHOLD);
         if (foundItem) {
             showFeedback(true); foundItem.found = true; updateSeconds(activePlayerIndex, R2_R3_R4_BONUS_SECONDS); showBonusFeedback(activePlayerIndex, R2_R3_R4_BONUS_SECONDS); currentSetAttempts = []; opendeurSubject.classList.remove('blurred-subject');
             document.getElementById('opendeur-keywords-container').innerHTML = activeOD.keywords.map(k => `<div class="opendeur-keyword ${k.found ? 'found' : ''}">${k.found ? k.word : '???'}</div>`).join('');
-            if (activeOD.keywords.every(k => k.found)) { stopTimer(); btnShowOpenDeurAnswers.style.display='none'; btnNextOpenDeur.style.display = 'inline-block'; currentSetAttempts = players.map(p => p.originalIndex); activePlayerIndex = getNextStartingPlayerIndex(3); } else { setTimeout(() => { if (!isTimerRunning) startTimer(activePlayerIndex); }, 50); }
+            if (activeOD.keywords.every(k => k.found)) { stopTimer(); btnCheckAnswer.style.display = 'none'; inputAnswer.style.display = 'none'; btnShowOpenDeurAnswers.style.display='none'; btnNextOpenDeur.style.display = 'inline-block'; currentSetAttempts = players.map(p => p.originalIndex); activePlayerIndex = getNextStartingPlayerIndex(3); } else { setTimeout(() => { if (!isTimerRunning) startTimer(activePlayerIndex); }, 50); }
         } else { showFeedback(false); setTimeout(() => { if (!isTimerRunning) startTimer(activePlayerIndex); }, 1000); }
+        inputAnswer.value = "";
     }
     function showOpenDeurAnswers() { activeOpenDeurQuestions[currentOpenDeurIndex].keywords.forEach(k => k.found = true); checkRound3Answer(); }
 
@@ -459,25 +514,23 @@
     function setupRound4() {
         currentRound = 4; currentMemoryList = 0; activePlayerIndex = getNextStartingPlayerIndex(4); roundTitle.textContent = `Ronde 4: Het Geheugen`; 
         quizData.ronde4_geheugen = shuffleArray(quizData.ronde4_geheugen);
-        hideAllGameAreas(); geheugenDisplayArea.style.display = 'block'; questionText.style.display = 'block'; questionCounter.style.display = 'block'; loadMemoryQuestion();
+        hideAllGameAreas(); geheugenDisplayArea.style.display = 'block'; questionText.style.display = 'block'; questionCounter.style.display = 'block'; questionIdElement.style.display = 'block'; inputAnswer.style.display = 'inline-block'; btnCheckAnswer.style.display = 'inline-block'; loadMemoryQuestion();
     }
     function loadMemoryQuestion() {
         if (currentMemoryList >= players.length) { hideAllGameAreas(); questionText.style.display = 'block'; questionText.textContent = "Einde van Ronde 4!"; btnStartRound5.style.display = 'inline-block'; return; }
         activePlayerIndex = getNextStartingPlayerIndex(4); currentSetAttempts = []; activeRound4Questions = quizData.ronde4_geheugen.slice(currentMemoryList*6, (currentMemoryList+1)*6);
-        geheugenBoard.classList.remove('answers-shown'); geheugenBoard.classList.add('blurred-board'); questionCounter.innerHTML = `Beurt ${currentMemoryList + 1} / ${players.length}`; 
-        
-        // SYNC MET DASHBOARD
+        geheugenBoard.classList.remove('answers-shown'); geheugenBoard.classList.add('blurred-board'); questionCounter.innerHTML = `Beurt ${currentMemoryList + 1} / ${players.length}`; formatAndDisplayIDs(activeRound4Questions.map(q => q.id));
         channel.postMessage({ type: 'SYNC_QUESTION', round: 4, ids: activeRound4Questions.map(q => q.id) });
-
         const renderMem = () => geheugenBoard.innerHTML = activeRound4Questions.map((q,i) => `<li class="geheugen-item ${q.found ? 'found' : ''}"><span>${i+1}. <strong>${q.q1}</strong>...</span><span class="geheugen-antwoord">${q.found ? q.a : '...?'}</span></li>`).join(''); renderMem(); window.renderMemUI = renderMem;
-        btnShowGeheugenAnswers.style.display = 'inline-block'; btnNextGeheugenSpeler.style.display = 'none'; stopTimer(); renderPlayers();
+        btnShowGeheugenAnswers.style.display = 'inline-block'; btnNextGeheugenSpeler.style.display = 'none'; inputAnswer.style.display = 'inline-block'; btnCheckAnswer.style.display = 'inline-block'; inputAnswer.disabled = true; stopTimer(); inputAnswer.value = "";
     }
     function checkRound4Answer() {
         const foundItem = activeRound4Questions.find(q => !q.found && stringSimilarity(q.a, inputAnswer.value) >= SIMILARITY_THRESHOLD);
         if (foundItem) {
             showFeedback(true); foundItem.found = true; updateSeconds(activePlayerIndex, R2_R3_R4_BONUS_SECONDS); showBonusFeedback(activePlayerIndex, R2_R3_R4_BONUS_SECONDS); currentSetAttempts = []; window.renderMemUI();
-            if (activeRound4Questions.every(q => q.found)) { stopTimer(); btnShowGeheugenAnswers.style.display='none'; btnNextGeheugenSpeler.style.display = 'inline-block'; currentSetAttempts = players.map(p => p.originalIndex); activePlayerIndex = getNextStartingPlayerIndex(4); } else { setTimeout(() => { if (!isTimerRunning) startTimer(activePlayerIndex); }, 50); }
+            if (activeRound4Questions.every(q => q.found)) { stopTimer(); btnCheckAnswer.style.display = 'none'; inputAnswer.style.display = 'none'; btnShowGeheugenAnswers.style.display='none'; btnNextGeheugenSpeler.style.display = 'inline-block'; currentSetAttempts = players.map(p => p.originalIndex); activePlayerIndex = getNextStartingPlayerIndex(4); } else { setTimeout(() => { if (!isTimerRunning) startTimer(activePlayerIndex); }, 50); }
         } else { showFeedback(false); setTimeout(() => { if (!isTimerRunning) startTimer(activePlayerIndex); }, 1000); }
+        inputAnswer.value = "";
     }
     function showMemoryAnswers() { activeRound4Questions.forEach(q => q.found = true); geheugenBoard.classList.add('answers-shown'); geheugenBoard.classList.remove('blurred-board'); checkRound4Answer(); }
 
@@ -486,19 +539,16 @@
     function setupRound5() {
         currentRound = 5; currentBeeldIndex = 0; activePlayerIndex = getNextStartingPlayerIndex(5); roundTitle.textContent = `Ronde 5: De Beeldronde`; 
         activeBeeldQuestions = shuffleArray([...quizData.ronde5_beeld]).slice(0, players.length);
-        hideAllGameAreas(); document.getElementById('beeld-display-area').style.display = 'block'; questionText.style.display = 'block'; questionCounter.style.display = 'block'; loadBeeldVraag();
+        hideAllGameAreas(); document.getElementById('beeld-display-area').style.display = 'block'; questionText.style.display = 'block'; questionCounter.style.display = 'block'; inputAnswer.style.display = 'inline-block'; btnCheckAnswer.style.display = 'inline-block'; loadBeeldVraag();
     }
     function loadBeeldVraag() {
         if (currentBeeldIndex >= activeBeeldQuestions.length || currentBeeldIndex >= players.length) { hideAllGameAreas(); questionText.style.display = 'block'; questionText.textContent = "Einde van de Beeldronde!"; btnStartFinale.style.display = 'inline-block'; return; }
         activePlayerIndex = getNextStartingPlayerIndex(5); currentSetAttempts = []; let q = activeBeeldQuestions[currentBeeldIndex];
-        questionCounter.innerHTML = `Fragment ${currentBeeldIndex + 1} / ${players.length}`; 
-        
-        // SYNC MET DASHBOARD
+        questionCounter.innerHTML = `Fragment ${currentBeeldIndex + 1} / ${players.length}`; formatAndDisplayIDs([q.id]); 
         channel.postMessage({ type: 'SYNC_QUESTION', round: 5, ids: [q.id] });
-        
         document.getElementById('beeld-video-player').src = q.videoBron;
         renderBeeldUI();
-        btnNextBeeld.style.display = 'none'; btnShowBeeld.style.display = 'inline-block'; stopTimer(); renderPlayers();
+        btnNextBeeld.style.display = 'none'; btnShowBeeld.style.display = 'inline-block'; inputAnswer.style.display = 'inline-block'; btnCheckAnswer.style.display = 'inline-block'; inputAnswer.disabled = true; stopTimer(); inputAnswer.value = "";
     }
     function renderBeeldUI() {
         let q = activeBeeldQuestions[currentBeeldIndex]; const container = document.getElementById('beeld-tasks-container');
@@ -510,8 +560,9 @@
         const foundItem = tasks.find(t => !t.found && stringSimilarity(t.word, inputAnswer.value) >= SIMILARITY_THRESHOLD);
         if (foundItem) {
             showFeedback(true); foundItem.found = true; updateSeconds(activePlayerIndex, R2_R3_R4_BONUS_SECONDS); showBonusFeedback(activePlayerIndex, R2_R3_R4_BONUS_SECONDS); currentSetAttempts = []; renderBeeldUI();
-            if (tasks.every(t => t.found)) { stopTimer(); btnShowBeeld.style.display='none'; btnNextBeeld.style.display = 'inline-block'; currentSetAttempts = players.map(p => p.originalIndex); activePlayerIndex = getNextStartingPlayerIndex(5); } else { setTimeout(() => { if (!isTimerRunning) startTimer(activePlayerIndex); }, 50); }
+            if (tasks.every(t => t.found)) { stopTimer(); btnCheckAnswer.style.display = 'none'; inputAnswer.style.display = 'none'; btnShowBeeld.style.display='none'; btnNextBeeld.style.display = 'inline-block'; currentSetAttempts = players.map(p => p.originalIndex); activePlayerIndex = getNextStartingPlayerIndex(5); } else { setTimeout(() => { if (!isTimerRunning) startTimer(activePlayerIndex); }, 50); }
         } else { showFeedback(false); setTimeout(() => { if (!isTimerRunning) startTimer(activePlayerIndex); }, 1000); }
+        inputAnswer.value = "";
     }
     function showBeeldAnswers() { let q = activeBeeldQuestions[currentBeeldIndex]; [q.ans_seizoen, q.ans_aflevering, q.ans_zin, q.ans_kw1, q.ans_kw2].forEach(t => t.found = true); checkRound5Answer(); }
 
@@ -522,17 +573,14 @@
         const topTwoPlayers = [...players].sort((a, b) => b.seconds - a.seconds).slice(0, 2); finalists = players.filter(p => topTwoPlayers.some(topP => topP.originalIndex === p.originalIndex)).map(p => ({ player: p, originalIndex: p.originalIndex }));
         activeFinaleQuestions = shuffleArray([...quizData.ronde6_finale]);
         const lowestScorePlayer = finalists.sort((a, b) => a.player.seconds - b.player.seconds)[0]; activePlayerIndex = lowestScorePlayer.player.originalIndex; activeFinalistIndex = finalists.findIndex(f => f.player.originalIndex === activePlayerIndex);
-        hideAllGameAreas(); document.getElementById('finale-display-area').style.display = 'block'; questionText.style.display = 'block'; questionCounter.style.display = 'block'; loadFinaleQuestion();
+        hideAllGameAreas(); document.getElementById('finale-display-area').style.display = 'block'; questionText.style.display = 'block'; questionCounter.style.display = 'block'; inputAnswer.style.display = 'inline-block'; btnCheckAnswer.style.display = 'inline-block'; loadFinaleQuestion();
     }
     function loadFinaleQuestion() {
         let q = activeFinaleQuestions[currentFinaleQuestionIndex]; document.getElementById('finale-subject').textContent = q.subject; document.getElementById('finale-subject').classList.add('blurred-subject');
-        questionCounter.innerHTML = `FINALE / Aan de beurt: ${finalists[activeFinalistIndex].player.name}`; 
-        
-        // SYNC MET DASHBOARD
+        questionCounter.innerHTML = `FINALE / Aan de beurt: ${finalists[activeFinalistIndex].player.name}`; formatAndDisplayIDs([q.id]);
         channel.postMessage({ type: 'SYNC_QUESTION', round: 6, ids: [q.id] });
-
         document.getElementById('finale-keywords-container').innerHTML = q.keywords.map(k => `<div class="finale-keyword" data-word="${k.word}">???</div>`).join('');
-        document.getElementById('btn-finale-show').style.display = 'inline-block'; document.getElementById('btn-finale-next').style.display = 'none'; stopTimer(); renderPlayers();
+        document.getElementById('btn-finale-show').style.display = 'inline-block'; document.getElementById('btn-finale-next').style.display = 'none'; btnCheckAnswer.style.display = 'inline-block'; inputAnswer.style.display = 'inline-block'; inputAnswer.disabled = true; stopTimer(); inputAnswer.value = '';
     }
     function checkFinaleAnswer() {
         let q = activeFinaleQuestions[currentFinaleQuestionIndex]; const foundItem = q.keywords.find(k => !k.found && stringSimilarity(k.word, inputAnswer.value) >= SIMILARITY_THRESHOLD);
@@ -542,8 +590,9 @@
             if (opponent) { showBonusFeedback(opponent.originalIndex, -R5_OPPONENT_PENALTY_SECONDS); updateSeconds(opponent.originalIndex, -R5_OPPONENT_PENALTY_SECONDS); }
             document.getElementById('finale-subject').classList.remove('blurred-subject');
             const kwEls = document.getElementById('finale-keywords-container').querySelectorAll('.finale-keyword'); const el = Array.from(kwEls).find(e => e.dataset.word === foundItem.word); if (el) { el.classList.add('found'); el.textContent = foundItem.word; }
-            if (q.keywords.every(k => k.found)) { document.getElementById('btn-finale-next').style.display = 'inline-block'; document.getElementById('btn-finale-show').style.display = 'none'; stopTimer(); } else { setTimeout(() => { if (!isTimerRunning && !isGameOver) startTimer(activePlayerIndex); }, 50); }
+            if (q.keywords.every(k => k.found)) { document.getElementById('btn-finale-next').style.display = 'inline-block'; btnCheckAnswer.style.display = 'none'; inputAnswer.style.display = 'none'; document.getElementById('btn-finale-show').style.display = 'none'; stopTimer(); } else { setTimeout(() => { if (!isTimerRunning && !isGameOver) startTimer(activePlayerIndex); }, 50); }
         } else { showFeedback(false); setTimeout(() => { if (!isTimerRunning) startTimer(activePlayerIndex); }, 50); }
+        inputAnswer.value = '';
     }
     
     playerContainer.addEventListener('click', (event) => {
@@ -551,6 +600,12 @@
         const clickedIndex = parseInt(card.dataset.playerIndex);
         if (currentRound === 1 || event.target.classList.contains('player-timer-btn') === false) { activePlayerIndex = clickedIndex; renderPlayers(); } else toggleTimer(clickedIndex);
     });
+
+    btnCheckAnswer.addEventListener('click', () => {
+        if(currentRound==1) checkRound1Answer(); else if(currentRound==2) checkRound2Answer(); else if(currentRound==3) checkRound3Answer();
+        else if(currentRound==4) checkRound4Answer(); else if(currentRound==5) checkRound5Answer(); else if(currentRound==6) checkFinaleAnswer();
+    });
+    inputAnswer.addEventListener('keyup', (e) => { if (e.key === 'Enter') { e.preventDefault(); btnCheckAnswer.click(); } });
 
     document.getElementById('start-round-1').addEventListener('click', startGameR1); document.getElementById('start-round-2').addEventListener('click', setupRound2);
     document.getElementById('start-round-3').addEventListener('click', setupRound3); document.getElementById('start-round-4').addEventListener('click', setupRound4);
@@ -562,13 +617,18 @@
     btnNextBeeld.addEventListener('click', () => { currentBeeldIndex++; loadBeeldVraag(); }); btnShowBeeld.addEventListener('click', showBeeldAnswers);
     document.getElementById('btn-finale-next').addEventListener('click', () => { currentFinaleQuestionIndex++; loadFinaleQuestion(); }); document.getElementById('btn-finale-show').addEventListener('click', () => { activeFinaleQuestions[currentFinaleQuestionIndex].keywords.forEach(k => k.found = true); checkFinaleAnswer(); });
 
+    document.getElementById('wrong-answer').addEventListener('click', () => { updateSeconds(activePlayerIndex, -20); showBonusFeedback(activePlayerIndex, -20); });
+    document.getElementById('add-seconds-10').addEventListener('click', () => { updateSeconds(activePlayerIndex, 10); showBonusFeedback(activePlayerIndex, 10); });
+    document.getElementById('add-seconds-20').addEventListener('click', () => { updateSeconds(activePlayerIndex, 20); showBonusFeedback(activePlayerIndex, 20); });
+
     const remoteChannel = new BroadcastChannel('trivial_time_channel');
     remoteChannel.onmessage = (event) => {
         if (!event.data) return;
-        if (event.data.type === 'FILL_ANSWER') { inputAnswer.value = event.data.answer; if(currentRound==1) checkRound1Answer(); else if(currentRound==2) checkRound2Answer(); else if(currentRound==3) checkRound3Answer(); else if(currentRound==4) checkRound4Answer(); else if(currentRound==5) checkRound5Answer(); else if(currentRound==6) checkFinaleAnswer(); }
-        if (event.data.type === 'TRIGGER_FAIL') { inputAnswer.value = "###FAIL###"; if(currentRound==1) checkRound1Answer(); else if(currentRound==2) checkRound2Answer(); else if(currentRound==3) checkRound3Answer(); else if(currentRound==4) checkRound4Answer(); else if(currentRound==5) checkRound5Answer(); else if(currentRound==6) checkFinaleAnswer(); }
+        if (event.data.type === 'FILL_ANSWER') { inputAnswer.value = event.data.answer; btnCheckAnswer.click(); }
+        if (event.data.type === 'TRIGGER_FAIL') { inputAnswer.value = "###FAIL###"; btnCheckAnswer.click(); }
         if (event.data.type === 'TOGGLE_TIMER') toggleTimer(activePlayerIndex);
         if (event.data.type === 'SELECT_PLAYER') { activePlayerIndex = event.data.playerIndex; renderPlayers(); }
+        
         if (event.data.type === 'NEXT_QUESTION') {
             if(currentRound==2) btnNextPuzzle.click();
             if(currentRound==3) btnNextOpenDeur.click();
@@ -582,6 +642,10 @@
             if(currentRound==4) btnShowGeheugenAnswers.click();
             if(currentRound==5) btnShowBeeld.click();
             if(currentRound==6) document.getElementById('btn-finale-show').click();
+        }
+        if (event.data.type === 'ADJUST_TIME') {
+            updateSeconds(activePlayerIndex, event.data.amount);
+            showBonusFeedback(activePlayerIndex, event.data.amount);
         }
     };
     </script>
