@@ -57,11 +57,9 @@
                 <ul id="geheugen-board"></ul>
             </div>
 
-            <!-- DE NIEUWE STIJL VOOR RONDE 5 -->
             <div id="beeld-display-area" style="display: none; width: 100%; flex-direction: column; align-items: center;">
                 <div id="beeld-grid" style="display: flex; gap: 20px; justify-content: center; flex-wrap: wrap; width: 90%; margin-top: 20px;"></div>
                 
-                <!-- PURE CINEMA: FULLSCREEN FIXED OVERLAY VOOR VIDEO -->
                 <div id="beeld-player-container" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #000; z-index: 9999; align-items: center; justify-content: center;">
                     <video id="beeld-video-player" playsinline style="width: 100%; height: 100%; object-fit: contain; background: #000; outline: none; border: none;"></video>
                 </div>
@@ -494,13 +492,20 @@
     let activeRound2Puzzles = [], currentPuzzleSet = null, currentR2SetCount = 0;
     function setupRound2() {
         currentRound = 2; currentR2SetCount = 0; startingPlayersThisRound = []; activePlayerIndex = getNextStartingPlayerIndex(2); roundTitle.textContent = `Ronde 2: De Puzzel`; 
+        
+        // CRASH-PREVENTIE
+        if (!quizData.ronde2_answer_pool || quizData.ronde2_answer_pool.length === 0) {
+            alert("⚠️ Geen data gevonden voor Ronde 2! Kijk je quizdata_r2.js bestand na.");
+            return;
+        }
+
         const fullPool = shuffleArray([...quizData.ronde2_answer_pool]); activeRound2Puzzles = [];
         for (let i = 0; i < players.length; i++) { activeRound2Puzzles.push(fullPool.slice(i * 3, (i + 1) * 3).map((p, j) => ({ ...p, found: false, missed: false, color: `color-${(j % 3) + 1}`, clues: p.clues.map(c => ({ text: c, color: `color-${(j % 3) + 1}` })) }))); }
         hideAllGameAreas(); document.getElementById('puzzle-display-area').style.display = 'flex';
         questionText.style.display = 'block'; questionCounter.style.display = 'block'; loadNewPuzzle();
     }
     function loadNewPuzzle() {
-        if (currentR2SetCount >= players.length) { hideAllGameAreas(); questionText.style.display = 'block'; questionText.textContent = "Einde van Ronde 2."; return; }
+        if (currentR2SetCount >= players.length || currentR2SetCount >= activeRound2Puzzles.length) { hideAllGameAreas(); questionText.style.display = 'block'; questionText.textContent = "Einde van Ronde 2."; return; }
         activePlayerIndex = getNextStartingPlayerIndex(2); currentSetAttempts = []; currentPuzzleSet = activeRound2Puzzles[currentR2SetCount];
         startingPlayersThisRound.push(activePlayerIndex); 
         
@@ -555,11 +560,18 @@
     let activeOpenDeurQuestions = [], currentOpenDeurIndex = 0;
     function setupRound3() {
         currentRound = 3; currentOpenDeurIndex = 0; startingPlayersThisRound = []; activePlayerIndex = getNextStartingPlayerIndex(3); roundTitle.textContent = `Ronde 3: Open Deur`; 
+        
+        // CRASH-PREVENTIE
+        if (!quizData.ronde3_openDeur || quizData.ronde3_openDeur.length === 0) {
+            alert("⚠️ Geen data gevonden voor Ronde 3! Controleer of quizdata_r3.js correct is ingevuld.");
+            return;
+        }
+
         activeOpenDeurQuestions = shuffleArray([...quizData.ronde3_openDeur]).slice(0, players.length);
         hideAllGameAreas(); opendeurDisplayArea.style.display = 'block'; questionText.style.display = 'block'; questionCounter.style.display = 'block'; loadOpenDeur();
     }
     function loadOpenDeur() {
-        if (currentOpenDeurIndex >= players.length) { hideAllGameAreas(); questionText.style.display = 'block'; questionText.textContent = "Einde van Ronde 3."; return; }
+        if (currentOpenDeurIndex >= players.length || currentOpenDeurIndex >= activeOpenDeurQuestions.length) { hideAllGameAreas(); questionText.style.display = 'block'; questionText.textContent = "Einde van Ronde 3."; return; }
         activePlayerIndex = getNextStartingPlayerIndex(3); currentSetAttempts = []; let activeOD = activeOpenDeurQuestions[currentOpenDeurIndex];
         startingPlayersThisRound.push(activePlayerIndex); 
         
@@ -593,11 +605,18 @@
     let activeRound4Questions = [], currentMemoryList = 0;
     function setupRound4() {
         currentRound = 4; currentMemoryList = 0; startingPlayersThisRound = []; activePlayerIndex = getNextStartingPlayerIndex(4); roundTitle.textContent = `Ronde 4: Het Geheugen`; 
+        
+        // CRASH-PREVENTIE
+        if (!quizData.ronde4_geheugen || quizData.ronde4_geheugen.length === 0) {
+            alert("⚠️ Geen data gevonden voor Ronde 4! Kijk je quizdata_r4.js bestand na.");
+            return;
+        }
+
         quizData.ronde4_geheugen = shuffleArray(quizData.ronde4_geheugen);
         hideAllGameAreas(); geheugenDisplayArea.style.display = 'block'; questionText.style.display = 'block'; questionCounter.style.display = 'block'; loadMemoryQuestion();
     }
     function loadMemoryQuestion() {
-        if (currentMemoryList >= players.length) { hideAllGameAreas(); questionText.style.display = 'block'; questionText.textContent = "Einde van Ronde 4!"; return; }
+        if (currentMemoryList >= players.length || (currentMemoryList*6) >= quizData.ronde4_geheugen.length) { hideAllGameAreas(); questionText.style.display = 'block'; questionText.textContent = "Einde van Ronde 4!"; return; }
         activePlayerIndex = getNextStartingPlayerIndex(4); currentSetAttempts = []; activeRound4Questions = quizData.ronde4_geheugen.slice(currentMemoryList*6, (currentMemoryList+1)*6);
         startingPlayersThisRound.push(activePlayerIndex); 
         
@@ -632,6 +651,13 @@
     function setupRound5() {
         currentRound = 5; currentBeeldIndex = -1; startingPlayersThisRound = []; playedVideos = [];
         activePlayerIndex = getNextStartingPlayerIndex(5); roundTitle.textContent = `Ronde 5: De Beeldronde`; 
+        
+        // CRASH-PREVENTIE
+        if (!quizData.ronde5_beeld || quizData.ronde5_beeld.length === 0) {
+            alert("⚠️ Geen data gevonden voor Ronde 5! Kijk je quizdata_r5.js bestand na.");
+            return;
+        }
+
         activeBeeldQuestions = shuffleArray([...quizData.ronde5_beeld]).slice(0, players.length); 
         
         hideAllGameAreas(); 
@@ -703,15 +729,12 @@
             
             const tasksContainer = document.getElementById('beeld-tasks-container');
             tasksContainer.style.display = 'grid';
-            
-            // NIET MEER BLURRED, KLAAR VOOR DE START!
-            tasksContainer.classList.remove('blurred-board');
+            tasksContainer.classList.add('blurred-board');
             tasksContainer.classList.remove('answers-shown');
             
             questionText.textContent = "Wat weet je nog?";
             channel.postMessage({ type: 'SYNC_QUESTION', round: 5, ids: [q.id] });
 
-            // START TIMER VOLAUTOMATISCH
             setTimeout(() => { startTimer(activePlayerIndex); }, 200); 
         };
 
@@ -771,6 +794,12 @@
     let activeFinaleQuestions = [], currentFinaleQuestionIndex = 0;
     function setupFinale() {
         currentRound = 6; currentFinaleQuestionIndex = 0; roundTitle.textContent = "Ronde 6: De Finale"; 
+        
+        if (!quizData.ronde6_finale || quizData.ronde6_finale.length === 0) {
+            alert("⚠️ Geen data gevonden voor de Finale! Kijk je quizdata_r6.js bestand na.");
+            return;
+        }
+
         const topTwoPlayers = [...players].sort((a, b) => b.seconds - a.seconds).slice(0, 2); finalists = players.filter(p => topTwoPlayers.some(topP => topP.originalIndex === p.originalIndex)).map(p => ({ player: p, originalIndex: p.originalIndex }));
         activeFinaleQuestions = shuffleArray([...quizData.ronde6_finale]);
         const lowestScorePlayer = finalists.sort((a, b) => a.player.seconds - b.player.seconds)[0]; activePlayerIndex = lowestScorePlayer.player.originalIndex; activeFinalistIndex = finalists.findIndex(f => f.player.originalIndex === activePlayerIndex);
