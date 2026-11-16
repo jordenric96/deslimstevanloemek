@@ -10,13 +10,11 @@
 </head>
 <body>
 
-    <!-- WINNAAR SCHERM -->
     <div id="game-over-overlay">
         <h2 id="game-over-subtitle">De slimste kampioen is voor nu:</h2>
         <h1 id="game-over-text">WINNAAR!</h1>
     </div>
 
-    <!-- NIEUW: HET EINDRAPPORT OVERLAY -->
     <div id="report-overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.95); z-index: 1000; flex-direction: column; align-items: center; justify-content: flex-start; overflow-y: auto; padding: 40px 20px; box-sizing: border-box;">
         <h1 style="color: var(--kamp-geel); font-size: 3.5em; margin-bottom: 20px; font-family: 'Chakra Petch', sans-serif; text-transform: uppercase; text-shadow: 0 5px 15px rgba(255,215,0,0.3);">📊 Eindrapport Spelers</h1>
         <div id="report-cards-container" style="display: flex; flex-wrap: wrap; gap: 20px; justify-content: center; width: 100%; max-width: 1400px;"></div>
@@ -59,11 +57,15 @@
                 <ul id="geheugen-board"></ul>
             </div>
 
+            <!-- DE NIEUWE STIJL VOOR RONDE 5 -->
             <div id="beeld-display-area" style="display: none; width: 100%; flex-direction: column; align-items: center;">
                 <div id="beeld-grid" style="display: flex; gap: 20px; justify-content: center; flex-wrap: wrap; width: 90%; margin-top: 20px;"></div>
-                <div id="beeld-player-container" style="display: none; width: 100%; height: 60vh; margin: 0 auto; display: flex; align-items: center; justify-content: center;">
-                    <video id="beeld-video-player" playsinline style="width: 100%; height: 100%; object-fit: contain; border: 4px solid var(--kamp-geel); border-radius: 12px; box-shadow: 0 15px 40px rgba(0,0,0,0.9); background: #000;"></video>
+                
+                <!-- PURE CINEMA: FULLSCREEN FIXED OVERLAY VOOR VIDEO -->
+                <div id="beeld-player-container" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #000; z-index: 9999; align-items: center; justify-content: center;">
+                    <video id="beeld-video-player" playsinline style="width: 100%; height: 100%; object-fit: contain; background: #000; outline: none; border: none;"></video>
                 </div>
+
                 <div id="beeld-tasks-container" style="display: none; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; width: 95%; margin-top: 20px;"></div>
             </div>
 
@@ -134,8 +136,6 @@
     let activePlayerIndex = 0, timerInterval = null, isTimerRunning = false, timerPlayerIndex = null, currentSetAttempts = [], currentQuestionAttempts = [];
     let startingPlayersThisRound = []; 
     let playedVideos = []; 
-    
-    // NIEUW: GLOBALE STATISTIEKEN TRACKER
     let playerStats = {};
 
     const setupScreen = document.getElementById('setup-screen'), playerNameInputs = document.getElementById('player-name-inputs');
@@ -202,7 +202,7 @@
         }));
 
         players = [];
-        playerStats = {}; // RESET STATS
+        playerStats = {}; 
         const numPlayers = parseInt(numPlayersInput.value); 
         const inputElements = playerNameInputs.querySelectorAll('input[type="text"]');
         let allNamesValid = true;
@@ -212,16 +212,7 @@
             if (i < 2 && !name) allNamesValid = false; 
             else if (name) {
                 players.push({ name: name, seconds: 60, originalIndex: i });
-                
-                // INITALISEER STATS PER SPELER
-                playerStats[i] = {
-                    r1: { c: 0, w: 0 },
-                    r2: { foundWords: [], w: 0 },
-                    r3: { c: 0, w: 0 },
-                    r4: { c: 0, w: 0 },
-                    r5: { c: 0, w: 0 },
-                    r6: { c: 0, w: 0 }
-                };
+                playerStats[i] = { r1: { c: 0, w: 0 }, r2: { foundWords: [], w: 0 }, r3: { c: 0, w: 0 }, r4: { c: 0, w: 0 }, r5: { c: 0, w: 0 }, r6: { c: 0, w: 0 } };
             }
         }
 
@@ -420,7 +411,6 @@
         if (videoPlayer) { videoPlayer.pause(); videoPlayer.src = ""; }
     }
 
-    // NIEUW: GENEREER EINDRAPPORT OP SCHERM
     function generateReport() {
         const container = document.getElementById('report-cards-container');
         container.innerHTML = '';
@@ -434,19 +424,15 @@
             container.innerHTML += `
                 <div style="background: rgba(255,255,255,0.05); border: 2px solid var(--kamp-geel); border-radius: 12px; padding: 20px; width: 320px; color: white; text-align: left; box-shadow: 0 10px 25px rgba(0,0,0,0.5); font-size: 1.1em; display:flex; flex-direction:column;">
                     <h2 style="color: var(--kamp-geel); font-size: 2.2em; margin-top: 0; margin-bottom: 15px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.2); padding-bottom: 10px; font-family: 'Chakra Petch', sans-serif;">${p.name}</h2>
-                    
                     <div style="margin-bottom: 10px; display: flex; justify-content: space-between;"><strong>R1 (Algemeen):</strong> <span><span style="color:var(--correct-color)">${stats.r1.c}✓</span> / <span style="color:var(--wrong-color)">${stats.r1.w}✗</span></span></div>
-                    
                     <div style="margin-bottom: 10px; display: flex; flex-direction: column;">
                         <div style="display: flex; justify-content: space-between;"><strong>R2 (Puzzel):</strong> <span><span style="color:var(--wrong-color)">${stats.r2.w}✗</span></span></div>
                         <span style="font-size: 0.85em; color: #aaa; margin-top: 3px;">Woorden: <span style="color:var(--correct-color)">${r2Words}</span></span>
                     </div>
-                    
                     <div style="margin-bottom: 10px; display: flex; justify-content: space-between;"><strong>R3 (Open Deur):</strong> <span><span style="color:var(--correct-color)">${stats.r3.c}✓</span> / <span style="color:var(--wrong-color)">${stats.r3.w}✗</span></span></div>
                     <div style="margin-bottom: 10px; display: flex; justify-content: space-between;"><strong>R4 (Geheugen):</strong> <span><span style="color:var(--correct-color)">${stats.r4.c}✓</span> / <span style="color:var(--wrong-color)">${stats.r4.w}✗</span></span></div>
                     <div style="margin-bottom: 10px; display: flex; justify-content: space-between;"><strong>R5 (Beeld):</strong> <span><span style="color:var(--correct-color)">${stats.r5.c}✓</span> / <span style="color:var(--wrong-color)">${stats.r5.w}✗</span></span></div>
                     <div style="margin-bottom: 10px; display: flex; justify-content: space-between;"><strong>R6 (Finale):</strong> <span><span style="color:var(--correct-color)">${stats.r6.c}✓</span> / <span style="color:var(--wrong-color)">${stats.r6.w}✗</span></span></div>
-                    
                     <div style="margin-top: auto; text-align: center; font-size: 1.8em; font-family: 'Chakra Petch', sans-serif; color: var(--kamp-geel); border-top: 1px solid rgba(255,255,255,0.2); padding-top: 15px; font-weight: bold;">
                         ⏱️ ${p.seconds}s
                     </div>
@@ -482,11 +468,11 @@
         stopTimer(); inputAnswer.value = "";
         
         if (isCorrect) {
-            playerStats[activePlayerIndex].r1.c++; // STATS
+            playerStats[activePlayerIndex].r1.c++; 
             showFeedback(true); updateSeconds(activePlayerIndex, R1_BONUS_SECONDS); showBonusFeedback(activePlayerIndex, R1_BONUS_SECONDS);
             setTimeout(() => { currentQuestionIndex++; displayQuestionR1(); }, 2000);
         } else {
-            playerStats[activePlayerIndex].r1.w++; // STATS
+            playerStats[activePlayerIndex].r1.w++; 
             showFeedback(false); if (!currentQuestionAttempts.includes(activePlayerIndex)) currentQuestionAttempts.push(activePlayerIndex);
             let nextFound = false; let currentIdx = players.findIndex(p => p.originalIndex === activePlayerIndex);
             for (let i = 1; i <= players.length; i++) {
@@ -534,7 +520,7 @@
     function checkRound2Answer() {
         const foundItem = currentPuzzleSet.find(p => !p.found && stringSimilarity(p.answer, inputAnswer.value) >= SIMILARITY_THRESHOLD);
         if (foundItem) {
-            playerStats[activePlayerIndex].r2.foundWords.push(foundItem.answer); // STATS
+            playerStats[activePlayerIndex].r2.foundWords.push(foundItem.answer); 
             showFeedback(true); foundItem.found = true; updateSeconds(activePlayerIndex, R2_R3_R4_BONUS_SECONDS); showBonusFeedback(activePlayerIndex, R2_R3_R4_BONUS_SECONDS); 
             document.getElementById('puzzle-answers-container').innerHTML = currentPuzzleSet.map(p => `<div class="puzzle-answer ${p.found && !p.missed ? 'found '+p.color : ''} ${p.missed ? 'missed' : ''}">${p.found ? p.answer : '???'}</div>`).join('');
             Array.from(document.getElementById('puzzle-clues-container').children).forEach(el => { if(el.dataset.answer === foundItem.answer.toLowerCase()) el.className = `puzzle-clue found ${foundItem.color}`; });
@@ -544,7 +530,7 @@
                 stopTimer(); currentSetAttempts = players.map(p => p.originalIndex); activePlayerIndex = getNextStartingPlayerIndex(2); 
             } else { setTimeout(() => { if (!isTimerRunning) startTimer(activePlayerIndex); }, 50); }
         } else { 
-            playerStats[activePlayerIndex].r2.w++; // STATS
+            playerStats[activePlayerIndex].r2.w++; 
             showFeedback(false); inputAnswer.value = ''; pasDeBeurt(); 
         }
         inputAnswer.value = '';
@@ -585,12 +571,12 @@
     function checkRound3Answer() {
         let activeOD = activeOpenDeurQuestions[currentOpenDeurIndex]; const foundItem = activeOD.keywords.find(k => !k.found && stringSimilarity(k.word, inputAnswer.value) >= SIMILARITY_THRESHOLD);
         if (foundItem) {
-            playerStats[activePlayerIndex].r3.c++; // STATS
+            playerStats[activePlayerIndex].r3.c++; 
             showFeedback(true); foundItem.found = true; updateSeconds(activePlayerIndex, R2_R3_R4_BONUS_SECONDS); showBonusFeedback(activePlayerIndex, R2_R3_R4_BONUS_SECONDS); opendeurSubject.classList.remove('blurred-subject');
             document.getElementById('opendeur-keywords-container').innerHTML = activeOD.keywords.map(k => `<div class="opendeur-keyword ${k.found && !k.missed ? 'found' : ''} ${k.missed ? 'missed' : ''}">${k.found ? k.word : '???'}</div>`).join('');
             if (activeOD.keywords.every(k => k.found)) { stopTimer(); currentSetAttempts = players.map(p => p.originalIndex); activePlayerIndex = getNextStartingPlayerIndex(3); } else { setTimeout(() => { if (!isTimerRunning) startTimer(activePlayerIndex); }, 50); }
         } else { 
-            playerStats[activePlayerIndex].r3.w++; // STATS
+            playerStats[activePlayerIndex].r3.w++; 
             showFeedback(false); inputAnswer.value = ''; pasDeBeurt(); 
         }
         inputAnswer.value = "";
@@ -625,11 +611,11 @@
     function checkRound4Answer() {
         const foundItem = activeRound4Questions.find(q => !q.found && stringSimilarity(q.a, inputAnswer.value) >= SIMILARITY_THRESHOLD);
         if (foundItem) {
-            playerStats[activePlayerIndex].r4.c++; // STATS
+            playerStats[activePlayerIndex].r4.c++; 
             showFeedback(true); foundItem.found = true; updateSeconds(activePlayerIndex, R2_R3_R4_BONUS_SECONDS); showBonusFeedback(activePlayerIndex, R2_R3_R4_BONUS_SECONDS); window.renderMemUI();
             if (activeRound4Questions.every(q => q.found)) { stopTimer(); currentSetAttempts = players.map(p => p.originalIndex); activePlayerIndex = getNextStartingPlayerIndex(4); } else { setTimeout(() => { if (!isTimerRunning) startTimer(activePlayerIndex); }, 50); }
         } else { 
-            playerStats[activePlayerIndex].r4.w++; // STATS
+            playerStats[activePlayerIndex].r4.w++; 
             showFeedback(false); inputAnswer.value = ''; pasDeBeurt(); 
         }
         inputAnswer.value = "";
@@ -717,11 +703,16 @@
             
             const tasksContainer = document.getElementById('beeld-tasks-container');
             tasksContainer.style.display = 'grid';
-            tasksContainer.classList.add('blurred-board');
+            
+            // NIET MEER BLURRED, KLAAR VOOR DE START!
+            tasksContainer.classList.remove('blurred-board');
             tasksContainer.classList.remove('answers-shown');
             
             questionText.textContent = "Wat weet je nog?";
             channel.postMessage({ type: 'SYNC_QUESTION', round: 5, ids: [q.id] });
+
+            // START TIMER VOLAUTOMATISCH
+            setTimeout(() => { startTimer(activePlayerIndex); }, 200); 
         };
 
         stopTimer(); inputAnswer.value = "";
@@ -750,7 +741,7 @@
         const foundItem = tasks.find(t => !t.found && stringSimilarity(t.word, inputAnswer.value) >= SIMILARITY_THRESHOLD);
         
         if (foundItem) {
-            playerStats[activePlayerIndex].r5.c++; // STATS
+            playerStats[activePlayerIndex].r5.c++; 
             showFeedback(true); foundItem.found = true; updateSeconds(activePlayerIndex, R2_R3_R4_BONUS_SECONDS); showBonusFeedback(activePlayerIndex, R2_R3_R4_BONUS_SECONDS); renderBeeldUI();
             if (tasks.every(t => t.found)) { 
                 document.getElementById('beeld-tasks-container').classList.add('answers-shown');
@@ -759,7 +750,7 @@
                 setTimeout(() => { returnToVideoGrid(); }, 3000);
             } else { setTimeout(() => { if (!isTimerRunning) startTimer(activePlayerIndex); }, 50); }
         } else { 
-            playerStats[activePlayerIndex].r5.w++; // STATS
+            playerStats[activePlayerIndex].r5.w++; 
             showFeedback(false); inputAnswer.value = ''; pasDeBeurt(); 
         }
         inputAnswer.value = "";
@@ -795,7 +786,7 @@
     function checkFinaleAnswer() {
         let q = activeFinaleQuestions[currentFinaleQuestionIndex]; const foundItem = q.keywords.find(k => !k.found && stringSimilarity(k.word, inputAnswer.value) >= SIMILARITY_THRESHOLD);
         if (foundItem) {
-            playerStats[activePlayerIndex].r6.c++; // STATS
+            playerStats[activePlayerIndex].r6.c++; 
             showFeedback(true); foundItem.found = true;
             const opponent = players.find(p => p.originalIndex !== activePlayerIndex && finalists.some(f => f.player.originalIndex === p.originalIndex));
             if (opponent) { showBonusFeedback(opponent.originalIndex, -R5_OPPONENT_PENALTY_SECONDS); updateSeconds(opponent.originalIndex, -R5_OPPONENT_PENALTY_SECONDS); }
@@ -803,7 +794,7 @@
             const kwEls = document.getElementById('finale-keywords-container').querySelectorAll('.finale-keyword'); const el = Array.from(kwEls).find(e => e.dataset.word === foundItem.word); if (el) { el.classList.add('found'); el.textContent = foundItem.word; }
             if (q.keywords.every(k => k.found)) { stopTimer(); } else { setTimeout(() => { if (!isTimerRunning && !isGameOver) startTimer(activePlayerIndex); }, 50); }
         } else { 
-            playerStats[activePlayerIndex].r6.w++; // STATS
+            playerStats[activePlayerIndex].r6.w++; 
             showFeedback(false); setTimeout(() => { if (!isTimerRunning) startTimer(activePlayerIndex); }, 50); 
         }
         inputAnswer.value = '';
