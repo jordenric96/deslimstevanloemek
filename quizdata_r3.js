@@ -1,16 +1,56 @@
-// quizdata_r3.js - Ronde 3: Open Deur
+// quizdata_r3.js - Ronde 3: Open Deur (Met MP4 video's en 4 trefwoorden)
 
 const RONDE3_DATA = {
     "KAMPIOENEN": [
-        { subject: "Wat weet je over Marc Vertongen?", keywords: ["Radio Hallo", "Bolleke", "Chocolademelk", "Dokter"] },
-        { subject: "Wat weet je over Dimitri De Tremmerie (DDT)?", keywords: ["Garage", "Zwart geld", "Gevangenis", "Zal 't gaan ja"] },
-        { subject: "Wat weet je over Bieke Crucke?", keywords: ["Publitijd", "Journaliste", "Paulien", "Marc"] },
-        { subject: "Wat weet je over F.C. De Stampers?", keywords: ["Voetbalploeg", "Concurrentie", "Freddy Van Overloop", "Burgemeester"] },
-        { subject: "Wat weet je over Fernand Costermans?", keywords: ["Duiven", "Antiek", "Brol", "Buitenkansje"] },
-        { subject: "Wat weet je over Pascale De Backer?", keywords: ["Café", "Madeleine", "Maurice", "Mijn gedacht"] },
-        { subject: "Wat weet je over de Dagschotel?", keywords: ["Pintje", "Xavier Waterslaeghers", "Café", "Vaste bestelling"] },
-        { subject: "Wat weet je over Pol De Tremmerie?", keywords: ["Trainer", "Afrika", "Doortje", "Leraar"] },
-        { subject: "Wat weet je over Château Migraine?", keywords: ["Wijn", "Boma", "Maagzuur", "Slecht"] },
-        { subject: "Wat weet je over Nero?", keywords: ["Hondje", "Yorkshire Terriër", "Carmen", "Boma"] }
+        { 
+            videoBron: "./fragmenten/r3_video1.mp4", 
+            subject: "VUL ONDERWERP IN", 
+            keywords: ["Trefwoord 1", "Trefwoord 2", "Trefwoord 3", "Trefwoord 4"] 
+        },
+        { 
+            videoBron: "./fragmenten/r3_video2.mp4", 
+            subject: "VUL ONDERWERP IN", 
+            keywords: ["Trefwoord 1", "Trefwoord 2", "Trefwoord 3", "Trefwoord 4"] 
+        },
+        { 
+            videoBron: "./fragmenten/r3_video3.mp4", 
+            subject: "VUL ONDERWERP IN", 
+            keywords: ["Trefwoord 1", "Trefwoord 2", "Trefwoord 3", "Trefwoord 4"] 
+        },
+        { 
+            videoBron: "./fragmenten/r3_video4.mp4", 
+            subject: "VUL ONDERWERP IN", 
+            keywords: ["Trefwoord 1", "Trefwoord 2", "Trefwoord 3", "Trefwoord 4"] 
+        },
+        { 
+            videoBron: "./fragmenten/r3_video5.mp4", 
+            subject: "VUL ONDERWERP IN", 
+            keywords: ["Trefwoord 1", "Trefwoord 2", "Trefwoord 3", "Trefwoord 4"] 
+        },
+        { 
+            videoBron: "./fragmenten/r3_video6.mp4", 
+            subject: "VUL ONDERWERP IN", 
+            keywords: ["Trefwoord 1", "Trefwoord 2", "Trefwoord 3", "Trefwoord 4"] 
+        },
+        { 
+            videoBron: "./fragmenten/r3_video7.mp4", 
+            subject: "VUL ONDERWERP IN", 
+            keywords: ["Trefwoord 1", "Trefwoord 2", "Trefwoord 3", "Trefwoord 4"] 
+        },
+        { 
+            videoBron: "./fragmenten/r3_video8.mp4", 
+            subject: "VUL ONDERWERP IN", 
+            keywords: ["Trefwoord 1", "Trefwoord 2", "Trefwoord 3", "Trefwoord 4"] 
+        },
+        { 
+            videoBron: "./fragmenten/r3_video9.mp4", 
+            subject: "VUL ONDERWERP IN", 
+            keywords: ["Trefwoord 1", "Trefwoord 2", "Trefwoord 3", "Trefwoord 4"] 
+        },
+        { 
+            videoBron: "./fragmenten/r3_video10.mp4", 
+            subject: "VUL ONDERWERP IN", 
+            keywords: ["Trefwoord 1", "Trefwoord 2", "Trefwoord 3", "Trefwoord 4"] 
+        }
     ]
 };
