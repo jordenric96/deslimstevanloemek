@@ -87,7 +87,7 @@
         <div class="round-controls">
             <button id="btn-round-1" data-round="1" class="active-round">R1</button>
             <button id="btn-round-2" data-round="2">R2 (Puzzel)</button>
-            <button id="btn-round-3" data-round="3">R3 (Open Deur)</button>
+            <button id="btn-round-3" data-round="3">R3 (Radio Hallo)</button>
             <button id="btn-round-4" data-round="4">R4 (Raad aflevering)</button>
             <button id="btn-round-5" data-round="5">R5 (Beeld)</button>
             <button id="btn-round-6" data-round="6">R6 (Finale)</button>
@@ -160,7 +160,7 @@
         
         let activeRound = 1;
         let activePlayerIndex = 0;
-        window.lastSyncedPlayers = []; // Houdt spelers bij voor R4 lijst
+        window.lastSyncedPlayers = []; 
 
         function selectPlayer(index) { channel.postMessage({ type: 'SELECT_PLAYER', playerIndex: index }); }
         function toggleTimer(index) { channel.postMessage({ type: 'TOGGLE_TIMER', playerIndex: index }); }
@@ -244,12 +244,10 @@
                 }
             }
             
-            // NIEUWE R4 SYNC (Raad de aflevering)
             if (event.data.type === 'SYNC_R4') {
                 activeRound = 4;
                 buttons.forEach(btn => btn.classList.remove('active-round'));
                 document.getElementById(`btn-round-4`).classList.add('active-round');
-
                 document.getElementById('standard-actions').style.display = 'none';
 
                 let html = `<div style="text-align:center;">
@@ -287,12 +285,10 @@
                 activeRound = 5;
                 buttons.forEach(btn => btn.classList.remove('active-round'));
                 document.getElementById(`btn-round-5`).classList.add('active-round');
-                
                 document.getElementById('standard-actions').style.display = 'flex';
 
                 let html = `<h3 style="color:var(--kamp-geel); margin-top:0;">Kies een Fragment:</h3>
                             <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:15px;">`;
-                
                 for (let i = 0; i < event.data.total; i++) {
                     const isPlayed = event.data.played.includes(i);
                     if (isPlayed) {
@@ -359,7 +355,14 @@
                             const word = k.word ? k.word : k; const safeW = escapeAnswer(word); 
                             return `<button class="correct-btn" onclick="sendAnswer('${safeW}')">✅ ${word}</button>`; 
                         }).join(' ');
-                        html += `<strong style="font-size:1.1em; color:#fff;">${q.subject}</strong><br><div style="margin-top:8px;">${keywordsHtml}</div>`;
+                        
+                        // NIEUW: De Grote Audio Play knop voor Ronde 3!
+                        html += `
+                            <button onclick="channel.postMessage({ type: 'PLAY_AUDIO' })" style="width: 100%; padding: 12px; background: var(--kamp-groen); color: white; border-radius: 8px; border: 2px solid white; font-weight: bold; font-size: 1.1em; cursor: pointer; margin-bottom: 10px;">
+                                🔊 SPEEL RADIO HALLO FRAGMENT
+                            </button>
+                            <strong style="font-size:1.1em; color:#fff;">Oplossing: ${q.subject}</strong><br>
+                            <div style="margin-top:8px;">${keywordsHtml}</div>`;
                     }
                     else if (activeRound === 5) {
                         const safeS = escapeAnswer(q.vraag1_seizoen); 
