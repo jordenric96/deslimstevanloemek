@@ -53,14 +53,15 @@
                 <div id="opendeur-keywords-container"></div>
             </div>
 
-            <!-- DE NIEUWE STIJL VOOR RONDE 4 (BORDJES) -->
+            <!-- RONDE 4: BORDJES (MET BLUR TRANSITIE) -->
             <div id="r4-display-area" style="display: none; width: 100%; flex-direction: column; align-items: center; margin-top: 20px;">
                 <div id="r4-timer-container" style="width: 80%; background: rgba(255,255,255,0.2); height: 20px; border-radius: 10px; overflow: hidden; margin-bottom: 20px; display: none;">
                     <div id="r4-timer-bar" style="width: 100%; height: 100%; background: var(--kamp-geel); transition: width 1s linear;"></div>
                 </div>
-                <img id="r4-photo" style="max-width: 80%; max-height: 55vh; border: 4px solid var(--kamp-geel); border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.8); display: none;" src="" />
                 
-                <!-- BORDJES.MP4 START HIER -->
+                <!-- TRANSITIE TOEGEVOEGD VOOR HET VLOEIEND ON-BLURREN -->
+                <img id="r4-photo" style="max-width: 80%; max-height: 55vh; border: 4px solid var(--kamp-geel); border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.8); display: none; transition: filter 1s ease-out;" src="" />
+                
                 <video id="r4-video" playsinline src="./fragmenten/bordjes.mp4" style="max-width: 80%; max-height: 55vh; border: 4px solid var(--kamp-geel); border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.8); display: none;"></video>
                 
                 <h1 id="r4-answer" style="display: none; font-size: 4.5em; color: var(--correct-color); margin-top: 30px; text-align: center; text-shadow: 2px 2px 10px rgba(0,0,0,0.8); font-family: 'Chakra Petch', sans-serif;"></h1>
@@ -181,7 +182,6 @@
             ...q, id: i + 1, keywords: (q.keywords || []).map(w => ({ word: w, found: false, missed: false })) 
         }));
         
-        // De structuur voor ronde 4 is nu aangepast naar foto's
         quizData.ronde4_geheugen = (quizData.ronde4_geheugen || []).map((q, i) => ({ ...q, id: i + 1 }));
         
         quizData.ronde5_beeld = (quizData.ronde5_beeld || []).map((q, i) => ({ 
@@ -370,7 +370,7 @@
             let idx = players.findIndex(p => p.originalIndex === activePlayerIndex);
             activePlayerIndex = players[(idx + 1) % players.length].originalIndex;
             renderPlayers();
-        } else if (currentRound >= 2 && currentRound <= 5 && currentRound !== 4) { // R4 heeeft nu eigen logica
+        } else if (currentRound >= 2 && currentRound <= 5 && currentRound !== 4) {
             if (previousPlayerIndex !== null && !currentSetAttempts.includes(previousPlayerIndex)) {
                 currentSetAttempts.push(previousPlayerIndex);
             }
@@ -484,7 +484,6 @@
     let activeRound2Puzzles = [], currentPuzzleSet = null, currentR2SetCount = 0;
     function setupRound2() {
         currentRound = 2; currentR2SetCount = 0; startingPlayersThisRound = []; activePlayerIndex = getNextStartingPlayerIndex(2); roundTitle.textContent = `Ronde 2: De Puzzel`; 
-        if (!quizData.ronde2_answer_pool || quizData.ronde2_answer_pool.length === 0) { alert("⚠️ Geen data gevonden voor Ronde 2! Kijk je quizdata_r2.js bestand na."); return; }
         const fullPool = shuffleArray([...quizData.ronde2_answer_pool]); activeRound2Puzzles = [];
         for (let i = 0; i < players.length; i++) { activeRound2Puzzles.push(fullPool.slice(i * 3, (i + 1) * 3).map((p, j) => ({ ...p, found: false, missed: false, color: `color-${(j % 3) + 1}`, clues: p.clues.map(c => ({ text: c, color: `color-${(j % 3) + 1}` })) }))); }
         hideAllGameAreas(); document.getElementById('puzzle-display-area').style.display = 'flex';
@@ -546,7 +545,6 @@
     let activeOpenDeurQuestions = [], currentOpenDeurIndex = 0;
     function setupRound3() {
         currentRound = 3; currentOpenDeurIndex = 0; startingPlayersThisRound = []; activePlayerIndex = getNextStartingPlayerIndex(3); roundTitle.textContent = `Ronde 3: Open Deur`; 
-        if (!quizData.ronde3_openDeur || quizData.ronde3_openDeur.length === 0) { alert("⚠️ Geen data gevonden voor Ronde 3!"); return; }
         activeOpenDeurQuestions = shuffleArray([...quizData.ronde3_openDeur]).slice(0, players.length);
         hideAllGameAreas(); opendeurDisplayArea.style.display = 'block'; questionText.style.display = 'block'; questionCounter.style.display = 'block'; loadOpenDeur();
     }
@@ -587,14 +585,7 @@
 
     function setupRound4() {
         currentRound = 4; currentR4Index = 0; roundTitle.textContent = "Ronde 4: Raad de aflevering (Bordjes!)"; 
-        
-        if (!quizData.ronde4_geheugen || quizData.ronde4_geheugen.length === 0 || !quizData.ronde4_geheugen[0].foto) {
-            alert("⚠️ Geen juiste foto-data gevonden voor Ronde 4! Zorg dat quizdata_r4.js klopt.");
-            return;
-        }
-
         activeRound4Questions = quizData.ronde4_geheugen;
-        
         hideAllGameAreas(); 
         document.getElementById('r4-display-area').style.display = 'flex'; 
         questionText.style.display = 'none'; 
@@ -613,12 +604,16 @@
         
         document.getElementById('r4-timer-container').style.display = 'none';
         document.getElementById('r4-timer-bar').style.width = '100%';
-        document.getElementById('r4-photo').src = q.foto;
-        document.getElementById('r4-photo').style.display = 'block';
+        
+        let photoEl = document.getElementById('r4-photo');
+        photoEl.src = q.foto;
+        photoEl.style.display = 'block';
+        photoEl.style.filter = 'blur(40px)'; // SUPER TROEBEL BIJ START
+        
         document.getElementById('r4-video').style.display = 'none';
         document.getElementById('r4-answer').style.display = 'none';
+        questionText.style.display = 'none'; // Zeker de vraagtekst verbergen
 
-        // Omdat iedereen speelt, deselecteren we de actieve speler in de UI
         activePlayerIndex = -1;
         renderPlayers();
 
@@ -627,6 +622,10 @@
 
     function startR4Timer() {
         document.getElementById('r4-timer-container').style.display = 'block';
+        
+        // ZODRA TIMER START: HAAL DE BLUR WEG!
+        document.getElementById('r4-photo').style.filter = 'blur(0px)';
+        
         let timeLeft = 15;
         document.getElementById('r4-timer-bar').style.width = '100%';
         
@@ -642,13 +641,21 @@
                 
                 let vid = document.getElementById('r4-video');
                 vid.style.display = 'block';
-                vid.currentTime = 0; // reset video to start just in case
+                vid.currentTime = 0; 
                 vid.play().catch(e => console.log("Video autoplay blocked by browser", e));
                 
                 vid.onended = () => {
                     vid.style.display = 'none';
-                    document.getElementById('r4-answer').textContent = activeRound4Questions[currentR4Index].antwoord;
-                    document.getElementById('r4-answer').style.display = 'block';
+                    
+                    // DE 5 SECONDEN WACHT-PAUZE
+                    questionText.textContent = "Kijken naar de bordjes...";
+                    questionText.style.display = 'block';
+                    
+                    setTimeout(() => {
+                        questionText.style.display = 'none';
+                        document.getElementById('r4-answer').textContent = activeRound4Questions[currentR4Index].antwoord;
+                        document.getElementById('r4-answer').style.display = 'block';
+                    }, 5000);
                 };
             }
         }, 1000);
@@ -659,8 +666,6 @@
     function setupRound5() {
         currentRound = 5; currentBeeldIndex = -1; startingPlayersThisRound = []; playedVideos = [];
         activePlayerIndex = getNextStartingPlayerIndex(5); roundTitle.textContent = `Ronde 5: De Beeldronde`; 
-        
-        if (!quizData.ronde5_beeld || quizData.ronde5_beeld.length === 0) { alert("⚠️ Geen data gevonden voor Ronde 5!"); return; }
         activeBeeldQuestions = shuffleArray([...quizData.ronde5_beeld]).slice(0, players.length); 
         
         hideAllGameAreas(); 
@@ -784,7 +789,6 @@
     let activeFinaleQuestions = [], currentFinaleQuestionIndex = 0;
     function setupFinale() {
         currentRound = 6; currentFinaleQuestionIndex = 0; roundTitle.textContent = "Ronde 6: De Finale"; 
-        if (!quizData.ronde6_finale || quizData.ronde6_finale.length === 0) { alert("⚠️ Geen data gevonden voor de Finale!"); return; }
         const topTwoPlayers = [...players].sort((a, b) => b.seconds - a.seconds).slice(0, 2); finalists = players.filter(p => topTwoPlayers.some(topP => topP.originalIndex === p.originalIndex)).map(p => ({ player: p, originalIndex: p.originalIndex }));
         activeFinaleQuestions = shuffleArray([...quizData.ronde6_finale]);
         const lowestScorePlayer = finalists.sort((a, b) => a.player.seconds - b.player.seconds)[0]; activePlayerIndex = lowestScorePlayer.player.originalIndex; activeFinalistIndex = finalists.findIndex(f => f.player.originalIndex === activePlayerIndex);
@@ -830,7 +834,6 @@
         
         if (event.data.type === 'ADJUST_TIME') {
             const target = (event.data.targetPlayer !== undefined) ? event.data.targetPlayer : activePlayerIndex;
-            // Als in ronde 4 de GM een speler manueel 40s geeft, telt dat als 1 correct antwoord in de stats.
             if (currentRound === 4 && event.data.amount > 0) { playerStats[target].r4.c++; }
             updateSeconds(target, event.data.amount);
             showBonusFeedback(target, event.data.amount);
@@ -862,6 +865,7 @@
         if (event.data.type === 'SELECT_VIDEO') {
             if (currentRound === 5) loadBeeldVraag(event.data.index);
         }
+        
         if (event.data.type === 'PLAY_VIDEO') {
             if (currentRound === 5) {
                 const vp = document.getElementById('beeld-video-player');
@@ -873,7 +877,7 @@
             if(currentRound==1) checkRound1Answer();
             if(currentRound==2) { currentR2SetCount++; loadNewPuzzle(); }
             if(currentRound==3) { currentOpenDeurIndex++; loadOpenDeur(); }
-            if(currentRound==4) { currentR4Index++; loadR4Vraag(); } // Verplaatst R4 logic naar next photo
+            if(currentRound==4) { currentR4Index++; loadR4Vraag(); } 
             if(currentRound==5) { returnToVideoGrid(); }
             if(currentRound==6) { currentFinaleQuestionIndex++; loadFinaleQuestion(); }
         }
