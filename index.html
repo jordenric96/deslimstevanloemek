@@ -7,6 +7,7 @@
 
     <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@600;700&family=Open+Sans:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="stijl.css">
+    
     <style>
         /* Animatie voor de Radio Hallo! */
         @keyframes radioPulse { 
@@ -57,14 +58,18 @@
                 <div id="puzzle-clues-container"></div>
             </div>
 
-            <!-- RONDE 3: RADIO HALLO -->
+            <!-- RONDE 3: RADIO HALLO (MET VERBORGEN MP4 SPELER) -->
             <div id="opendeur-display-area" style="display: none; width: 100%; flex-direction: column; align-items: center;">
                 <div id="radio-visual" style="font-size: 6em; margin-bottom: 20px; transition: transform 0.2s;">📻</div>
-                <audio id="r3-audio-player" src=""></audio>
+                
+                <!-- De video is verborgen! Enkel het geluid wordt afgespeeld. -->
+                <video id="r3-audio-player" style="display: none;" src=""></video>
+                
                 <h3 id="opendeur-subject"></h3>
                 <div id="opendeur-keywords-container"></div>
             </div>
 
+            <!-- RONDE 4: BORDJES -->
             <div id="r4-display-area" style="display: none; width: 100%; flex-direction: column; align-items: center; margin-top: 20px;">
                 <div id="r4-timer-container" style="width: 80%; background: rgba(255,255,255,0.2); height: 20px; border-radius: 10px; overflow: hidden; margin-bottom: 20px; display: none;">
                     <div id="r4-timer-bar" style="width: 100%; height: 100%; background: var(--kamp-geel); transition: width 1s linear;"></div>
@@ -72,6 +77,10 @@
                 <img id="r4-photo" style="max-width: 80%; max-height: 55vh; border: 4px solid var(--kamp-geel); border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.8); display: none; transition: filter 1s ease-out;" src="" />
                 <video id="r4-video" playsinline src="./fragmenten/bordjes.mp4" style="max-width: 80%; max-height: 55vh; border: 4px solid var(--kamp-geel); border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.8); display: none;"></video>
                 <h1 id="r4-answer" style="display: none; font-size: 4.5em; color: var(--correct-color); margin-top: 30px; text-align: center; text-shadow: 2px 2px 10px rgba(0,0,0,0.8); font-family: 'Chakra Petch', sans-serif;"></h1>
+            </div>
+
+            <div id="geheugen-display-area" style="display: none;">
+                <ul id="geheugen-board"></ul>
             </div>
 
             <div id="beeld-display-area" style="display: none; width: 100%; flex-direction: column; align-items: center;">
@@ -185,10 +194,13 @@
 
         quizData.ronde1_pool = (quizData.ronde1_pool || []).map((q, i) => ({ ...q, id: i + 1 }));
         quizData.ronde2_answer_pool = (quizData.ronde2_answer_pool || []).map((q, i) => ({ ...q, id: i + 1 }));
+        
         quizData.ronde3_openDeur = (quizData.ronde3_openDeur || []).map((q, i) => ({ 
             ...q, id: i + 1, keywords: (q.keywords || []).map(w => ({ word: w, found: false, missed: false })) 
         }));
+        
         quizData.ronde4_geheugen = (quizData.ronde4_geheugen || []).map((q, i) => ({ ...q, id: i + 1 }));
+        
         quizData.ronde5_beeld = (quizData.ronde5_beeld || []).map((q, i) => ({ 
             ...q, id: i + 1, 
             ans_seizoen: { word: q.vraag1_seizoen || "?", found: false, missed: false, label: "Seizoen" }, 
@@ -197,6 +209,7 @@
             ans_kw1: { word: (q.vraag4_keywords && q.vraag4_keywords[0]) ? q.vraag4_keywords[0] : "?", found: false, missed: false, label: "Trefwoord 1" }, 
             ans_kw2: { word: (q.vraag4_keywords && q.vraag4_keywords[1]) ? q.vraag4_keywords[1] : "?", found: false, missed: false, label: "Trefwoord 2" } 
         }));
+
         quizData.ronde6_finale = (quizData.ronde6_finale || []).map((q, i) => ({ 
             ...q, id: i + 1, keywords: (q.keywords || []).map(w => ({ word: w, found: false, missed: false })) 
         }));
@@ -308,7 +321,7 @@
         
         if (currentRound === 2) document.getElementById('puzzle-clues-container').classList.remove('blurred-board');
         if (currentRound === 3) {
-            opendeurSubject.textContent = activeOpenDeurQuestions[currentOpenDeurIndex].subject; // TOON ECHTE ONDERWERP
+            opendeurSubject.textContent = activeOpenDeurQuestions[currentOpenDeurIndex].subject || "Open Deur"; 
             opendeurSubject.classList.remove('blurred-subject');
         }
         if (currentRound === 5) document.getElementById('beeld-tasks-container').classList.remove('blurred-board');
@@ -409,8 +422,8 @@
         if (videoPlayer) { videoPlayer.pause(); videoPlayer.src = ""; }
         const r4Video = document.getElementById('r4-video');
         if(r4Video) { r4Video.pause(); }
-        const ap = document.getElementById('r3-audio-player');
-        if (ap) { ap.pause(); }
+        const r3Video = document.getElementById('r3-audio-player');
+        if(r3Video) { r3Video.pause(); }
     }
 
     function generateReport() {
@@ -551,7 +564,7 @@
         stopTimer(); currentSetAttempts = players.map(p => p.originalIndex); activePlayerIndex = getNextStartingPlayerIndex(2); 
     }
 
-    // --- RONDE 3: RADIO HALLO ---
+    // --- RONDE 3: RADIO HALLO (MET MP4 VERBORGEN) ---
     let activeOpenDeurQuestions = [], currentOpenDeurIndex = 0;
     function setupRound3() {
         currentRound = 3; currentOpenDeurIndex = 0; startingPlayersThisRound = []; activePlayerIndex = getNextStartingPlayerIndex(3); roundTitle.textContent = `Ronde 3: Radio Hallo (Open Deur)`; 
@@ -566,9 +579,9 @@
         
         questionCounter.innerHTML = `Vraag ${currentOpenDeurIndex + 1} / ${players.length}`; 
         
-        // LAAD AUDIO IN
+        // LAAD MP4 IN MAAR TOON ENKEL DE RADIO (video = hidden via CSS inline)
         const ap = document.getElementById('r3-audio-player');
-        if(ap) { ap.src = activeOD.audioBron || ""; }
+        if(ap) { ap.src = activeOD.mediaBron || ""; }
         
         opendeurSubject.textContent = "Luister naar Radio Hallo..."; 
         opendeurSubject.classList.add('blurred-subject'); 
@@ -599,7 +612,7 @@
         stopTimer(); currentSetAttempts = players.map(p => p.originalIndex); activePlayerIndex = getNextStartingPlayerIndex(3);
     }
 
-    // --- RONDE 4 ---
+    // --- RONDE 4 (BORDJES) ---
     let activeRound4Questions = [], currentR4Index = 0;
     let r4TimerInt = null;
 
@@ -712,9 +725,12 @@
     }
 
     function loadBeeldVraag(index) {
-        currentBeeldIndex = index; currentSetAttempts = []; let q = activeBeeldQuestions[currentBeeldIndex]; 
+        currentBeeldIndex = index;
+        currentSetAttempts = []; let q = activeBeeldQuestions[currentBeeldIndex]; 
         startingPlayersThisRound.push(activePlayerIndex); 
-        questionText.textContent = "Kijk naar het fragment!"; questionCounter.innerHTML = `Fragment ${currentBeeldIndex + 1}`; 
+        
+        questionText.textContent = "Kijk naar het fragment!";
+        questionCounter.innerHTML = `Fragment ${currentBeeldIndex + 1}`; 
         
         document.getElementById('beeld-grid').style.display = 'none';
         document.getElementById('beeld-tasks-container').style.display = 'none';
