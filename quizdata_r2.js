@@ -20,9 +20,6 @@ const RONDE2_DATA = {
            { answer: "Proost", clues: ["Schol", "Pater Benny", "Oh ik ben zo zat, ik ben zo zat", "Amberkleurig] },
           { answer: "Wafel", clues: ["Geen frikandellen", "Brussels of Luiks?", "één boekske van tien.." "Om te eten"] },
 
-
-
-
         { answer: "Bolleke", clues: ["Auto", "Fiat 500", "Marc", "Klein"] }
     ]
 };
