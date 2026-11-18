@@ -9,12 +9,37 @@
     <link rel="stylesheet" href="stijl.css">
     
     <style>
+        /* Animatie voor de Radio Hallo! */
         @keyframes radioPulse { 
             0% { transform: scale(1); filter: drop-shadow(0 0 0px var(--kamp-geel)); } 
             50% { transform: scale(1.15) rotate(-5deg); filter: drop-shadow(0 0 25px var(--kamp-geel)); } 
             100% { transform: scale(1); filter: drop-shadow(0 0 0px var(--kamp-geel)); } 
         }
         .playing-audio { animation: radioPulse 0.6s infinite !important; }
+
+        /* NIEUW: Animatie en styling voor de 4 trefwoorden van Ronde 4 */
+        @keyframes popIn {
+            0% { transform: scale(0); opacity: 0; }
+            80% { transform: scale(1.1); opacity: 1; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        
+        .r4-keyword-box {
+            background: linear-gradient(135deg, var(--kamp-donkergroen), #0a4022);
+            border: 3px solid var(--kamp-geel);
+            padding: 20px 40px;
+            border-radius: 12px;
+            font-size: 2.2em;
+            color: white;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.6);
+            font-family: 'Chakra Petch', sans-serif;
+            text-align: center;
+            min-width: 250px;
+            opacity: 0;
+            transform: scale(0);
+            animation: popIn 0.5s ease forwards;
+        }
     </style>
 </head>
 <body>
@@ -64,12 +89,11 @@
                 <div id="opendeur-keywords-container"></div>
             </div>
 
-            <!-- NIEUW: RONDE 4 MET GRID ZONDER FOTO'S -->
+            <!-- RONDE 4 MET GRID ZONDER FOTO'S EN NIEUWE TREFWOORD LAYOUT -->
             <div id="r4-display-area" style="display: none; width: 100%; flex-direction: column; align-items: center; margin-top: 20px;">
                 <!-- Raster met blinde knoppen -->
                 <div id="r4-grid" style="display: flex; gap: 20px; justify-content: center; flex-wrap: wrap; width: 90%; margin-bottom: 20px;"></div>
                 
-                <!-- De Vraag / Het Gekozen Fragment -->
                 <div id="r4-vraag-container" style="display: none; width: 100%; flex-direction: column; align-items: center;">
                     <div id="r4-timer-container" style="width: 80%; background: rgba(255,255,255,0.2); height: 20px; border-radius: 10px; overflow: hidden; margin-bottom: 20px; display: none;">
                         <div id="r4-timer-bar" style="width: 100%; height: 100%; background: var(--kamp-geel); transition: width 1s linear;"></div>
@@ -78,7 +102,8 @@
                     <video id="r4-clue-video" playsinline style="max-width: 80%; max-height: 55vh; border: 4px solid var(--kamp-geel); border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.8); display: none;" src=""></video>
                     <video id="r4-video" playsinline src="./fragmenten/bordjes.mp4" style="max-width: 80%; max-height: 55vh; border: 4px solid var(--kamp-geel); border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.8); display: none;"></video>
                     
-                    <h1 id="r4-answer" style="display: none; font-size: 4.5em; color: var(--correct-color); margin-top: 30px; text-align: center; text-shadow: 2px 2px 10px rgba(0,0,0,0.8); font-family: 'Chakra Petch', sans-serif;"></h1>
+                    <!-- NIEUW: DE 4 TREFWOORDEN CONTAINER -->
+                    <div id="r4-answer" style="display: none; width: 90%; justify-content: center; gap: 25px; flex-wrap: wrap; margin-top: 30px;"></div>
                 </div>
             </div>
 
@@ -153,7 +178,7 @@
     let startingPlayersThisRound = []; 
     let playedVideos = []; 
     let playerStats = {};
-    let r1BaseIndex = 0; // Bewaart de "basis" beurt voor Ronde 1
+    let r1BaseIndex = 0; 
 
     const setupScreen = document.getElementById('setup-screen'), playerNameInputs = document.getElementById('player-name-inputs');
     const numPlayersInput = document.getElementById('num-players'), playerContainer = document.getElementById('player-container');
@@ -202,6 +227,7 @@
             ...q, id: i + 1, keywords: (q.keywords || []).map(w => ({ word: w, found: false, missed: false })) 
         }));
         
+        // R4 HEEFT NU OOK EEN KEYWORDS ARRAY
         quizData.ronde4_geheugen = (quizData.ronde4_geheugen || []).map((q, i) => ({ ...q, id: i + 1 }));
         
         quizData.ronde5_beeld = (quizData.ronde5_beeld || []).map((q, i) => ({ 
@@ -448,7 +474,7 @@
                         <span style="font-size: 0.85em; color: #aaa; margin-top: 3px;">Woorden: <span style="color:var(--correct-color)">${r2Words}</span></span>
                     </div>
                     <div style="margin-bottom: 10px; display: flex; justify-content: space-between;"><strong>R3 (Radio Hallo):</strong> <span><span style="color:var(--correct-color)">${stats.r3.c}✓</span> / <span style="color:var(--wrong-color)">${stats.r3.w}✗</span></span></div>
-                    <div style="margin-bottom: 10px; display: flex; justify-content: space-between;"><strong>R4 (Raad Aflevering):</strong> <span><span style="color:var(--correct-color)">${stats.r4.c}✓</span></div>
+                    <div style="margin-bottom: 10px; display: flex; justify-content: space-between;"><strong>R4 (Bordjes):</strong> <span><span style="color:var(--correct-color)">${stats.r4.c}✓</span></div>
                     <div style="margin-bottom: 10px; display: flex; justify-content: space-between;"><strong>R5 (Beeld):</strong> <span><span style="color:var(--correct-color)">${stats.r5.c}✓</span> / <span style="color:var(--wrong-color)">${stats.r5.w}✗</span></span></div>
                     <div style="margin-bottom: 10px; display: flex; justify-content: space-between;"><strong>R6 (Finale):</strong> <span><span style="color:var(--correct-color)">${stats.r6.c}✓</span> / <span style="color:var(--wrong-color)">${stats.r6.w}✗</span></span></div>
                     <div style="margin-top: auto; text-align: center; font-size: 1.8em; font-family: 'Chakra Petch', sans-serif; color: var(--kamp-geel); border-top: 1px solid rgba(255,255,255,0.2); padding-top: 15px; font-weight: bold;">
@@ -461,12 +487,12 @@
         channel.postMessage({ type: 'SYNC_REPORT', html: container.innerHTML });
     }
 
-    // --- RONDE 1 (VERBETERDE LOGICA: STRIKT SEQUENTIEEL PER VRAAG) ---
+    // --- RONDE 1 ---
     let activeRound1Questions = [];
     
     function startGameR1() {
         currentRound = 1; currentQuestionIndex = 0; 
-        r1BaseIndex = getNextStartingPlayerIndex(1); // Wie start de quiz? (Meestal speler 0)
+        r1BaseIndex = getNextStartingPlayerIndex(1);
         roundTitle.textContent = "Ronde 1: Algemene Kennis"; 
         activeRound1Questions = shuffleArray([...quizData.ronde1_pool]).slice(0, 12);
         hideAllGameAreas(); questionText.style.display = 'block'; questionCounter.style.display = 'block';
@@ -480,7 +506,6 @@
             questionCounter.innerHTML = `Vraag ${currentQuestionIndex + 1} / ${activeRound1Questions.length}`;
             inputAnswer.value = ""; inputAnswer.focus(); 
             
-            // Nieuwe vraag = Altijd terug naar de speler wiens "beurt" het is in de opstelling
             activePlayerIndex = players[r1BaseIndex].originalIndex; 
             timerPlayerIndex = activePlayerIndex; renderPlayers();
             channel.postMessage({ type: 'SYNC_QUESTION', round: 1, ids: [q.id] });
@@ -498,14 +523,13 @@
             showFeedback(true); updateSeconds(activePlayerIndex, R1_BONUS_SECONDS); showBonusFeedback(activePlayerIndex, R1_BONUS_SECONDS);
             setTimeout(() => { 
                 currentQuestionIndex++; 
-                r1BaseIndex = (r1BaseIndex + 1) % players.length; // Volgende speler mag straks de nieuwe vraag starten!
+                r1BaseIndex = (r1BaseIndex + 1) % players.length; 
                 displayQuestionR1(); 
             }, 2000);
         } else {
             playerStats[activePlayerIndex].r1.w++; 
             showFeedback(false); if (!currentQuestionAttempts.includes(activePlayerIndex)) currentQuestionAttempts.push(activePlayerIndex);
             
-            // Fout antwoord = GEEF BEURT DOOR VOOR DEZE VRAAG
             let nextFound = false; let currentIdx = players.findIndex(p => p.originalIndex === activePlayerIndex);
             for (let i = 1; i <= players.length; i++) {
                 let candidate = players[(currentIdx + i) % players.length];
@@ -520,7 +544,7 @@
                 questionText.textContent = `Niemand wist het. Antwoord: ${q.a}`;
                 setTimeout(() => { 
                     currentQuestionIndex++; 
-                    r1BaseIndex = (r1BaseIndex + 1) % players.length; // Niemand wist het, we schuiven de basisbeurt op!
+                    r1BaseIndex = (r1BaseIndex + 1) % players.length;
                     displayQuestionR1(); 
                 }, 3000);
             }
@@ -589,7 +613,7 @@
         stopTimer(); currentSetAttempts = players.map(p => p.originalIndex); activePlayerIndex = getNextStartingPlayerIndex(2); 
     }
 
-    // --- RONDE 3: RADIO HALLO ---
+    // --- RONDE 3 ---
     let activeOpenDeurQuestions = [], currentOpenDeurIndex = 0;
     function setupRound3() {
         currentRound = 3; currentOpenDeurIndex = 0; startingPlayersThisRound = []; activePlayerIndex = getNextStartingPlayerIndex(3); roundTitle.textContent = `Ronde 3: Radio Hallo (Open Deur)`; 
@@ -636,7 +660,7 @@
         stopTimer(); currentSetAttempts = players.map(p => p.originalIndex); activePlayerIndex = getNextStartingPlayerIndex(3);
     }
 
-    // --- NIEUW RONDE 4: BORDJES (MET BLIND GRID SELECTIE & MP4) ---
+    // --- RONDE 4: BORDJES (MET 4 TREFWOORDEN) ---
     let activeRound4Questions = [], currentR4Index = -1;
     let r4TimerInt = null;
     let playedR4Videos = [];
@@ -645,7 +669,7 @@
     function setupRound4() {
         currentRound = 4; currentR4Index = -1; playedR4Videos = []; currentR4BaseIndex = 0;
         roundTitle.textContent = "Ronde 4: Raad de aflevering (Bordjes!)"; 
-        activeRound4Questions = shuffleArray([...quizData.ronde4_geheugen]).slice(0, players.length); // Max 1 fragment per speler
+        activeRound4Questions = shuffleArray([...quizData.ronde4_geheugen]).slice(0, players.length); 
         
         hideAllGameAreas(); 
         document.getElementById('r4-display-area').style.display = 'flex'; 
@@ -657,7 +681,6 @@
     function renderR4Grid() {
         if (playedR4Videos.length >= players.length) { hideAllGameAreas(); questionText.style.display = 'block'; questionText.textContent = "Einde van Ronde 4!"; return; }
         
-        // De speler die aan de beurt is om te 'kiezen'
         activePlayerIndex = players[currentR4BaseIndex].originalIndex;
         questionText.textContent = "Kies een willekeurig fragment!";
         questionCounter.innerHTML = `Aan de beurt om te kiezen: ${players.find(p=>p.originalIndex===activePlayerIndex).name}`;
@@ -666,7 +689,6 @@
         grid.innerHTML = activeRound4Questions.map((q, i) => { 
             const isPlayed = playedR4Videos.includes(i);
             const opacity = isPlayed ? '0.3' : '1';
-            // Pure blokken zonder foto/thumbnail!
             return `<div style="width: 180px; height: 120px; background-color: var(--kamp-donkergroen); border: 3px solid var(--kamp-geel); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 1.5em; font-weight: bold; opacity: ${opacity}; color: white; cursor: ${isPlayed ? 'not-allowed' : 'pointer'}; box-shadow: 0 5px 15px rgba(0,0,0,0.5);">
                 ${isPlayed ? '❌' : 'Fragment ' + (i+1)}
             </div>`;
@@ -687,6 +709,7 @@
         document.getElementById('r4-grid').style.display = 'none';
         document.getElementById('r4-vraag-container').style.display = 'flex';
         document.getElementById('r4-timer-container').style.display = 'none';
+        document.getElementById('r4-answer').style.display = 'none';
         
         let clueEl = document.getElementById('r4-clue-video');
         clueEl.src = q.mediaBron;
@@ -694,14 +717,13 @@
         clueEl.play().catch(e => console.log(e));
         
         document.getElementById('r4-video').style.display = 'none';
-        document.getElementById('r4-answer').style.display = 'none';
         questionText.style.display = 'none'; 
         
-        // Tijdens de timer speelt iedereen mee
         activePlayerIndex = -1;
         renderPlayers();
         
-        channel.postMessage({ type: 'SYNC_R4', answer: q.antwoord, qNum: currentR4Index + 1, total: activeRound4Questions.length });
+        // Stuur de hele array keywords door!
+        channel.postMessage({ type: 'SYNC_R4', keywords: q.keywords, qNum: currentR4Index + 1, total: activeRound4Questions.length });
     }
 
     function startR4Timer() {
@@ -734,8 +756,12 @@
                     
                     setTimeout(() => {
                         questionText.style.display = 'none';
-                        document.getElementById('r4-answer').textContent = activeRound4Questions[currentR4Index].antwoord;
-                        document.getElementById('r4-answer').style.display = 'block';
+                        let ansContainer = document.getElementById('r4-answer');
+                        // DE 4 TEGELS MET ANIMATIE!
+                        ansContainer.innerHTML = activeRound4Questions[currentR4Index].keywords.map((kw, idx) =>
+                            `<div class="r4-keyword-box" style="animation-delay: ${idx * 0.25}s;">${kw}</div>`
+                        ).join('');
+                        ansContainer.style.display = 'flex';
                     }, 5000);
                 };
             }
@@ -751,7 +777,7 @@
         renderR4Grid();
     }
 
-    // --- RONDE 5 (Beeldronde) ---
+    // --- RONDE 5 ---
     let activeBeeldQuestions = [], currentBeeldIndex = -1;
     function setupRound5() {
         currentRound = 5; currentBeeldIndex = -1; startingPlayersThisRound = []; playedVideos = [];
@@ -928,7 +954,8 @@
         
         if (event.data.type === 'ADJUST_TIME') {
             const target = (event.data.targetPlayer !== undefined) ? event.data.targetPlayer : activePlayerIndex;
-            if (currentRound === 4 && event.data.amount > 0) { playerStats[target].r4.c++; }
+            // Als de GM in Ronde 4 punten uitdeelt, telt event.data.isR4Score de AANTALLEN correct
+            if (currentRound === 4 && event.data.isR4Score) { playerStats[target].r4.c += event.data.isR4Score; }
             updateSeconds(target, event.data.amount);
             showBonusFeedback(target, event.data.amount);
         }
