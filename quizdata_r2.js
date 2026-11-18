@@ -3,7 +3,7 @@
 const RONDE2_DATA = {
     "KAMPIOENEN": [
         // --- Speler 1 ---
-        { answer: "Gentil De Schepper", clues: ["Beetje een opschepper", "Klasgenoot van Oscar", "Kinpolis is het", "Maar dan twee keer"] },
+        { answer: "Gentil De Schepper", clues: ["Beetje een opschepper", "Klasgenoot van Oscar", "Kinepolis is het", "Maar dan twee keer"] },
         { answer: "Helga Botermans", clues: ["Kader Gurbuz", "tegenhanger van margarinevrouw", "Psycho Boma", "Pol in de put"] },
         { answer: "Ouagadougou", clues: ["Afrika", "Pol", "Ontwikkelingshulp", "Burkina Faso"] },
         { answer: "Jean-Luc Grootjans", clues: ["Aartsrivaal", "Worsten", "Voorzitter", "Vleesindustrie"] },
