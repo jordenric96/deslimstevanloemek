@@ -244,23 +244,41 @@
                 }
             }
             
-            if (event.data.type === 'SYNC_R4_GRID') {
+            // RONDE 4 SYNC (BORDJES, FOTO, MANUAL SCORE)
+            if (event.data.type === 'SYNC_R4') {
                 activeRound = 4;
                 buttons.forEach(btn => btn.classList.remove('active-round'));
                 document.getElementById(`btn-round-4`).classList.add('active-round');
-                document.getElementById('standard-actions').style.display = 'flex';
+                document.getElementById('standard-actions').style.display = 'none';
 
-                let html = `<h3 style="color:var(--kamp-geel); margin-top:0;">Speler mag kiezen:</h3>
-                            <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:15px;">`;
-                for (let i = 0; i < event.data.total; i++) {
-                    const isPlayed = event.data.played.includes(i);
-                    if (isPlayed) {
-                        html += `<button disabled class="grid-select-btn">❌ Fragment ${i+1}</button>`;
-                    } else {
-                        html += `<button onclick="channel.postMessage({ type: 'SELECT_VIDEO_R4', index: ${i} })" class="grid-select-btn">▶ Kies Fragment ${i+1}</button>`;
-                    }
-                }
-                html += `</div>`;
+                let html = `<div style="text-align:center;">
+                            <h3 style="color:var(--kamp-geel); margin-top:0;">Foto ${event.data.qNum} / ${event.data.total}</h3>
+                            <p style="font-size: 1.2em; color: #fff;">Antwoord: <strong style="color:var(--correct-color); font-size:1.6em; display:block; margin-top:5px; text-shadow: 0 2px 5px #000;">${event.data.answer}</strong></p>
+                            
+                            <button onclick="channel.postMessage({ type: 'START_R4_TIMER' })" style="width:100%; background:var(--kamp-groen); color:#fff; font-size:1.3em; font-weight:bold; padding:15px; border-radius:8px; border:2px solid #fff; cursor:pointer; margin-top:10px; margin-bottom:25px; box-shadow: 0 5px 15px rgba(0,0,0,0.4);">
+                                ⏱️ START 15 SEC TIMER
+                            </button>
+                            
+                            <div style="background: rgba(0,0,0,0.4); padding: 15px; border-radius: 8px; border: 1px solid var(--border-col);">
+                                <h4 style="color:#fff; border-bottom: 1px solid rgba(255,255,255,0.2); padding-bottom: 5px; margin-top:0;">Punten uitdelen:</h4>
+                                <p style="font-size:0.85em; color:var(--kamp-geel); margin-top:-5px;">Klik op wie juist gegokt heeft:</p>
+                                <div style="display:flex; flex-direction:column; gap:10px; margin-bottom: 20px;">`;
+                
+                window.lastSyncedPlayers.forEach(p => {
+                    html += `<button onclick="this.style.background='var(--kamp-groen)'; this.style.color='#fff'; this.textContent='✔️ Punten toegekend'; channel.postMessage({ type: 'ADJUST_TIME', amount: 40, targetPlayer: ${p.index}, isR4Score: 1 })" style="background:var(--kamp-geel); color:#000; font-weight:bold; padding:12px; border-radius:8px; border:none; cursor:pointer; text-align:left; font-size:1.1em; transition: 0.2s;">
+                                ✅ Geef ${p.name} +40 sec
+                            </button>`;
+                });
+
+                html += `</div></div>
+                         <button onclick="channel.postMessage({ type: 'NEXT_QUESTION' })" style="margin-top:20px; width:100%; background:#1e3a8a; color:#fff; font-size:1.2em; font-weight:bold; padding:15px; border-radius:8px; border:none; cursor:pointer;">
+                            ▶ VOLGENDE FOTO
+                         </button>
+                         <button onclick="channel.postMessage({ type: 'REQUEST_REPORT' })" style="margin-top:10px; width: 100%; background: transparent; color: #3b82f6; font-weight: bold; border: 2px solid #3b82f6; border-radius:8px; padding:15px; cursor:pointer;">
+                            📊 TOON EINDRAPPORT
+                         </button>
+                         </div>`;
+                
                 resultArea.innerHTML = html;
             }
 
@@ -345,16 +363,6 @@
                                 ▶ SPEEL MP4 FRAGMENT AF (GELUID ONLY)
                             </button>
                             <strong style="font-size:1.1em; color:#fff;">Oplossing: ${q.subject}</strong><br>
-                            <div style="margin-top:8px;">${keywordsHtml}</div>`;
-                    }
-                    else if (activeRound === 4) {
-                        const keywordsHtml = q.keywords.map(k => { 
-                            const word = k.word ? k.word : k; const safeW = escapeAnswer(word); 
-                            return `<button class="correct-btn" onclick="sendAnswer('${safeW}')">✅ ${word}</button>`; 
-                        }).join(' ');
-                        
-                        html += `
-                            <strong style="font-size:1.1em; color:#fff;">Trefwoorden (+20 sec):</strong><br>
                             <div style="margin-top:8px;">${keywordsHtml}</div>`;
                     }
                     else if (activeRound === 5) {
