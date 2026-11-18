@@ -264,49 +264,6 @@
                 resultArea.innerHTML = html;
             }
 
-            if (event.data.type === 'SYNC_R4') {
-                document.getElementById('standard-actions').style.display = 'none';
-
-                let kwHtml = event.data.keywords.map(kw => `<span style="background: rgba(255,255,255,0.1); padding: 5px 10px; border-radius: 6px; border: 1px solid var(--kamp-geel); margin: 3px; display: inline-block;">${kw}</span>`).join('');
-
-                let html = `<div style="text-align:center;">
-                            <h3 style="color:var(--kamp-geel); margin-top:0;">Fragment ${event.data.qNum} / ${event.data.total}</h3>
-                            <p style="font-size: 1.2em; color: #fff; margin-bottom: 15px;">Antwoorden:<br><div style="display:flex; justify-content:center; gap:8px; flex-wrap:wrap;">${kwHtml}</div></p>
-                            
-                            <button onclick="channel.postMessage({ type: 'START_R4_TIMER' })" style="width:100%; background:var(--kamp-groen); color:#fff; font-size:1.3em; font-weight:bold; padding:15px; border-radius:8px; border:2px solid #fff; cursor:pointer; margin-top:10px; margin-bottom:25px; box-shadow: 0 5px 15px rgba(0,0,0,0.4);">
-                                ⏱️ START 15 SEC TIMER
-                            </button>
-                            
-                            <div style="background: rgba(0,0,0,0.4); padding: 15px; border-radius: 8px; border: 1px solid var(--border-col);">
-                                <h4 style="color:#fff; border-bottom: 1px solid rgba(255,255,255,0.2); padding-bottom: 5px; margin-top:0;">Punten uitdelen (+10 per trefwoord):</h4>
-                                <div style="display:flex; flex-direction:column; gap:5px; margin-bottom: 10px;">`;
-                
-                // DE NIEUWE MULTI-SELECTIE BORDJES KNOPPEN
-                window.lastSyncedPlayers.forEach(p => {
-                    html += `
-                    <div style="background: rgba(255,255,255,0.05); padding: 8px 12px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; border: 1px solid rgba(255,255,255,0.1);">
-                        <span style="font-size: 1.1em; color: #fff; font-weight: bold;">${p.name}</span>
-                        <div style="display: flex; gap: 5px;">
-                            <button onclick="channel.postMessage({ type: 'ADJUST_TIME', amount: 10, targetPlayer: ${p.index}, isR4Score: 1 }); this.style.background='var(--kamp-groen)';" style="padding: 10px; background: var(--kamp-geel); color: #000; border:none; border-radius: 6px; font-weight: bold; cursor:pointer; width: 42px;">1</button>
-                            <button onclick="channel.postMessage({ type: 'ADJUST_TIME', amount: 20, targetPlayer: ${p.index}, isR4Score: 2 }); this.style.background='var(--kamp-groen)';" style="padding: 10px; background: var(--kamp-geel); color: #000; border:none; border-radius: 6px; font-weight: bold; cursor:pointer; width: 42px;">2</button>
-                            <button onclick="channel.postMessage({ type: 'ADJUST_TIME', amount: 30, targetPlayer: ${p.index}, isR4Score: 3 }); this.style.background='var(--kamp-groen)';" style="padding: 10px; background: var(--kamp-geel); color: #000; border:none; border-radius: 6px; font-weight: bold; cursor:pointer; width: 42px;">3</button>
-                            <button onclick="channel.postMessage({ type: 'ADJUST_TIME', amount: 40, targetPlayer: ${p.index}, isR4Score: 4 }); this.style.background='var(--kamp-groen)';" style="padding: 10px; background: var(--kamp-geel); color: #000; border:none; border-radius: 6px; font-weight: bold; cursor:pointer; width: 42px;">4</button>
-                        </div>
-                    </div>`;
-                });
-
-                html += `</div></div>
-                         <button onclick="channel.postMessage({ type: 'NEXT_QUESTION' })" style="margin-top:20px; width:100%; background:#1e3a8a; color:#fff; font-size:1.2em; font-weight:bold; padding:15px; border-radius:8px; border:none; cursor:pointer;">
-                            ▶ VOLGENDE SPELER KIEST
-                         </button>
-                         <button onclick="channel.postMessage({ type: 'REQUEST_REPORT' })" style="margin-top:10px; width: 100%; background: transparent; color: #3b82f6; font-weight: bold; border: 2px solid #3b82f6; border-radius:8px; padding:15px; cursor:pointer;">
-                            📊 TOON EINDRAPPORT
-                         </button>
-                         </div>`;
-                
-                resultArea.innerHTML = html;
-            }
-
             if (event.data.type === 'SYNC_R5_GRID') {
                 activeRound = 5;
                 buttons.forEach(btn => btn.classList.remove('active-round'));
@@ -355,6 +312,7 @@
             if (activeRound == 1) pool = themeData.ronde1_pool;
             else if (activeRound == 2) pool = themeData.ronde2_answer_pool;
             else if (activeRound == 3) pool = themeData.ronde3_openDeur;
+            else if (activeRound == 4) pool = themeData.ronde4_geheugen;
             else if (activeRound == 5) pool = themeData.ronde5_beeld;
             else if (activeRound == 6) pool = themeData.ronde6_finale;
 
@@ -387,6 +345,16 @@
                                 ▶ SPEEL MP4 FRAGMENT AF (GELUID ONLY)
                             </button>
                             <strong style="font-size:1.1em; color:#fff;">Oplossing: ${q.subject}</strong><br>
+                            <div style="margin-top:8px;">${keywordsHtml}</div>`;
+                    }
+                    else if (activeRound === 4) {
+                        const keywordsHtml = q.keywords.map(k => { 
+                            const word = k.word ? k.word : k; const safeW = escapeAnswer(word); 
+                            return `<button class="correct-btn" onclick="sendAnswer('${safeW}')">✅ ${word}</button>`; 
+                        }).join(' ');
+                        
+                        html += `
+                            <strong style="font-size:1.1em; color:#fff;">Trefwoorden (+20 sec):</strong><br>
                             <div style="margin-top:8px;">${keywordsHtml}</div>`;
                     }
                     else if (activeRound === 5) {
