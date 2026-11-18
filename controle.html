@@ -267,23 +267,32 @@
             if (event.data.type === 'SYNC_R4') {
                 document.getElementById('standard-actions').style.display = 'none';
 
+                let kwHtml = event.data.keywords.map(kw => `<span style="background: rgba(255,255,255,0.1); padding: 5px 10px; border-radius: 6px; border: 1px solid var(--kamp-geel); margin: 3px; display: inline-block;">${kw}</span>`).join('');
+
                 let html = `<div style="text-align:center;">
                             <h3 style="color:var(--kamp-geel); margin-top:0;">Fragment ${event.data.qNum} / ${event.data.total}</h3>
-                            <p style="font-size: 1.2em; color: #fff;">Antwoord: <strong style="color:var(--correct-color); font-size:1.6em; display:block; margin-top:5px; text-shadow: 0 2px 5px #000;">${event.data.answer}</strong></p>
+                            <p style="font-size: 1.2em; color: #fff; margin-bottom: 15px;">Antwoorden:<br><div style="display:flex; justify-content:center; gap:8px; flex-wrap:wrap;">${kwHtml}</div></p>
                             
                             <button onclick="channel.postMessage({ type: 'START_R4_TIMER' })" style="width:100%; background:var(--kamp-groen); color:#fff; font-size:1.3em; font-weight:bold; padding:15px; border-radius:8px; border:2px solid #fff; cursor:pointer; margin-top:10px; margin-bottom:25px; box-shadow: 0 5px 15px rgba(0,0,0,0.4);">
                                 ⏱️ START 15 SEC TIMER
                             </button>
                             
                             <div style="background: rgba(0,0,0,0.4); padding: 15px; border-radius: 8px; border: 1px solid var(--border-col);">
-                                <h4 style="color:#fff; border-bottom: 1px solid rgba(255,255,255,0.2); padding-bottom: 5px; margin-top:0;">Punten uitdelen:</h4>
-                                <p style="font-size:0.85em; color:var(--kamp-geel); margin-top:-5px;">Klik op wie juist gegokt heeft:</p>
-                                <div style="display:flex; flex-direction:column; gap:10px; margin-bottom: 20px;">`;
+                                <h4 style="color:#fff; border-bottom: 1px solid rgba(255,255,255,0.2); padding-bottom: 5px; margin-top:0;">Punten uitdelen (+10 per trefwoord):</h4>
+                                <div style="display:flex; flex-direction:column; gap:5px; margin-bottom: 10px;">`;
                 
+                // DE NIEUWE MULTI-SELECTIE BORDJES KNOPPEN
                 window.lastSyncedPlayers.forEach(p => {
-                    html += `<button onclick="this.style.background='var(--kamp-groen)'; this.style.color='#fff'; this.textContent='✔️ Punten toegekend'; channel.postMessage({ type: 'ADJUST_TIME', amount: 40, targetPlayer: ${p.index} })" style="background:var(--kamp-geel); color:#000; font-weight:bold; padding:12px; border-radius:8px; border:none; cursor:pointer; text-align:left; font-size:1.1em; transition: 0.2s;">
-                                ✅ Geef ${p.name} +40 sec
-                            </button>`;
+                    html += `
+                    <div style="background: rgba(255,255,255,0.05); padding: 8px 12px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; border: 1px solid rgba(255,255,255,0.1);">
+                        <span style="font-size: 1.1em; color: #fff; font-weight: bold;">${p.name}</span>
+                        <div style="display: flex; gap: 5px;">
+                            <button onclick="channel.postMessage({ type: 'ADJUST_TIME', amount: 10, targetPlayer: ${p.index}, isR4Score: 1 }); this.style.background='var(--kamp-groen)';" style="padding: 10px; background: var(--kamp-geel); color: #000; border:none; border-radius: 6px; font-weight: bold; cursor:pointer; width: 42px;">1</button>
+                            <button onclick="channel.postMessage({ type: 'ADJUST_TIME', amount: 20, targetPlayer: ${p.index}, isR4Score: 2 }); this.style.background='var(--kamp-groen)';" style="padding: 10px; background: var(--kamp-geel); color: #000; border:none; border-radius: 6px; font-weight: bold; cursor:pointer; width: 42px;">2</button>
+                            <button onclick="channel.postMessage({ type: 'ADJUST_TIME', amount: 30, targetPlayer: ${p.index}, isR4Score: 3 }); this.style.background='var(--kamp-groen)';" style="padding: 10px; background: var(--kamp-geel); color: #000; border:none; border-radius: 6px; font-weight: bold; cursor:pointer; width: 42px;">3</button>
+                            <button onclick="channel.postMessage({ type: 'ADJUST_TIME', amount: 40, targetPlayer: ${p.index}, isR4Score: 4 }); this.style.background='var(--kamp-groen)';" style="padding: 10px; background: var(--kamp-geel); color: #000; border:none; border-radius: 6px; font-weight: bold; cursor:pointer; width: 42px;">4</button>
+                        </div>
+                    </div>`;
                 });
 
                 html += `</div></div>
