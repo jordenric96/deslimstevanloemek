@@ -9,7 +9,6 @@
     <link rel="stylesheet" href="stijl.css">
     
     <style>
-        /* Animatie voor de Radio Hallo! */
         @keyframes radioPulse { 
             0% { transform: scale(1); filter: drop-shadow(0 0 0px var(--kamp-geel)); } 
             50% { transform: scale(1.15) rotate(-5deg); filter: drop-shadow(0 0 25px var(--kamp-geel)); } 
@@ -58,25 +57,29 @@
                 <div id="puzzle-clues-container"></div>
             </div>
 
-            <!-- RONDE 3: RADIO HALLO (MET VERBORGEN MP4 SPELER) -->
             <div id="opendeur-display-area" style="display: none; width: 100%; flex-direction: column; align-items: center;">
                 <div id="radio-visual" style="font-size: 6em; margin-bottom: 20px; transition: transform 0.2s;">📻</div>
-                
-                <!-- De video is verborgen! Enkel het geluid wordt afgespeeld. -->
                 <video id="r3-audio-player" style="display: none;" src=""></video>
-                
                 <h3 id="opendeur-subject"></h3>
                 <div id="opendeur-keywords-container"></div>
             </div>
 
-            <!-- RONDE 4: BORDJES -->
+            <!-- NIEUW: RONDE 4 MET GRID ZONDER FOTO'S -->
             <div id="r4-display-area" style="display: none; width: 100%; flex-direction: column; align-items: center; margin-top: 20px;">
-                <div id="r4-timer-container" style="width: 80%; background: rgba(255,255,255,0.2); height: 20px; border-radius: 10px; overflow: hidden; margin-bottom: 20px; display: none;">
-                    <div id="r4-timer-bar" style="width: 100%; height: 100%; background: var(--kamp-geel); transition: width 1s linear;"></div>
+                <!-- Raster met blinde knoppen -->
+                <div id="r4-grid" style="display: flex; gap: 20px; justify-content: center; flex-wrap: wrap; width: 90%; margin-bottom: 20px;"></div>
+                
+                <!-- De Vraag / Het Gekozen Fragment -->
+                <div id="r4-vraag-container" style="display: none; width: 100%; flex-direction: column; align-items: center;">
+                    <div id="r4-timer-container" style="width: 80%; background: rgba(255,255,255,0.2); height: 20px; border-radius: 10px; overflow: hidden; margin-bottom: 20px; display: none;">
+                        <div id="r4-timer-bar" style="width: 100%; height: 100%; background: var(--kamp-geel); transition: width 1s linear;"></div>
+                    </div>
+                    
+                    <video id="r4-clue-video" playsinline style="max-width: 80%; max-height: 55vh; border: 4px solid var(--kamp-geel); border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.8); display: none;" src=""></video>
+                    <video id="r4-video" playsinline src="./fragmenten/bordjes.mp4" style="max-width: 80%; max-height: 55vh; border: 4px solid var(--kamp-geel); border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.8); display: none;"></video>
+                    
+                    <h1 id="r4-answer" style="display: none; font-size: 4.5em; color: var(--correct-color); margin-top: 30px; text-align: center; text-shadow: 2px 2px 10px rgba(0,0,0,0.8); font-family: 'Chakra Petch', sans-serif;"></h1>
                 </div>
-                <img id="r4-photo" style="max-width: 80%; max-height: 55vh; border: 4px solid var(--kamp-geel); border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.8); display: none; transition: filter 1s ease-out;" src="" />
-                <video id="r4-video" playsinline src="./fragmenten/bordjes.mp4" style="max-width: 80%; max-height: 55vh; border: 4px solid var(--kamp-geel); border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.8); display: none;"></video>
-                <h1 id="r4-answer" style="display: none; font-size: 4.5em; color: var(--correct-color); margin-top: 30px; text-align: center; text-shadow: 2px 2px 10px rgba(0,0,0,0.8); font-family: 'Chakra Petch', sans-serif;"></h1>
             </div>
 
             <div id="geheugen-display-area" style="display: none;">
@@ -150,13 +153,13 @@
     let startingPlayersThisRound = []; 
     let playedVideos = []; 
     let playerStats = {};
+    let r1BaseIndex = 0; // Bewaart de "basis" beurt voor Ronde 1
 
     const setupScreen = document.getElementById('setup-screen'), playerNameInputs = document.getElementById('player-name-inputs');
     const numPlayersInput = document.getElementById('num-players'), playerContainer = document.getElementById('player-container');
     const gameBoard = document.getElementById('game-board'), roundTitle = document.getElementById('round-title');
     const questionText = document.getElementById('question-text'), questionCounter = document.getElementById('question-counter');
     const inputAnswer = document.getElementById('answer-input'), btnCheckAnswer = document.getElementById('check-answer');
-    
     const opendeurDisplayArea = document.getElementById('opendeur-display-area'), opendeurSubject = document.getElementById('opendeur-subject');
 
     function showFinaleWinner(winnerPlayer) {
@@ -424,6 +427,8 @@
         if(r4Video) { r4Video.pause(); }
         const r3Video = document.getElementById('r3-audio-player');
         if(r3Video) { r3Video.pause(); }
+        const r4Clue = document.getElementById('r4-clue-video');
+        if (r4Clue) { r4Clue.pause(); }
     }
 
     function generateReport() {
@@ -456,25 +461,34 @@
         channel.postMessage({ type: 'SYNC_REPORT', html: container.innerHTML });
     }
 
-    // --- RONDE 1 ---
+    // --- RONDE 1 (VERBETERDE LOGICA: STRIKT SEQUENTIEEL PER VRAAG) ---
     let activeRound1Questions = [];
+    
     function startGameR1() {
-        currentRound = 1; currentQuestionIndex = 0; roundTitle.textContent = "Ronde 1: Algemene Kennis"; 
+        currentRound = 1; currentQuestionIndex = 0; 
+        r1BaseIndex = getNextStartingPlayerIndex(1); // Wie start de quiz? (Meestal speler 0)
+        roundTitle.textContent = "Ronde 1: Algemene Kennis"; 
         activeRound1Questions = shuffleArray([...quizData.ronde1_pool]).slice(0, 12);
         hideAllGameAreas(); questionText.style.display = 'block'; questionCounter.style.display = 'block';
         stopTimer(); displayQuestionR1(); 
     }
+    
     function displayQuestionR1() {
         if (currentQuestionIndex < activeRound1Questions.length) {
             currentQuestionAttempts = []; const q = activeRound1Questions[currentQuestionIndex];
             questionText.textContent = q.q; 
             questionCounter.innerHTML = `Vraag ${currentQuestionIndex + 1} / ${activeRound1Questions.length}`;
-            inputAnswer.value = ""; inputAnswer.focus(); timerPlayerIndex = activePlayerIndex; renderPlayers();
+            inputAnswer.value = ""; inputAnswer.focus(); 
+            
+            // Nieuwe vraag = Altijd terug naar de speler wiens "beurt" het is in de opstelling
+            activePlayerIndex = players[r1BaseIndex].originalIndex; 
+            timerPlayerIndex = activePlayerIndex; renderPlayers();
             channel.postMessage({ type: 'SYNC_QUESTION', round: 1, ids: [q.id] });
         } else {
             hideAllGameAreas(); questionText.style.display = 'block'; questionText.textContent = "Einde van Ronde 1.";
         }
     }
+    
     function checkRound1Answer() {
         const q = activeRound1Questions[currentQuestionIndex]; const isCorrect = (stringSimilarity(q.a, inputAnswer.value) >= SIMILARITY_THRESHOLD);
         stopTimer(); inputAnswer.value = "";
@@ -482,21 +496,32 @@
         if (isCorrect) {
             playerStats[activePlayerIndex].r1.c++; 
             showFeedback(true); updateSeconds(activePlayerIndex, R1_BONUS_SECONDS); showBonusFeedback(activePlayerIndex, R1_BONUS_SECONDS);
-            setTimeout(() => { currentQuestionIndex++; displayQuestionR1(); }, 2000);
+            setTimeout(() => { 
+                currentQuestionIndex++; 
+                r1BaseIndex = (r1BaseIndex + 1) % players.length; // Volgende speler mag straks de nieuwe vraag starten!
+                displayQuestionR1(); 
+            }, 2000);
         } else {
             playerStats[activePlayerIndex].r1.w++; 
             showFeedback(false); if (!currentQuestionAttempts.includes(activePlayerIndex)) currentQuestionAttempts.push(activePlayerIndex);
+            
+            // Fout antwoord = GEEF BEURT DOOR VOOR DEZE VRAAG
             let nextFound = false; let currentIdx = players.findIndex(p => p.originalIndex === activePlayerIndex);
             for (let i = 1; i <= players.length; i++) {
                 let candidate = players[(currentIdx + i) % players.length];
-                if (!currentQuestionAttempts.includes(candidate.originalIndex) && candidate.seconds > 0) { activePlayerIndex = candidate.originalIndex; nextFound = true; break; }
+                if (!currentQuestionAttempts.includes(candidate.originalIndex) && candidate.seconds > 0) { 
+                    activePlayerIndex = candidate.originalIndex; nextFound = true; break; 
+                }
             }
             if (nextFound) {
                 questionText.textContent = `${players.find(p => p.originalIndex === activePlayerIndex).name} is aan de beurt.`;
                 setTimeout(() => { questionText.textContent = q.q; renderPlayers(); inputAnswer.focus(); }, 1500);
             } else {
                 questionText.textContent = `Niemand wist het. Antwoord: ${q.a}`;
-                setTimeout(() => { currentQuestionIndex++; activePlayerIndex = players[(players.findIndex(p => p.originalIndex === activePlayerIndex) + 1) % players.length].originalIndex; displayQuestionR1(); 
+                setTimeout(() => { 
+                    currentQuestionIndex++; 
+                    r1BaseIndex = (r1BaseIndex + 1) % players.length; // Niemand wist het, we schuiven de basisbeurt op!
+                    displayQuestionR1(); 
                 }, 3000);
             }
         }
@@ -506,7 +531,7 @@
     let activeRound2Puzzles = [], currentPuzzleSet = null, currentR2SetCount = 0;
     function setupRound2() {
         currentRound = 2; currentR2SetCount = 0; startingPlayersThisRound = []; activePlayerIndex = getNextStartingPlayerIndex(2); roundTitle.textContent = `Ronde 2: De Puzzel`; 
-        if (!quizData.ronde2_answer_pool || quizData.ronde2_answer_pool.length === 0) { alert("⚠️ Geen data gevonden voor Ronde 2! Kijk je quizdata_r2.js bestand na."); return; }
+        if (!quizData.ronde2_answer_pool || quizData.ronde2_answer_pool.length === 0) { alert("⚠️ Geen data gevonden voor Ronde 2!"); return; }
         const fullPool = shuffleArray([...quizData.ronde2_answer_pool]); activeRound2Puzzles = [];
         for (let i = 0; i < players.length; i++) { activeRound2Puzzles.push(fullPool.slice(i * 3, (i + 1) * 3).map((p, j) => ({ ...p, found: false, missed: false, color: `color-${(j % 3) + 1}`, clues: p.clues.map(c => ({ text: c, color: `color-${(j % 3) + 1}` })) }))); }
         hideAllGameAreas(); document.getElementById('puzzle-display-area').style.display = 'flex';
@@ -564,7 +589,7 @@
         stopTimer(); currentSetAttempts = players.map(p => p.originalIndex); activePlayerIndex = getNextStartingPlayerIndex(2); 
     }
 
-    // --- RONDE 3: RADIO HALLO (MET MP4 VERBORGEN) ---
+    // --- RONDE 3: RADIO HALLO ---
     let activeOpenDeurQuestions = [], currentOpenDeurIndex = 0;
     function setupRound3() {
         currentRound = 3; currentOpenDeurIndex = 0; startingPlayersThisRound = []; activePlayerIndex = getNextStartingPlayerIndex(3); roundTitle.textContent = `Ronde 3: Radio Hallo (Open Deur)`; 
@@ -579,7 +604,6 @@
         
         questionCounter.innerHTML = `Vraag ${currentOpenDeurIndex + 1} / ${players.length}`; 
         
-        // LAAD MP4 IN MAAR TOON ENKEL DE RADIO (video = hidden via CSS inline)
         const ap = document.getElementById('r3-audio-player');
         if(ap) { ap.src = activeOD.mediaBron || ""; }
         
@@ -612,44 +636,79 @@
         stopTimer(); currentSetAttempts = players.map(p => p.originalIndex); activePlayerIndex = getNextStartingPlayerIndex(3);
     }
 
-    // --- RONDE 4 (BORDJES) ---
-    let activeRound4Questions = [], currentR4Index = 0;
+    // --- NIEUW RONDE 4: BORDJES (MET BLIND GRID SELECTIE & MP4) ---
+    let activeRound4Questions = [], currentR4Index = -1;
     let r4TimerInt = null;
+    let playedR4Videos = [];
+    let currentR4BaseIndex = 0;
 
     function setupRound4() {
-        currentRound = 4; currentR4Index = 0; roundTitle.textContent = "Ronde 4: Raad de aflevering (Bordjes!)"; 
-        activeRound4Questions = quizData.ronde4_geheugen;
+        currentRound = 4; currentR4Index = -1; playedR4Videos = []; currentR4BaseIndex = 0;
+        roundTitle.textContent = "Ronde 4: Raad de aflevering (Bordjes!)"; 
+        activeRound4Questions = shuffleArray([...quizData.ronde4_geheugen]).slice(0, players.length); // Max 1 fragment per speler
+        
         hideAllGameAreas(); 
         document.getElementById('r4-display-area').style.display = 'flex'; 
-        questionText.style.display = 'none'; 
+        questionText.style.display = 'block'; 
         questionCounter.style.display = 'block'; 
-        loadR4Vraag();
+        renderR4Grid();
     }
 
-    function loadR4Vraag() {
-        if (currentR4Index >= activeRound4Questions.length) { hideAllGameAreas(); questionText.style.display = 'block'; questionText.textContent = "Einde van Ronde 4!"; return; }
+    function renderR4Grid() {
+        if (playedR4Videos.length >= players.length) { hideAllGameAreas(); questionText.style.display = 'block'; questionText.textContent = "Einde van Ronde 4!"; return; }
+        
+        // De speler die aan de beurt is om te 'kiezen'
+        activePlayerIndex = players[currentR4BaseIndex].originalIndex;
+        questionText.textContent = "Kies een willekeurig fragment!";
+        questionCounter.innerHTML = `Aan de beurt om te kiezen: ${players.find(p=>p.originalIndex===activePlayerIndex).name}`;
+        
+        const grid = document.getElementById('r4-grid');
+        grid.innerHTML = activeRound4Questions.map((q, i) => { 
+            const isPlayed = playedR4Videos.includes(i);
+            const opacity = isPlayed ? '0.3' : '1';
+            // Pure blokken zonder foto/thumbnail!
+            return `<div style="width: 180px; height: 120px; background-color: var(--kamp-donkergroen); border: 3px solid var(--kamp-geel); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 1.5em; font-weight: bold; opacity: ${opacity}; color: white; cursor: ${isPlayed ? 'not-allowed' : 'pointer'}; box-shadow: 0 5px 15px rgba(0,0,0,0.5);">
+                ${isPlayed ? '❌' : 'Fragment ' + (i+1)}
+            </div>`;
+        }).join('');
+        
+        document.getElementById('r4-grid').style.display = 'flex';
+        document.getElementById('r4-vraag-container').style.display = 'none';
+        
+        stopTimer();
+        channel.postMessage({ type: 'SYNC_R4_GRID', total: activeRound4Questions.length, played: playedR4Videos }); 
+    }
+
+    function loadR4Vraag(index) {
+        currentR4Index = index;
         let q = activeRound4Questions[currentR4Index];
-        questionCounter.innerHTML = `Foto ${currentR4Index + 1} / ${activeRound4Questions.length}`; 
+        questionCounter.innerHTML = `Fragment ${currentR4Index + 1}`; 
         
+        document.getElementById('r4-grid').style.display = 'none';
+        document.getElementById('r4-vraag-container').style.display = 'flex';
         document.getElementById('r4-timer-container').style.display = 'none';
-        document.getElementById('r4-timer-bar').style.width = '100%';
         
-        let photoEl = document.getElementById('r4-photo');
-        photoEl.src = q.foto;
-        photoEl.style.display = 'block';
-        photoEl.style.filter = 'blur(40px)'; 
+        let clueEl = document.getElementById('r4-clue-video');
+        clueEl.src = q.mediaBron;
+        clueEl.style.display = 'block';
+        clueEl.play().catch(e => console.log(e));
         
         document.getElementById('r4-video').style.display = 'none';
         document.getElementById('r4-answer').style.display = 'none';
         questionText.style.display = 'none'; 
+        
+        // Tijdens de timer speelt iedereen mee
         activePlayerIndex = -1;
         renderPlayers();
+        
         channel.postMessage({ type: 'SYNC_R4', answer: q.antwoord, qNum: currentR4Index + 1, total: activeRound4Questions.length });
     }
 
     function startR4Timer() {
         document.getElementById('r4-timer-container').style.display = 'block';
-        document.getElementById('r4-photo').style.filter = 'blur(0px)';
+        let clueEl = document.getElementById('r4-clue-video');
+        clueEl.pause(); 
+        
         let timeLeft = 15;
         document.getElementById('r4-timer-bar').style.width = '100%';
         
@@ -661,9 +720,9 @@
             if(timeLeft <= 0) {
                 clearInterval(r4TimerInt);
                 document.getElementById('r4-timer-container').style.display = 'none';
-                document.getElementById('r4-photo').style.display = 'none';
+                clueEl.style.display = 'none';
                 
-                let vid = document.getElementById('r4-video');
+                let vid = document.getElementById('r4-video'); // bordjes.mp4
                 vid.style.display = 'block';
                 vid.currentTime = 0; 
                 vid.play().catch(e => console.log("Video autoplay blocked", e));
@@ -681,6 +740,15 @@
                 };
             }
         }, 1000);
+    }
+    
+    function returnToR4Grid() {
+        if(currentR4Index !== -1 && !playedR4Videos.includes(currentR4Index)) {
+            playedR4Videos.push(currentR4Index);
+            currentR4BaseIndex++; 
+        }
+        currentR4Index = -1; 
+        renderR4Grid();
     }
 
     // --- RONDE 5 (Beeldronde) ---
@@ -725,12 +793,9 @@
     }
 
     function loadBeeldVraag(index) {
-        currentBeeldIndex = index;
-        currentSetAttempts = []; let q = activeBeeldQuestions[currentBeeldIndex]; 
+        currentBeeldIndex = index; currentSetAttempts = []; let q = activeBeeldQuestions[currentBeeldIndex]; 
         startingPlayersThisRound.push(activePlayerIndex); 
-        
-        questionText.textContent = "Kijk naar het fragment!";
-        questionCounter.innerHTML = `Fragment ${currentBeeldIndex + 1}`; 
+        questionText.textContent = "Kijk naar het fragment!"; questionCounter.innerHTML = `Fragment ${currentBeeldIndex + 1}`; 
         
         document.getElementById('beeld-grid').style.display = 'none';
         document.getElementById('beeld-tasks-container').style.display = 'none';
@@ -895,6 +960,10 @@
             if (currentRound === 5) loadBeeldVraag(event.data.index);
         }
         
+        if (event.data.type === 'SELECT_VIDEO_R4') {
+            if (currentRound === 4) loadR4Vraag(event.data.index);
+        }
+
         if (event.data.type === 'PLAY_VIDEO') {
             if (currentRound === 5) {
                 const vp = document.getElementById('beeld-video-player');
@@ -906,7 +975,7 @@
             if(currentRound==1) checkRound1Answer();
             if(currentRound==2) { currentR2SetCount++; loadNewPuzzle(); }
             if(currentRound==3) { currentOpenDeurIndex++; loadOpenDeur(); }
-            if(currentRound==4) { currentR4Index++; loadR4Vraag(); } 
+            if(currentRound==4) { returnToR4Grid(); } 
             if(currentRound==5) { returnToVideoGrid(); }
             if(currentRound==6) { currentFinaleQuestionIndex++; loadFinaleQuestion(); }
         }
