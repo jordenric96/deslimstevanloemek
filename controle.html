@@ -3,73 +3,69 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GM Regiekamer - FC De Kampioenen</title>
-    <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;600;700&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
+    <title>GM Regiekamer - F.C. De Kampioenen</title>
+    <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@600;700&family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="stijl.css">
-    
     <style>
-        :root { --panel-bg: rgba(15, 23, 42, 0.95); --border-col: rgba(255, 255, 255, 0.15); }
-        body { margin: 0; padding: 0; height: 100vh; width: 100vw; overflow: hidden; display: flex; flex-direction: column; background: var(--bg-dark); font-family: 'Open Sans', sans-serif; font-size: 14px; }
-        
-        #dashboard-header { height: 70px; background: rgba(0,0,0,0.6); border-bottom: 2px solid var(--kamp-geel); display: flex; align-items: center; justify-content: space-between; padding: 0 20px; flex-shrink: 0; z-index: 10; }
-        h1 { display: block !important; margin: 0; font-size: 1.8em; text-align: left; width: auto; color: var(--kamp-geel); }
-        .round-controls { display: flex; gap: 8px; }
-        .round-controls button { margin: 0; padding: 10px 15px; font-size: 0.95em; height: 45px; display: block !important; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); cursor: pointer; }
-        .round-controls button.active-round { background: var(--kamp-geel); color: #000; box-shadow: 0 0 15px rgba(255,215,0,0.5); border: 1px solid #fff; font-weight: bold; }
-        
-        #dashboard-main { flex: 1; display: grid; grid-template-columns: 280px 1fr 450px; gap: 20px; padding: 20px; overflow: hidden; }
-        .panel { background: rgba(0, 0, 0, 0.4); border: 1px solid var(--border-col); border-radius: 12px; padding: 20px; display: flex; flex-direction: column; overflow: hidden; }
-        h2 { font-size: 1.2em; margin: 0 0 15px 0; border-bottom: 1px solid var(--border-col); padding-bottom: 10px; color: #fff; text-transform: uppercase; text-align: center; }
+        body { padding: 0; align-items: stretch; min-height: 100vh; }
+        #header {
+            display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between;
+            gap: 10px; padding: 12px 18px; background: rgba(0,0,0,0.75); border-bottom: 2px solid var(--kamp-geel);
+        }
+        #header h1 { margin: 0; font-size: 1.4rem; text-align: left; }
+        .round-bar { display: flex; flex-wrap: wrap; gap: 6px; }
+        .round-bar button {
+            padding: 8px 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.2);
+            background: rgba(255,255,255,0.08); color: #fff; font-weight: 700; cursor: pointer; font-family: 'Chakra Petch', sans-serif;
+        }
+        .round-bar button.active-round { background: var(--kamp-geel); color: #000; border-color: #fff; }
+        .header-reports { display: flex; gap: 8px; }
+        .header-reports button {
+            padding: 8px 12px; border-radius: 8px; border: none; font-weight: 700; cursor: pointer; font-family: 'Chakra Petch', sans-serif;
+        }
 
-        #live-players-container { flex: 1; overflow-y: auto; padding-right: 5px; }
-        .sidebar-player { padding: 12px 15px; margin-bottom: 8px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; transition: 0.2s; }
-        .sidebar-player:hover { filter: brightness(1.2); }
-        
-        #panel-center { background: rgba(11, 128, 67, 0.15); border: 3px solid var(--kamp-geel); align-items: center; justify-content: center; box-shadow: 0 0 30px rgba(255, 215, 0, 0.1); transition: 0.3s; padding: 20px; display: flex; flex-direction: column; }
-        
-        .active-player-info { text-align: center; width: 100%; margin-bottom: auto; margin-top: auto; }
-        #active-player-name { font-size: 4em; font-family: 'Chakra Petch', sans-serif; font-weight: 700; color: #fff; text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.1; margin-bottom: 10px; }
-        #active-player-score { font-family: 'Chakra Petch', sans-serif; font-size: 9em; font-weight: bold; color: var(--kamp-geel); text-shadow: 0 5px 25px rgba(0,0,0,0.8); line-height: 1; margin: 0; }
-        
-        .massive-btn { width: 100%; font-size: 1.6em; padding: 20px; border-radius: 12px; font-weight: bold; text-transform: uppercase; cursor: pointer; transition: 0.2s; border: none; box-shadow: 0 8px 20px rgba(0,0,0,0.4); margin-bottom: 12px; }
-        .massive-btn:active { transform: scale(0.98); }
-        
-        .time-adjust-row { display: flex; gap: 12px; width: 100%; margin-top: 5px; }
-        .time-adjust-row button { flex: 1; padding: 15px; font-size: 1.3em; border-radius: 8px; font-weight: bold; border: none; cursor: pointer; box-shadow: 0 5px 15px rgba(0,0,0,0.3); transition: 0.2s; }
-        .time-adjust-row button:active { transform: scale(0.95); }
+        #main-grid {
+            display: grid;
+            grid-template-columns: 240px 1fr 400px;
+            gap: 16px;
+            padding: 16px;
+            flex: 1;
+        }
+        @media (max-width: 1050px) { #main-grid { grid-template-columns: 1fr 1fr; } }
+        @media (max-width: 720px) { #main-grid { grid-template-columns: 1fr; } }
 
-        .game-flow-actions { display: flex; flex-direction: column; gap: 10px; margin-bottom: 15px; padding-bottom: 15px; border-bottom: 1px solid var(--border-col); }
-        .game-flow-actions button { padding: 15px; font-size: 1.2em; border-radius: 8px; margin: 0; cursor: pointer; border:none; }
-        .game-flow-row { display: flex; gap: 10px; }
-        .game-flow-row button { flex: 1; }
+        .panel {
+            background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 14px;
+            padding: 16px; display: flex; flex-direction: column;
+        }
+        .panel h2 { font-size: 1.05rem; margin: 0 0 12px 0; border-bottom: 1px solid rgba(255,255,255,0.12); padding-bottom: 8px; color: var(--kamp-geel); }
 
-        #result-area { flex: 1; overflow-y: auto; background: rgba(0,0,0,0.2); border-radius: 8px; padding: 15px; border: 1px solid rgba(255,255,255,0.1); text-align: center; }
-        .list-item { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,215,0,0.3); margin-bottom: 10px; padding: 15px; border-radius: 8px; line-height: 1.5; font-size: 1.1em; text-align: left; }
-        
+        .sidebar-player {
+            padding: 10px 12px; margin-bottom: 8px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; cursor: pointer;
+        }
+        #active-player-name { font-size: clamp(1.8rem, 3vw, 2.8rem); font-family: 'Chakra Petch', sans-serif; font-weight: 700; text-align: center; }
+        #active-player-score { font-size: clamp(3.5rem, 6vw, 6rem); font-family: 'Chakra Petch', sans-serif; font-weight: 700; color: var(--kamp-geel); text-align: center; line-height: 1.05; margin-bottom: 14px; }
+
+        .big-btn {
+            width: 100%; padding: 15px; border-radius: 10px; border: none; font-size: 1.2rem; font-weight: 700;
+            font-family: 'Chakra Petch', sans-serif; cursor: pointer; margin-bottom: 10px;
+        }
+        .row-btns { display: flex; gap: 8px; width: 100%; margin-bottom: 10px; }
+        .row-btns button { flex: 1; padding: 11px; border-radius: 8px; border: none; font-weight: 700; cursor: pointer; font-family: 'Chakra Petch', sans-serif; }
+
         .correct-btn {
             background: var(--kamp-donkergroen); color: #fff; border: 2px solid var(--kamp-groen);
-            padding: 10px 20px; font-size: 1.1em; border-radius: 8px; cursor: pointer; font-weight: bold;
-            display: inline-block; margin: 5px 5px 5px 0; box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-            transition: 0.2s; text-transform: none; font-family: 'Open Sans', sans-serif;
+            padding: 9px 14px; border-radius: 8px; cursor: pointer; font-weight: 700; margin: 4px 4px 4px 0;
         }
-        .correct-btn:hover { background: var(--correct-color); color: #000; border-color: #fff; transform: scale(1.05); }
-
+        .correct-btn:hover { background: var(--correct-color); color: #000; }
         .grid-select-btn {
-            background: var(--kamp-groen); color: #fff; padding: 15px; border-radius: 8px; 
-            border: 2px solid var(--kamp-geel); cursor: pointer; font-weight: bold; font-size: 1.2em;
-            flex: 1; min-width: 120px; text-align: center;
+            background: var(--kamp-groen); color: #fff; padding: 12px; border-radius: 8px; border: 2px solid var(--kamp-geel);
+            cursor: pointer; font-weight: 700; flex: 1; min-width: 110px;
         }
-        .grid-select-btn:hover { background: var(--kamp-geel); color: #000; }
-        .grid-select-btn:disabled { background: #333; color: #666; border-color: #444; cursor: not-allowed; text-decoration: line-through; }
-
-        ::-webkit-scrollbar { width: 8px; }
-        ::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); }
-        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.4); }
+        .grid-select-btn:disabled { background: #334155; color: #94a3b8; border-color: #475569; cursor: not-allowed; }
     </style>
 </head>
 <body>
-    
     <script src="quizdata_r1.js"></script>
     <script src="quizdata_r2.js"></script>
     <script src="quizdata_r3.js"></script>
@@ -78,319 +74,150 @@
     <script src="quizdata_r6.js"></script>
     <script src="quizdata_loader.js"></script>
 
-    <div id="dashboard-header">
-        <div style="display:flex; align-items:center;">
-            <h1>GM REGIEKAMER</h1>
-            <span style="margin-left: 15px; padding: 6px 12px; background: var(--kamp-groen); color: white; border-radius: 6px; font-weight: bold; font-size: 0.9em; letter-spacing: 1px;">F.C. De Kampioenen</span>
+    <div id="header">
+        <h1>🎬 REGIEKAMER</h1>
+        <div class="round-bar">
+            <button data-round="1" onclick="startRoundDirect(1)">R1 Algemeen</button>
+            <button data-round="2" onclick="startRoundDirect(2)">R2 Puzzel</button>
+            <button data-round="3" onclick="startRoundDirect(3)">R3 Radio Hallo</button>
+            <button data-round="4" onclick="startRoundDirect(4)">R4 Bordjes</button>
+            <button data-round="5" onclick="startRoundDirect(5)">R5 Beeld</button>
+            <button data-round="6" onclick="startRoundDirect(6)">R6 Finale</button>
         </div>
-
-        <div class="round-controls">
-            <button id="btn-round-1" data-round="1" class="active-round">R1</button>
-            <button id="btn-round-2" data-round="2">R2 (Puzzel)</button>
-            <button id="btn-round-3" data-round="3">R3 (Radio Hallo)</button>
-            <button id="btn-round-4" data-round="4">R4 (Raad aflevering)</button>
-            <button id="btn-round-5" data-round="5">R5 (Beeld)</button>
-            <button id="btn-round-6" data-round="6">R6 (Finale)</button>
+        <div class="header-reports">
+            <button style="background:#2563eb; color:#fff;" onclick="channel.postMessage({ type: 'REQUEST_REPORT' })">📊 Scherm</button>
+            <button style="background:var(--kamp-geel); color:#000;" onclick="channel.postMessage({ type: 'DOWNLOAD_PDF_REPORT' })">📄 PDF Rapport</button>
         </div>
     </div>
-    
-    <div id="dashboard-main">
-        
+
+    <div id="main-grid">
         <div class="panel">
-            <h2>👥 Overzicht Spelers</h2>
-            <p style="font-size: 0.85em; color: var(--text-muted); text-align: center; margin-top: -10px; margin-bottom: 15px;">Klik om beurt te geven.</p>
-            <div id="live-players-container">
-                <p style="color: var(--text-muted); text-align: center; margin-top: 50px;">Wacht tot het spel gestart is...</p>
-            </div>
+            <h2>👥 Spelers</h2>
+            <div id="live-players-container"><p style="color:var(--text-muted); text-align:center;">Start eerst de quiz op het grote scherm.</p></div>
         </div>
 
         <div class="panel" id="panel-center">
-            <div class="active-player-info">
-                <div style="font-size: 1em; color: var(--text-muted); font-weight: bold; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 5px;">🎯 Aan de beurt</div>
-                <div id="active-player-name">Niemand</div>
-                <div id="active-player-score">0</div>
-            </div>
-            
-            <button id="btn-massive-timer" class="massive-btn" style="background: var(--kamp-geel); color: #000;" onclick="toggleTimer(activePlayerIndex)">
-                ▶ START TIMER
-            </button>
-            
-            <button class="massive-btn" style="background: var(--kamp-rood); color: #fff; font-size: 1.4em;" onclick="channel.postMessage({ type: 'TRIGGER_FAIL' })">
-                ❌ FOUT / PAS (Volgende)
-            </button>
-
-            <div class="time-adjust-row">
-                <button style="background: var(--kamp-rood); color: #fff;" onclick="channel.postMessage({ type: 'ADJUST_TIME', amount: -20 })">-20 SEC</button>
-                <button style="background: var(--kamp-groen); color: #fff;" onclick="channel.postMessage({ type: 'ADJUST_TIME', amount: 10 })">+10 SEC</button>
-                <button style="background: var(--kamp-groen); color: #fff;" onclick="channel.postMessage({ type: 'ADJUST_TIME', amount: 20 })">+20 SEC</button>
+            <h2>⏱️ Klok & Beurt</h2>
+            <div id="active-player-name">—</div>
+            <div id="active-player-score">0</div>
+            <button id="btn-massive-timer" class="big-btn" style="background:var(--kamp-geel); color:#000;" onclick="channel.postMessage({ type: 'TOGGLE_TIMER' })">▶ START TIMER</button>
+            <button class="big-btn" style="background:var(--kamp-rood); color:#fff;" onclick="channel.postMessage({ type: 'TRIGGER_FAIL' })">❌ FOUT / PAS</button>
+            <div class="row-btns">
+                <button style="background:#991b1b; color:#fff;" onclick="channel.postMessage({ type: 'ADJUST_TIME', amount: -20 })">-20s</button>
+                <button style="background:#047857; color:#fff;" onclick="channel.postMessage({ type: 'ADJUST_TIME', amount: 10 })">+10s</button>
+                <button style="background:#047857; color:#fff;" onclick="channel.postMessage({ type: 'ADJUST_TIME', amount: 20 })">+20s</button>
             </div>
         </div>
 
         <div class="panel">
-            <h2>📝 Spelverloop / Antwoorden</h2>
-            
-            <div class="game-flow-actions" id="standard-actions">
-                <button onclick="channel.postMessage({ type: 'START_ROUND', round: activeRound })" style="background: var(--kamp-groen); color: #fff; font-weight: bold;">
-                    ▶ START GESELECTEERDE RONDE
-                </button>
-                <div class="game-flow-row" id="flow-buttons">
-                    <button onclick="channel.postMessage({ type: 'NEXT_QUESTION' })" style="background: var(--kamp-geel); color: #000; font-weight: bold;">Terug / Volgende</button>
-                    <button onclick="channel.postMessage({ type: 'SHOW_ANSWERS' })" style="background: var(--kamp-rood); color: #fff; font-weight: bold;">Toon op Scherm</button>
-                </div>
-                
-                <div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.1);">
-                    <button onclick="channel.postMessage({ type: 'REQUEST_REPORT' })" style="width: 100%; background: #1e3a8a; color: #fff; font-weight: bold; border: 2px solid #3b82f6; box-shadow: 0 4px 10px rgba(0,0,0,0.3);">
-                        📊 TOON EINDRAPPORT
-                    </button>
-                </div>
+            <h2>📝 Antwoorden & Verloop</h2>
+            <div class="row-btns" id="flow-buttons">
+                <button style="background:var(--kamp-geel); color:#000;" onclick="channel.postMessage({ type: 'NEXT_QUESTION' })">▶ Volgende</button>
+                <button style="background:var(--kamp-rood); color:#fff;" onclick="channel.postMessage({ type: 'SHOW_ANSWERS' })">👁️ Toon Alles</button>
             </div>
-
-            <div id="result-area">
-                <div style="text-align: center; color: var(--text-muted); margin-top: 30px;">
-                    <p style="font-size: 1.2em;">Zodra een ronde start, verschijnen de keuzes hier.</p>
-                </div>
+            <div id="result-area" style="overflow-y:auto; flex:1;">
+                <p style="color:var(--text-muted); text-align:center; margin-top:20px;">Klik bovenaan op een ronde om direct te starten.</p>
             </div>
         </div>
     </div>
-    
+
     <script>
         const channel = new BroadcastChannel('trivial_time_channel');
         const resultArea = document.getElementById('result-area');
-        const buttons = document.querySelectorAll('.round-controls button');
-        
-        let activeRound = 1;
-        let activePlayerIndex = 0;
-        window.lastSyncedPlayers = []; 
+        let activeRound = 0, lastPlayers = [];
 
-        function selectPlayer(index) { channel.postMessage({ type: 'SELECT_PLAYER', playerIndex: index }); }
-        function toggleTimer(index) { channel.postMessage({ type: 'TOGGLE_TIMER', playerIndex: index }); }
-        function escapeAnswer(str) { if (!str) return ''; return str.replace(/'/g, "\\'"); }
-        function sendAnswer(text) { channel.postMessage({ type: 'FILL_ANSWER', answer: text }); }
-
-        buttons.forEach(button => { 
-            button.addEventListener('click', () => { 
-                buttons.forEach(btn => btn.classList.remove('active-round'));
-                button.classList.add('active-round');
-                activeRound = parseInt(button.dataset.round);
-            }); 
-        });
-
-        function triggerVideo(index) {
-            channel.postMessage({ type: 'SELECT_VIDEO', index: index });
-            setTimeout(() => { channel.postMessage({ type: 'PLAY_VIDEO' }); }, 300);
-            resultArea.innerHTML = `<div style="text-align:center; color:#fff; margin-top:40px;">
-                <h3 style="color:var(--kamp-geel);">🎬 Video speelt af...</h3>
-                <p>Wacht tot de video eindigt. De antwoorden verschijnen dan automatisch hier!</p>
-            </div>`;
+        function startRoundDirect(r) {
+            if (activeRound !== 0 && activeRound !== r && !confirm(`Wil je overschakelen naar Ronde ${r}?`)) return;
+            activeRound = r;
+            document.querySelectorAll('.round-bar button').forEach(b => b.classList.toggle('active-round', parseInt(b.dataset.round) === r));
+            channel.postMessage({ type: 'START_ROUND', round: r });
         }
 
-        channel.onmessage = (event) => {
-            if (event.data.type === 'SYNC_PLAYERS') {
-                window.lastSyncedPlayers = event.data.players;
-                const container = document.getElementById('live-players-container');
-                container.innerHTML = '';
-                
-                let activePlayerFound = null;
+        function esc(s) { return (s || '').replace(/'/g, "\\'"); }
+        function sendAnswer(txt) { channel.postMessage({ type: 'FILL_ANSWER', answer: txt }); }
+        function triggerVideo(i) {
+            channel.postMessage({ type: 'SELECT_VIDEO', index: i });
+            setTimeout(() => channel.postMessage({ type: 'PLAY_VIDEO' }), 250);
+            resultArea.innerHTML = `<p style="text-align:center; color:var(--kamp-geel); margin-top:30px;">🎬 Video speelt af op groot scherm...</p>`;
+        }
 
-                event.data.players.forEach(p => {
-                    if (p.isActive) {
-                        activePlayerFound = p;
-                        activePlayerIndex = p.index;
-                    }
+        channel.onmessage = (e) => {
+            const d = e.data; if (!d) return;
 
-                    const bgColor = p.isActive ? 'rgba(255,215,0,0.15)' : 'rgba(255,255,255,0.05)';
-                    const borderStyle = p.isActive ? `2px solid var(--kamp-geel)` : `2px solid transparent`;
-                    const textColor = p.isActive ? 'var(--kamp-geel)' : '#fff';
-                    const scoreColor = p.isRunning ? 'var(--kamp-rood)' : 'var(--kamp-geel)';
-                    
-                    const playedIcon = p.hasPlayed ? '<span style="color:var(--correct-color); font-size:0.9em; margin-right:5px;" title="Heeft eigen vraag al gehad">✔️</span>' : '';
+            if (d.type === 'SYNC_PLAYERS') {
+                lastPlayers = d.players;
+                const c = document.getElementById('live-players-container');
+                let activeP = null;
+                c.innerHTML = d.players.map(p => {
+                    if (p.isActive) activeP = p;
+                    return `<div class="sidebar-player" style="background:${p.isActive ? 'rgba(251,191,36,0.18)' : 'rgba(255,255,255,0.05)'}; border:2px solid ${p.isActive ? 'var(--kamp-geel)' : 'transparent'};" onclick="channel.postMessage({ type: 'SELECT_PLAYER', playerIndex: ${p.index} })">
+                        <strong>${p.isActive ? '👉 ' : ''}${p.hasPlayed ? '✔️ ' : ''}${p.name}</strong>
+                        <span style="font-family:'Chakra Petch',sans-serif; font-size:1.3rem; color:${p.isRunning ? 'var(--kamp-rood)' : 'var(--kamp-geel)'};">${p.seconds}</span>
+                    </div>`;
+                }).join('');
 
-                    container.innerHTML += `
-                        <div class="sidebar-player" style="background: ${bgColor}; border: ${borderStyle};" onclick="selectPlayer(${p.index})">
-                            <span style="font-weight: bold; font-size: 1.1em; color: ${textColor}; max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
-                                ${p.isActive ? '👉 ' : ''}${playedIcon}${p.name}
-                            </span>
-                            <span style="font-family: 'Chakra Petch', sans-serif; font-size: 1.5em; font-weight: bold; color: ${scoreColor};">
-                                ${p.seconds}
-                            </span>
-                        </div>
-                    `;
-                });
-
-                if (activePlayerFound) {
-                    document.getElementById('active-player-name').textContent = activePlayerFound.name;
-                    document.getElementById('active-player-score').textContent = activePlayerFound.seconds;
-                    
-                    const btnTimer = document.getElementById('btn-massive-timer');
-                    const centerPanel = document.getElementById('panel-center');
-
-                    if (activePlayerFound.isRunning) {
-                        btnTimer.textContent = '❚❚ STOP TIMER';
-                        btnTimer.style.background = 'var(--kamp-rood)';
-                        btnTimer.style.color = '#fff';
-                        centerPanel.style.borderColor = 'var(--kamp-rood)';
-                        centerPanel.style.background = 'rgba(217, 37, 37, 0.1)';
-                        centerPanel.style.boxShadow = '0 0 40px rgba(217, 37, 37, 0.2)';
-                        document.getElementById('active-player-score').style.color = 'var(--kamp-rood)';
-                    } else {
-                        btnTimer.textContent = '▶ START TIMER';
-                        btnTimer.style.background = 'var(--kamp-geel)';
-                        btnTimer.style.color = '#000';
-                        centerPanel.style.borderColor = 'var(--kamp-geel)';
-                        centerPanel.style.background = 'rgba(11, 128, 67, 0.15)';
-                        centerPanel.style.boxShadow = '0 0 30px rgba(255, 215, 0, 0.1)';
-                        document.getElementById('active-player-score').style.color = 'var(--kamp-geel)';
-                    }
+                if (activeP) {
+                    document.getElementById('active-player-name').textContent = activeP.name;
+                    document.getElementById('active-player-score').textContent = activeP.seconds;
+                    const btn = document.getElementById('btn-massive-timer');
+                    btn.textContent = activeP.isRunning ? '❚❚ STOP TIMER' : '▶ START TIMER';
+                    btn.style.background = activeP.isRunning ? 'var(--kamp-rood)' : 'var(--kamp-geel)';
+                    btn.style.color = activeP.isRunning ? '#fff' : '#000';
                 }
             }
-            
-            // RONDE 4 SYNC (BORDJES, FOTO, MANUAL SCORE)
-            if (event.data.type === 'SYNC_R4') {
-                activeRound = 4;
-                buttons.forEach(btn => btn.classList.remove('active-round'));
-                document.getElementById(`btn-round-4`).classList.add('active-round');
-                document.getElementById('standard-actions').style.display = 'none';
 
-                let html = `<div style="text-align:center;">
-                            <h3 style="color:var(--kamp-geel); margin-top:0;">Foto ${event.data.qNum} / ${event.data.total}</h3>
-                            <p style="font-size: 1.2em; color: #fff;">Antwoord: <strong style="color:var(--correct-color); font-size:1.6em; display:block; margin-top:5px; text-shadow: 0 2px 5px #000;">${event.data.answer}</strong></p>
-                            
-                            <button onclick="channel.postMessage({ type: 'START_R4_TIMER' })" style="width:100%; background:var(--kamp-groen); color:#fff; font-size:1.3em; font-weight:bold; padding:15px; border-radius:8px; border:2px solid #fff; cursor:pointer; margin-top:10px; margin-bottom:25px; box-shadow: 0 5px 15px rgba(0,0,0,0.4);">
-                                ⏱️ START 15 SEC TIMER
-                            </button>
-                            
-                            <div style="background: rgba(0,0,0,0.4); padding: 15px; border-radius: 8px; border: 1px solid var(--border-col);">
-                                <h4 style="color:#fff; border-bottom: 1px solid rgba(255,255,255,0.2); padding-bottom: 5px; margin-top:0;">Punten uitdelen:</h4>
-                                <p style="font-size:0.85em; color:var(--kamp-geel); margin-top:-5px;">Klik op wie juist gegokt heeft:</p>
-                                <div style="display:flex; flex-direction:column; gap:10px; margin-bottom: 20px;">`;
-                
-                window.lastSyncedPlayers.forEach(p => {
-                    html += `<button onclick="this.style.background='var(--kamp-groen)'; this.style.color='#fff'; this.textContent='✔️ Punten toegekend'; channel.postMessage({ type: 'ADJUST_TIME', amount: 40, targetPlayer: ${p.index}, isR4Score: 1 })" style="background:var(--kamp-geel); color:#000; font-weight:bold; padding:12px; border-radius:8px; border:none; cursor:pointer; text-align:left; font-size:1.1em; transition: 0.2s;">
-                                ✅ Geef ${p.name} +40 sec
-                            </button>`;
-                });
-
-                html += `</div></div>
-                         <button onclick="channel.postMessage({ type: 'NEXT_QUESTION' })" style="margin-top:20px; width:100%; background:#1e3a8a; color:#fff; font-size:1.2em; font-weight:bold; padding:15px; border-radius:8px; border:none; cursor:pointer;">
-                            ▶ VOLGENDE FOTO
-                         </button>
-                         <button onclick="channel.postMessage({ type: 'REQUEST_REPORT' })" style="margin-top:10px; width: 100%; background: transparent; color: #3b82f6; font-weight: bold; border: 2px solid #3b82f6; border-radius:8px; padding:15px; cursor:pointer;">
-                            📊 TOON EINDRAPPORT
-                         </button>
-                         </div>`;
-                
-                resultArea.innerHTML = html;
-            }
-
-            if (event.data.type === 'SYNC_R5_GRID') {
-                activeRound = 5;
-                buttons.forEach(btn => btn.classList.remove('active-round'));
-                document.getElementById(`btn-round-5`).classList.add('active-round');
-                document.getElementById('standard-actions').style.display = 'flex';
-
-                let html = `<h3 style="color:var(--kamp-geel); margin-top:0;">Kies een Fragment:</h3>
-                            <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:15px;">`;
-                for (let i = 0; i < event.data.total; i++) {
-                    const isPlayed = event.data.played.includes(i);
-                    if (isPlayed) {
-                        html += `<button disabled class="grid-select-btn">❌ Fragment ${i+1}</button>`;
-                    } else {
-                        html += `<button onclick="triggerVideo(${i})" class="grid-select-btn">▶ Fragment ${i+1}</button>`;
-                    }
-                }
-                html += `</div>`;
-                resultArea.innerHTML = html;
-            }
-
-            if (event.data.type === 'SYNC_QUESTION') {
-                activeRound = event.data.round;
-                buttons.forEach(btn => btn.classList.remove('active-round'));
-                document.getElementById(`btn-round-${activeRound}`).classList.add('active-round');
-                document.getElementById('standard-actions').style.display = 'flex';
-                lookupAnswers(event.data.ids);
-            }
-
-            if (event.data.type === 'SYNC_REPORT') {
+            if (d.type === 'SYNC_R4') {
+                document.getElementById('flow-buttons').style.display = 'none';
                 resultArea.innerHTML = `
-                    <h3 style="color:var(--kamp-geel); margin-top:0; font-size:1.5em;">📊 Statistieken</h3>
-                    <div style="display:flex; flex-direction:column; gap:15px; font-size:0.95em;">
-                        ${event.data.html}
-                    </div>
-                    <p style="color:#aaa; font-size:0.85em; margin-top:20px;">*Kijk ook naar het grote scherm voor de volledige presentatie!</p>
-                `;
+                    <div style="text-align:center;">
+                        <h3 style="color:var(--kamp-geel); margin:0;">Foto ${d.qNum} / ${d.total}</h3>
+                        <p style="font-size:1.25rem; color:var(--correct-color); font-weight:bold; margin:8px 0 14px 0;">${d.answer}</p>
+                        <button class="big-btn" style="background:var(--kamp-groen); color:#fff;" onclick="channel.postMessage({ type: 'START_R4_TIMER' })">⏱️ START 15 SEC TIMER</button>
+                        <div style="display:flex; flex-direction:column; gap:8px; margin:12px 0;">
+                            ${lastPlayers.map(p => `<button style="padding:10px; border-radius:8px; border:none; background:var(--kamp-geel); color:#000; font-weight:bold; cursor:pointer; text-align:left;" onclick="this.style.background='var(--kamp-groen)'; this.style.color='#fff'; this.textContent='✔️ ${p.name} (+40s)'; channel.postMessage({ type: 'ADJUST_TIME', amount: 40, targetPlayer: ${p.index} })">✅ Geef ${p.name} +40 sec</button>`).join('')}
+                        </div>
+                        <button class="big-btn" style="background:#2563eb; color:#fff;" onclick="channel.postMessage({ type: 'NEXT_QUESTION' })">▶ VOLGENDE FOTO</button>
+                    </div>`;
+            }
+
+            if (d.type === 'SYNC_R5_GRID') {
+                document.getElementById('flow-buttons').style.display = 'flex';
+                let html = `<div style="display:flex; gap:8px; flex-wrap:wrap;">`;
+                for (let i = 0; i < d.total; i++) {
+                    const done = d.played.includes(i);
+                    html += `<button class="grid-select-btn" ${done ? 'disabled' : `onclick="triggerVideo(${i})"`}>${done ? '❌' : '▶'} Fragment ${i + 1}</button>`;
+                }
+                resultArea.innerHTML = html + `</div>`;
+            }
+
+            if (d.type === 'SYNC_QUESTION') {
+                activeRound = d.round;
+                document.getElementById('flow-buttons').style.display = 'flex';
+                lookupAnswers(d.ids);
             }
         };
 
         function lookupAnswers(ids) {
-            if (!ids || ids.length === 0) return;
-            const themeData = window.ThemeManager.getTheme("KAMPIOENEN");
-            if (!themeData) { resultArea.innerHTML = `<p style="color: var(--wrong-color)">Themadatas 'KAMPIOENEN' niet gevonden.</p>`; return; }
+            const data = window.ThemeManager.getTheme("KAMPIOENEN");
+            if (!data) return;
+            const pools = { 1: data.ronde1_pool, 2: data.ronde2_answer_pool, 3: data.ronde3_openDeur, 5: data.ronde5_beeld, 6: data.ronde6_finale };
+            const pool = pools[activeRound] || [];
 
-            let pool;
-            if (activeRound == 1) pool = themeData.ronde1_pool;
-            else if (activeRound == 2) pool = themeData.ronde2_answer_pool;
-            else if (activeRound == 3) pool = themeData.ronde3_openDeur;
-            else if (activeRound == 4) pool = themeData.ronde4_geheugen;
-            else if (activeRound == 5) pool = themeData.ronde5_beeld;
-            else if (activeRound == 6) pool = themeData.ronde6_finale;
-
-            if (!pool || pool.length === 0) { resultArea.innerHTML = `<p style="color: var(--wrong-color)">Geen data beschikbaar voor deze ronde.</p>`; return; }
-
-            let html = `<ul style="list-style: none; padding: 0; margin: 0;">`;
-            ids.forEach(id => {
-                const q = pool.find(item => item.id === id) || pool[id - 1]; 
-                if (q) {
-                    html += `<li class="list-item"><strong style="color: var(--kamp-geel); margin-bottom: 5px; display:inline-block;">ID #${id}</strong><br>`;
-                    
-                    if (activeRound === 1) {
-                        const safeA = escapeAnswer(q.a);
-                        html += `<div style="margin-bottom: 10px;">${q.q}</div>
-                                 <button class="correct-btn" onclick="sendAnswer('${safeA}')">✅ ${q.a}</button>`;
-                    }
-                    else if (activeRound === 2) {
-                        const safeA = escapeAnswer(q.answer);
-                        html += `<span style="font-size:0.9em; color:#aaa;">Hints: ${q.clues.join(' - ')}</span><br>
-                                 <button class="correct-btn" onclick="sendAnswer('${safeA}')">✅ ${q.answer}</button>`;
-                    }
-                    else if (activeRound === 3) {
-                        const keywordsHtml = q.keywords.map(k => { 
-                            const word = k.word ? k.word : k; const safeW = escapeAnswer(word); 
-                            return `<button class="correct-btn" onclick="sendAnswer('${safeW}')">✅ ${word}</button>`; 
-                        }).join(' ');
-                        
-                        html += `
-                            <button onclick="channel.postMessage({ type: 'PLAY_AUDIO' })" style="width: 100%; padding: 12px; background: var(--kamp-groen); color: white; border-radius: 8px; border: 2px solid white; font-weight: bold; font-size: 1.1em; cursor: pointer; margin-bottom: 10px;">
-                                ▶ SPEEL MP4 FRAGMENT AF (GELUID ONLY)
-                            </button>
-                            <strong style="font-size:1.1em; color:#fff;">Oplossing: ${q.subject}</strong><br>
-                            <div style="margin-top:8px;">${keywordsHtml}</div>`;
-                    }
-                    else if (activeRound === 5) {
-                        const safeS = escapeAnswer(q.vraag1_seizoen); 
-                        const safeA = escapeAnswer(q.vraag2_aflevering); 
-                        const safeZ = escapeAnswer(q.vraag3_zinEind);
-                        const keywordsHtml = q.vraag4_keywords.map(k => `<button class="correct-btn" onclick="sendAnswer('${escapeAnswer(k)}')">✅ ${k}</button>`).join(' ');
-                        
-                        html += `<strong style="color:#fff; font-size:1.1em;">Keur goed!</strong><br>
-                                 <div style="margin-top: 10px; display: flex; flex-direction: column; gap: 5px;">
-                                     <div><span style="color:#aaa; width: 80px; display: inline-block;">Seizoen:</span> <button class="correct-btn" onclick="sendAnswer('${safeS}')">✅ ${q.vraag1_seizoen}</button></div>
-                                     <div><span style="color:#aaa; width: 80px; display: inline-block;">Aflevering:</span> <button class="correct-btn" onclick="sendAnswer('${safeA}')">✅ ${q.vraag2_aflevering}</button></div>
-                                     <div><span style="color:#aaa; width: 80px; display: inline-block;">Zin:</span> <button class="correct-btn" onclick="sendAnswer('${safeZ}')">✅ ${q.vraag3_zinEind}</button></div>
-                                     <div><span style="color:#aaa; width: 80px; display: inline-block;">Trefwoorden:</span> ${keywordsHtml}</div>
-                                 </div>`;
-                    }
-                    else if (activeRound === 6) {
-                        const keywordsHtml = q.keywords.map(k => { 
-                            const word = k.word ? k.word : k; const safeW = escapeAnswer(word); 
-                            return `<button class="correct-btn" onclick="sendAnswer('${safeW}')">✅ ${word}</button>`; 
-                        }).join(' ');
-                        html += `<strong style="font-size:1.1em; color:#fff;">${q.subject}</strong><br><div style="margin-top:8px;">${keywordsHtml}</div>`;
-                    }
-                    html += `</li>`;
-                }
-            });
-            html += `</ul>`;
-            resultArea.innerHTML = html;
+            resultArea.innerHTML = ids.map(id => {
+                const q = pool.find(x => x.id === id) || pool[id - 1];
+                if (!q) return '';
+                if (activeRound === 1) return `<div style="margin-bottom:12px;"><p style="margin:0 0 8px 0;">${q.q}</p><button class="correct-btn" onclick="sendAnswer('${esc(q.a)}')">✅ ${q.a}</button></div>`;
+                if (activeRound === 2) return `<div style="margin-bottom:10px; padding:10px; background:rgba(255,255,255,0.05); border-radius:8px;"><div style="font-size:0.85rem; color:var(--text-muted);">${q.clues.join(' • ')}</div><button class="correct-btn" onclick="sendAnswer('${esc(q.answer)}')">✅ ${q.answer}</button></div>`;
+                if (activeRound === 3) return `<button class="big-btn" style="background:var(--kamp-groen); color:#fff;" onclick="channel.postMessage({ type: 'PLAY_AUDIO' })">📻 SPEEL RADIO HALLO</button><div>${q.keywords.map(k => `<button class="correct-btn" onclick="sendAnswer('${esc(k.word || k)}')">✅ ${k.word || k}</button>`).join('')}</div>`;
+                if (activeRound === 5) return `<div style="display:flex; flex-direction:column; gap:6px;">
+                    <button class="correct-btn" onclick="sendAnswer('${esc(q.vraag1_seizoen)}')">Seizoen: ${q.vraag1_seizoen}</button>
+                    <button class="correct-btn" onclick="sendAnswer('${esc(q.vraag2_aflevering)}')">Aflevering: ${q.vraag2_aflevering}</button>
+                    <button class="correct-btn" onclick="sendAnswer('${esc(q.vraag3_zinEind)}')">Zin: ${q.vraag3_zinEind}</button>
+                    <div>${(q.vraag4_keywords || []).map(k => `<button class="correct-btn" onclick="sendAnswer('${esc(k)}')">✅ ${k}</button>`).join('')}</div>
+                </div>`;
+                if (activeRound === 6) return `<strong>${q.subject}</strong><div style="margin-top:8px;">${q.keywords.map(k => `<button class="correct-btn" onclick="sendAnswer('${esc(k.word || k)}')">✅ ${k.word || k}</button>`).join('')}</div>`;
+                return '';
+            }).join('');
         }
     </script>
 </body>
