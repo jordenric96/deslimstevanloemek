@@ -10,6 +10,10 @@
 </head>
 <body>
 
+    <div id="beeld-player-container" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #000; z-index: 9999; align-items: center; justify-content: center;">
+        <video id="beeld-video-player" playsinline style="width: 100%; height: 100%; object-fit: contain;"></video>
+    </div>
+
     <div id="game-over-overlay">
         <h2 id="game-over-subtitle">De slimste kampioen is:</h2>
         <h1 id="game-over-text">WINNAAR!</h1>
@@ -79,9 +83,6 @@
             <!-- RONDE 5: BEELDRONDE -->
             <div id="beeld-display-area" style="display: none; width: 100%; flex-direction: column; align-items: center;">
                 <div id="beeld-grid" style="display: flex; gap: 18px; justify-content: center; flex-wrap: wrap; width: 95%; margin-top: 15px;"></div>
-                <div id="beeld-player-container" style="display: none; position: fixed; inset: 0; background: #000; z-index: 9999; align-items: center; justify-content: center;">
-                    <video id="beeld-video-player" playsinline style="width: 100%; height: 100%; object-fit: contain;"></video>
-                </div>
                 <div id="beeld-tasks-container" style="display: none; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; width: 100%; margin-top: 20px;"></div>
             </div>
 
@@ -209,7 +210,6 @@
         questionText.textContent = "Klaar voor de aftrap! Wachten op de spelleider...";
     }
 
-    // FIX: Selecteert nu ook geneste display-area's binnen #question-area!
     function hideAllGameAreas() {
         document.querySelectorAll('[id$="-display-area"]').forEach(el => el.style.display = 'none');
         questionText.style.display = 'none';
@@ -218,6 +218,7 @@
             const el = document.getElementById(id);
             if (el) { el.pause(); }
         });
+        document.getElementById('beeld-player-container').style.display = 'none';
         document.getElementById('on-air-badge').classList.remove('live');
         document.getElementById('radio-eq').classList.remove('active');
     }
@@ -391,7 +392,7 @@
         }
     }
 
-    // --- RONDE 2: DE PUZZEL (GEFIXT!) ---
+    // --- RONDE 2: DE PUZZEL ---
     let activeRound2Puzzles = [], currentPuzzleSet = null, currentR2SetCount = 0;
     function setupRound2() {
         currentRound = 2; currentR2SetCount = 0; startingPlayersThisRound = [];
@@ -701,7 +702,6 @@
             const totW = s.r1.w + s.r2.w + s.r3.w + s.r5.w + s.r6.w;
             const acc = (totC + totW) > 0 ? Math.round((totC / (totC + totW)) * 100) : 0;
 
-            // Header balk
             doc.setFillColor(6, 78, 59);
             doc.rect(0, 0, 210, 38, 'F');
             doc.setTextColor(251, 191, 36);
@@ -712,7 +712,6 @@
             doc.setFontSize(12);
             doc.text(`Speler: ${p.name}   |   Eindplaats: #${rank + 1} van ${players.length}   |   Datum: ${dateStr}`, 15, 29);
 
-            // Samenvatting KPI-vakken
             doc.setFillColor(245, 247, 250);
             doc.roundedRect(15, 46, 180, 28, 3, 3, 'F');
             doc.setTextColor(15, 23, 42);
@@ -723,7 +722,6 @@
             doc.setTextColor(6, 78, 59);
             doc.text(`Titel: ${getKampioenenTitel(rank, acc, p.seconds)}`, 78, 66);
 
-            // Detail per ronde
             let y = 86;
             const addRoundSection = (title, statsLine, items) => {
                 doc.setFillColor(236, 253, 245);
@@ -752,7 +750,6 @@
             addRoundSection("Ronde 5: De Beeldronde", `${s.r5.c} juist / ${s.r5.w} fout`, s.r5.foundItems);
             addRoundSection("Ronde 6: De Finale", `${s.r6.c} juist (-${s.r6.stolenSec}s bij tegenstander)`, s.r6.foundWords);
 
-            // Footer
             doc.setFontSize(9);
             doc.setTextColor(148, 163, 184);
             doc.text(`Pagina ${rank + 1} van ${sorted.length} — Officieel F.C. De Kampioenen Quiz Rapport`, 105, 288, { align: 'center' });
