@@ -41,6 +41,15 @@ const RONDE5_DATA = {
             vraag2_aflevering: "De helderziende",
             vraag3_zinEind: "Oei, er vallen er nog uit",
             vraag4_keywords: ["Doortje wijsmaken dat Pol met Doortje is", "Pascal aan Xavier koppelen"]
+        },
+
+        {
+            videoBron: "./fragmenten/fragment6.mp4", 
+            thumbnail: "./fragmenten/thumbnail6.png",
+            vraag1_seizoen: "Seizoen 13",
+            vraag2_aflevering: "Kamer te huur",
+            vraag3_zinEind: "De Musical Cats",
+            vraag4_keywords: ["Dieudonné", "Krijgt onderdak bij Pascale"]
         }
     ]
 };
