@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="stijl.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
-<body>
+<body style="padding-bottom: 100px;">
 
     <div id="beeld-player-container" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #000; z-index: 9999; align-items: center; justify-content: center;">
         <video id="beeld-video-player" playsinline style="width: 100%; height: 100%; object-fit: contain;"></video>
@@ -99,6 +99,15 @@
         </div>
     </div>
 
+    <!-- VOLLEDIGE TIJDLIJN ONDERAAN -->
+    <div id="quiz-timeline-bar">
+        <div class="timeline-steps" id="timeline-steps"></div>
+        <div class="timeline-stats">
+            <div class="tl-badge">Nog te gaan: <span id="tl-remaining-q">—</span></div>
+            <div class="tl-badge">Nog te verdienen: <span id="tl-remaining-sec">—</span></div>
+        </div>
+    </div>
+
     <script src="quizdata_r1.js"></script>
     <script src="quizdata_r2.js"></script>
     <script src="quizdata_r3.js"></script>
@@ -125,6 +134,77 @@
     const gameBoard = document.getElementById('game-board'), roundTitle = document.getElementById('round-title');
     const questionText = document.getElementById('question-text'), questionCounter = document.getElementById('question-counter');
     const inputAnswer = document.getElementById('answer-input'), opendeurSubject = document.getElementById('opendeur-subject');
+
+    const ROUND_NAMES = [
+        { num: 1, name: "R1 Algemeen" },
+        { num: 2, name: "R2 Puzzel" },
+        { num: 3, name: "R3 Radio Hallo" },
+        { num: 4, name: "R4 Bordjes" },
+        { num: 5, name: "R5 Beeld" },
+        { num: 6, name: "R6 Finale" }
+    ];
+
+    function updateTimeline() {
+        const bar = document.getElementById('quiz-timeline-bar');
+        const stepsEl = document.getElementById('timeline-steps');
+        const remQEl = document.getElementById('tl-remaining-q');
+        const remSecEl = document.getElementById('tl-remaining-sec');
+        if (!bar || !stepsEl) return;
+
+        bar.style.display = 'flex';
+        stepsEl.innerHTML = ROUND_NAMES.map(r => {
+            let cls = 'tl-step', prefix = '';
+            if (currentRound > r.num) { cls += ' passed'; prefix = '✓ '; }
+            else if (currentRound === r.num) { cls += ' active'; }
+            return `<div class="${cls}">${prefix}${r.name}</div>`;
+        }).join('');
+
+        let remQ = "Wachten...", remSec = "—";
+        if (currentRound === 1) {
+            const left = Math.max(0, activeRound1Questions.length - currentQuestionIndex);
+            remQ = `${left} ${left === 1 ? 'vraag' : 'vragen'}`;
+            remSec = `+${left * R1_BONUS}s`;
+        } else if (currentRound === 2) {
+            const leftSets = Math.max(0, activeRound2Puzzles.length - currentR2SetCount);
+            const curUnfound = currentPuzzleSet ? currentPuzzleSet.filter(p => !p.found).length : 0;
+            const futureWords = Math.max(0, leftSets - 1) * 3;
+            remQ = `${leftSets} ${leftSets === 1 ? 'puzzel' : 'puzzels'}`;
+            remSec = `+${(curUnfound + futureWords) * R2_R3_R4_R5_BONUS}s`;
+        } else if (currentRound === 3) {
+            const unplayed = Math.max(0, activeOpenDeurQuestions.length - playedR3Fragments.length);
+            let unfoundWords = 0;
+            if (currentOpenDeurIndex !== -1 && activeOpenDeurQuestions[currentOpenDeurIndex]) {
+                unfoundWords = activeOpenDeurQuestions[currentOpenDeurIndex].keywords.filter(k => !k.found).length;
+                unfoundWords += Math.max(0, unplayed - 1) * 4;
+            } else {
+                unfoundWords = unplayed * 4;
+            }
+            remQ = `${unplayed} ${unplayed === 1 ? 'fragment' : 'fragmenten'}`;
+            remSec = `+${unfoundWords * R2_R3_R4_R5_BONUS}s`;
+        } else if (currentRound === 4) {
+            const left = Math.max(0, activeRound4Questions.length - currentR4Index);
+            remQ = `${left} ${left === 1 ? 'foto' : 'foto\'s'}`;
+            remSec = `+${left * R2_R3_R4_R5_BONUS}s / speler`;
+        } else if (currentRound === 5) {
+            const unplayed = Math.max(0, activeBeeldQuestions.length - playedVideos.length);
+            let unfoundTasks = 0;
+            if (currentBeeldIndex !== -1 && activeBeeldQuestions[currentBeeldIndex]) {
+                const q = activeBeeldQuestions[currentBeeldIndex];
+                unfoundTasks = [q.ans_seizoen, q.ans_aflevering, q.ans_zin, q.ans_kw1, q.ans_kw2].filter(t => !t.found).length;
+                unfoundTasks += Math.max(0, unplayed - 1) * 5;
+            } else {
+                unfoundTasks = unplayed * 5;
+            }
+            remQ = `${unplayed} ${unplayed === 1 ? 'video' : 'video\'s'}`;
+            remSec = `+${unfoundTasks * R2_R3_R4_R5_BONUS}s`;
+        } else if (currentRound === 6) {
+            remQ = `Finale`;
+            remSec = `-20s / juist woord`;
+        }
+
+        remQEl.textContent = remQ;
+        remSecEl.textContent = remSec;
+    }
 
     function levenshteinDistance(s1, s2) {
         s1 = s1.toLowerCase().trim().replace(/\s/g, ""); s2 = s2.toLowerCase().trim().replace(/\s/g, "");
@@ -166,51 +246,66 @@
     window.addEventListener('load', updatePlayerInputs);
 
     function initializeGame() {
-        if (!window.ThemeManager) return alert("Systeemfout: quizdata_loader.js niet geladen.");
-        quizData = window.ThemeManager.getTheme('KAMPIOENEN');
-        if (!quizData) return alert("Thema KAMPIOENEN niet gevonden.");
-
-        quizData.ronde1_pool = (quizData.ronde1_pool || []).map((q, i) => ({ ...q, id: i + 1 }));
-        quizData.ronde2_answer_pool = (quizData.ronde2_answer_pool || []).map((q, i) => ({ ...q, id: i + 1 }));
-        quizData.ronde3_openDeur = (quizData.ronde3_openDeur || []).map((q, i) => ({ ...q, id: i + 1, keywords: (q.keywords || []).map(w => ({ word: w, found: false, missed: false })) }));
-        quizData.ronde4_geheugen = (quizData.ronde4_geheugen || []).map((q, i) => ({ ...q, id: i + 1 }));
-        quizData.ronde5_beeld = (quizData.ronde5_beeld || []).map((q, i) => ({
-            ...q, id: i + 1,
-            ans_seizoen: { word: q.vraag1_seizoen || "?", found: false, missed: false, label: "Seizoen" },
-            ans_aflevering: { word: q.vraag2_aflevering || "?", found: false, missed: false, label: "Aflevering" },
-            ans_zin: { word: q.vraag3_zinEind || "?", found: false, missed: false, label: `Zin: "${q.vraag3_zinBegin || "..."}"` },
-            ans_kw1: { word: (q.vraag4_keywords && q.vraag4_keywords[0]) || "?", found: false, missed: false, label: "Trefwoord 1" },
-            ans_kw2: { word: (q.vraag4_keywords && q.vraag4_keywords[1]) || "?", found: false, missed: false, label: "Trefwoord 2" }
-        }));
-        quizData.ronde6_finale = (quizData.ronde6_finale || []).map((q, i) => ({ ...q, id: i + 1, keywords: (q.keywords || []).map(w => ({ word: w, found: false, missed: false })) }));
-
-        players = []; playerStats = {};
-        const inputs = playerNameInputs.querySelectorAll('input[type="text"]');
-        inputs.forEach((inp, i) => {
-            const name = inp.value.trim();
-            if (name) {
-                players.push({ name, seconds: 60, originalIndex: i });
-                playerStats[i] = {
-                    totalGained: 0, totalLost: 0,
-                    r1: { c: 0, w: 0, details: [] },
-                    r2: { c: 0, w: 0, foundWords: [] },
-                    r3: { c: 0, w: 0, foundWords: [] },
-                    r4: { c: 0, episodes: [] },
-                    r5: { c: 0, w: 0, foundItems: [] },
-                    r6: { c: 0, w: 0, stolenSec: 0, foundWords: [] }
+        try {
+            if (window.ThemeManager && window.ThemeManager.getTheme('KAMPIOENEN')) {
+                quizData = window.ThemeManager.getTheme('KAMPIOENEN');
+            } else {
+                // Veilige fallback als quizdata_loader.js niet kon laden door een fout in 1 bestand
+                quizData = {
+                    ronde1_pool: (typeof RONDE1_DATA !== 'undefined' && RONDE1_DATA.KAMPIOENEN) ? RONDE1_DATA.KAMPIOENEN : [],
+                    ronde2_answer_pool: (typeof RONDE2_DATA !== 'undefined' && RONDE2_DATA.KAMPIOENEN) ? RONDE2_DATA.KAMPIOENEN : [],
+                    ronde3_openDeur: (typeof RONDE3_DATA !== 'undefined' && RONDE3_DATA.KAMPIOENEN) ? RONDE3_DATA.KAMPIOENEN : [],
+                    ronde4_geheugen: (typeof RONDE4_DATA !== 'undefined' && RONDE4_DATA.KAMPIOENEN) ? RONDE4_DATA.KAMPIOENEN : [],
+                    ronde5_beeld: (typeof RONDE5_DATA !== 'undefined' && RONDE5_DATA.KAMPIOENEN) ? RONDE5_DATA.KAMPIOENEN : [],
+                    ronde6_finale: (typeof RONDE6_DATA !== 'undefined' && RONDE6_DATA.KAMPIOENEN) ? RONDE6_DATA.KAMPIOENEN : []
                 };
             }
-        });
 
-        if (players.length < 2) return alert("Minimaal 2 spelers nodig.");
-        setupScreen.style.display = 'none';
-        playerContainer.style.display = 'flex';
-        gameBoard.style.display = 'block';
-        activePlayerIndex = players[0].originalIndex;
-        renderPlayers();
-        hideAllGameAreas();
-        questionText.style.display = 'block';
-        questionText.textContent = "Klaar voor de aftrap! Wachten op de spelleider...";
+            quizData.ronde1_pool = (quizData.ronde1_pool || []).map((q, i) => ({ ...q, id: i + 1 }));
+            quizData.ronde2_answer_pool = (quizData.ronde2_answer_pool || []).map((q, i) => ({ ...q, id: i + 1 }));
+            quizData.ronde3_openDeur = (quizData.ronde3_openDeur || []).map((q, i) => ({ ...q, id: i + 1, keywords: (q.keywords || []).map(w => ({ word: w.word || w, found: false, missed: false })) }));
+            quizData.ronde4_geheugen = (quizData.ronde4_geheugen || []).map((q, i) => ({ ...q, id: i + 1 }));
+            quizData.ronde5_beeld = (quizData.ronde5_beeld || []).map((q, i) => ({
+                ...q, id: i + 1,
+                ans_seizoen: { word: q.vraag1_seizoen || "?", found: false, missed: false, label: "Seizoen" },
+                ans_aflevering: { word: q.vraag2_aflevering || "?", found: false, missed: false, label: "Aflevering" },
+                ans_zin: { word: q.vraag3_zinEind || "?", found: false, missed: false, label: `Zin: "${q.vraag3_zinBegin || "..."}"` },
+                ans_kw1: { word: (q.vraag4_keywords && q.vraag4_keywords[0]) || "?", found: false, missed: false, label: "Trefwoord 1" },
+                ans_kw2: { word: (q.vraag4_keywords && q.vraag4_keywords[1]) || "?", found: false, missed: false, label: "Trefwoord 2" }
+            }));
+            quizData.ronde6_finale = (quizData.ronde6_finale || []).map((q, i) => ({ ...q, id: i + 1, keywords: (q.keywords || []).map(w => ({ word: w.word || w, found: false, missed: false })) }));
+
+            players = []; playerStats = {};
+            const inputs = playerNameInputs.querySelectorAll('input[type="text"]');
+            inputs.forEach((inp, i) => {
+                const name = inp.value.trim();
+                if (name) {
+                    players.push({ name, seconds: 60, originalIndex: i });
+                    playerStats[i] = {
+                        totalGained: 0, totalLost: 0,
+                        r1: { c: 0, w: 0, details: [] },
+                        r2: { c: 0, w: 0, foundWords: [] },
+                        r3: { c: 0, w: 0, foundWords: [] },
+                        r4: { c: 0, episodes: [] },
+                        r5: { c: 0, w: 0, foundItems: [] },
+                        r6: { c: 0, w: 0, stolenSec: 0, foundWords: [] }
+                    };
+                }
+            });
+
+            if (players.length < 2) return alert("Minimaal 2 spelers nodig.");
+            setupScreen.style.display = 'none';
+            playerContainer.style.display = 'flex';
+            gameBoard.style.display = 'block';
+            activePlayerIndex = players[0].originalIndex;
+            renderPlayers();
+            hideAllGameAreas();
+            questionText.style.display = 'block';
+            questionText.textContent = "Klaar voor de aftrap! Wachten op de spelleider...";
+            updateTimeline();
+        } catch (err) {
+            alert("Fout bij het starten van de quiz: " + err.message);
+        }
     }
 
     function hideAllGameAreas() {
@@ -359,6 +454,7 @@
         stopTimer(); displayQuestionR1();
     }
     function displayQuestionR1() {
+        updateTimeline();
         if (currentQuestionIndex < activeRound1Questions.length) {
             currentQuestionAttempts = []; const q = activeRound1Questions[currentQuestionIndex];
             questionText.textContent = q.q;
@@ -416,7 +512,7 @@
         loadNewPuzzle();
     }
     function loadNewPuzzle() {
-        if (currentR2SetCount >= activeRound2Puzzles.length) { hideAllGameAreas(); questionText.style.display = 'block'; questionText.textContent = "Einde van Ronde 2!"; return; }
+        if (currentR2SetCount >= activeRound2Puzzles.length) { currentPuzzleSet = null; updateTimeline(); hideAllGameAreas(); questionText.style.display = 'block'; questionText.textContent = "Einde van Ronde 2!"; return; }
         activePlayerIndex = getNextStartingPlayerIndex();
         currentSetAttempts = []; currentPuzzleSet = activeRound2Puzzles[currentR2SetCount];
         startingPlayersThisRound.push(activePlayerIndex);
@@ -431,7 +527,7 @@
         const cc = document.getElementById('puzzle-clues-container');
         cc.innerHTML = clues.map(c => `<div class="puzzle-clue" data-answer="${c.answer.toLowerCase()}">${c.text}</div>`).join('');
         cc.classList.remove('answers-shown'); cc.classList.add('blurred-board');
-        stopTimer();
+        stopTimer(); updateTimeline();
     }
     function checkRound2Answer() {
         const found = currentPuzzleSet.find(p => !p.found && stringSimilarity(p.answer, inputAnswer.value) >= SIMILARITY_THRESHOLD);
@@ -442,6 +538,7 @@
             found.found = true; updateSeconds(activePlayerIndex, R2_R3_R4_R5_BONUS); showBonusFeedback(activePlayerIndex, R2_R3_R4_R5_BONUS);
             document.getElementById('puzzle-answers-container').innerHTML = currentPuzzleSet.map(p => `<div class="puzzle-answer ${p.found && !p.missed ? 'found ' + p.color : ''} ${p.missed ? 'missed' : ''}">${p.found ? p.answer : '???'}</div>`).join('');
             Array.from(document.getElementById('puzzle-clues-container').children).forEach(el => { if (el.dataset.answer === found.answer.toLowerCase()) el.className = `puzzle-clue found ${found.color}`; });
+            updateTimeline();
             if (currentPuzzleSet.every(p => p.found)) {
                 document.getElementById('puzzle-clues-container').classList.add('answers-shown');
                 document.getElementById('puzzle-clues-container').classList.remove('blurred-board');
@@ -458,7 +555,7 @@
         });
         document.getElementById('puzzle-clues-container').classList.add('answers-shown');
         document.getElementById('puzzle-clues-container').classList.remove('blurred-board');
-        stopTimer(); currentSetAttempts = players.map(p => p.originalIndex);
+        stopTimer(); currentSetAttempts = players.map(p => p.originalIndex); updateTimeline();
     }
 
     // --- RONDE 3: RADIO HALLO MET FRAGMENTKEUZE ---
@@ -472,6 +569,7 @@
         renderR3Grid();
     }
     function renderR3Grid() {
+        updateTimeline();
         if (playedR3Fragments.length >= activeOpenDeurQuestions.length) {
             hideAllGameAreas(); questionText.style.display = 'block'; questionText.textContent = "Einde van Ronde 3!"; return;
         }
@@ -503,7 +601,7 @@
         opendeurSubject.textContent = "Luister naar Radio Hallo..."; opendeurSubject.classList.add('blurred-subject');
         channel.postMessage({ type: 'SYNC_QUESTION', round: 3, ids: [q.id] });
         document.getElementById('opendeur-keywords-container').innerHTML = q.keywords.map(() => `<div class="opendeur-keyword">???</div>`).join('');
-        stopTimer();
+        stopTimer(); updateTimeline();
     }
     function returnToR3Grid() {
         if (currentOpenDeurIndex !== -1 && !playedR3Fragments.includes(currentOpenDeurIndex)) playedR3Fragments.push(currentOpenDeurIndex);
@@ -519,6 +617,7 @@
             playerStats[activePlayerIndex].r3.c++; playerStats[activePlayerIndex].r3.foundWords.push(found.word);
             found.found = true; updateSeconds(activePlayerIndex, R2_R3_R4_R5_BONUS); showBonusFeedback(activePlayerIndex, R2_R3_R4_R5_BONUS);
             document.getElementById('opendeur-keywords-container').innerHTML = q.keywords.map(k => `<div class="opendeur-keyword ${k.found && !k.missed ? 'found' : ''} ${k.missed ? 'missed' : ''}">${k.found ? k.word : '???'}</div>`).join('');
+            updateTimeline();
             if (q.keywords.every(k => k.found)) { stopTimer(); currentSetAttempts = players.map(p => p.originalIndex); setTimeout(returnToR3Grid, 3000); }
         } else { playerStats[activePlayerIndex].r3.w++; pasDeBeurt(); }
     }
@@ -527,7 +626,7 @@
         q.keywords.forEach(k => { if (!k.found) { k.found = true; k.missed = true; } });
         document.getElementById('opendeur-keywords-container').innerHTML = q.keywords.map(k => `<div class="opendeur-keyword ${k.missed ? 'missed' : 'found'}">${k.word}</div>`).join('');
         opendeurSubject.textContent = q.subject || "Radio Hallo"; opendeurSubject.classList.remove('blurred-subject');
-        stopTimer(); currentSetAttempts = players.map(p => p.originalIndex);
+        stopTimer(); currentSetAttempts = players.map(p => p.originalIndex); updateTimeline();
     }
 
     // --- RONDE 4: BORDJES ---
@@ -539,6 +638,7 @@
         loadR4Vraag();
     }
     function loadR4Vraag() {
+        updateTimeline();
         if (currentR4Index >= activeRound4Questions.length) { hideAllGameAreas(); questionText.style.display = 'block'; questionText.textContent = "Einde van Ronde 4!"; return; }
         const q = activeRound4Questions[currentR4Index];
         questionCounter.textContent = `Foto ${currentR4Index + 1} / ${activeRound4Questions.length}`;
@@ -588,6 +688,7 @@
         renderVideoGrid();
     }
     function renderVideoGrid() {
+        updateTimeline();
         if (playedVideos.length >= activeBeeldQuestions.length) { hideAllGameAreas(); questionText.style.display = 'block'; questionText.textContent = "Einde van de Beeldronde!"; return; }
         activePlayerIndex = getNextStartingPlayerIndex();
         questionText.textContent = "Kies een fragment!";
@@ -619,6 +720,7 @@
             questionText.textContent = "Wat weet je nog?";
             channel.postMessage({ type: 'SYNC_QUESTION', round: 5, ids: [q.id] });
             setTimeout(() => startTimer(activePlayerIndex), 200);
+            updateTimeline();
         };
         stopTimer();
     }
@@ -634,7 +736,7 @@
         inputAnswer.value = "";
         if (found) {
             playerStats[activePlayerIndex].r5.c++; playerStats[activePlayerIndex].r5.foundItems.push(`${found.label}: ${found.word}`);
-            found.found = true; updateSeconds(activePlayerIndex, R2_R3_R4_R5_BONUS); showBonusFeedback(activePlayerIndex, R2_R3_R4_R5_BONUS); renderBeeldUI();
+            found.found = true; updateSeconds(activePlayerIndex, R2_R3_R4_R5_BONUS); showBonusFeedback(activePlayerIndex, R2_R3_R4_R5_BONUS); renderBeeldUI(); updateTimeline();
             if (tasks.every(t => t.found)) { document.getElementById('beeld-tasks-container').classList.add('answers-shown'); stopTimer(); setTimeout(returnToVideoGrid, 3000); }
         } else { playerStats[activePlayerIndex].r5.w++; pasDeBeurt(); }
     }
@@ -643,7 +745,7 @@
         [q.ans_seizoen, q.ans_aflevering, q.ans_zin, q.ans_kw1, q.ans_kw2].forEach(t => { if (!t.found) { t.found = true; t.missed = true; } });
         document.getElementById('beeld-tasks-container').classList.add('answers-shown');
         document.getElementById('beeld-tasks-container').classList.remove('blurred-board');
-        renderBeeldUI(); stopTimer(); setTimeout(returnToVideoGrid, 3500);
+        renderBeeldUI(); stopTimer(); updateTimeline(); setTimeout(returnToVideoGrid, 3500);
     }
 
     // --- RONDE 6: FINALE ---
@@ -664,7 +766,7 @@
         questionCounter.textContent = `FINALE — Aan de beurt: ${finalists[activeFinalistIndex].player.name}`;
         channel.postMessage({ type: 'SYNC_QUESTION', round: 6, ids: [q.id] });
         document.getElementById('finale-keywords-container').innerHTML = q.keywords.map(() => `<div class="finale-keyword">???</div>`).join('');
-        stopTimer();
+        stopTimer(); updateTimeline();
     }
     function checkFinaleAnswer() {
         const q = activeFinaleQuestions[currentFinaleQuestionIndex];
@@ -803,4 +905,59 @@
                 ap.play().catch(() => {});
                 document.getElementById('on-air-badge').classList.add('live');
                 document.getElementById('radio-eq').classList.add('active');
-                ap.onended = () => { document.getElementById('on-air-badge').classList.remove('live
+                ap.onended = () => { document.getElementById('on-air-badge').classList.remove('live'); document.getElementById('radio-eq').classList.remove('active'); };
+            }
+        }
+        if (d.type === 'ADJUST_TIME') {
+            const t = d.targetPlayer !== undefined ? d.targetPlayer : activePlayerIndex;
+            if (currentRound === 4 && d.amount > 0) {
+                playerStats[t].r4.c++;
+                playerStats[t].r4.episodes.push(activeRound4Questions[currentR4Index]?.antwoord || "Aflevering");
+            }
+            updateSeconds(t, d.amount); showBonusFeedback(t, d.amount);
+        }
+        if (d.type === 'FILL_ANSWER') {
+            inputAnswer.value = d.answer;
+            if (currentRound === 1) checkRound1Answer();
+            else if (currentRound === 2) checkRound2Answer();
+            else if (currentRound === 3) checkRound3Answer();
+            else if (currentRound === 5) checkRound5Answer();
+            else if (currentRound === 6) checkFinaleAnswer();
+        }
+        if (d.type === 'TRIGGER_FAIL') {
+            inputAnswer.value = "###FAIL###";
+            if (currentRound === 1) checkRound1Answer();
+            else if (currentRound === 2) { playerStats[activePlayerIndex].r2.w++; pasDeBeurt(); }
+            else if (currentRound === 3) { playerStats[activePlayerIndex].r3.w++; pasDeBeurt(); }
+            else if (currentRound === 5) { playerStats[activePlayerIndex].r5.w++; pasDeBeurt(); }
+            else if (currentRound === 6) checkFinaleAnswer();
+        }
+        if (d.type === 'TOGGLE_TIMER') toggleTimer(activePlayerIndex);
+        if (d.type === 'SELECT_PLAYER') { activePlayerIndex = d.playerIndex; renderPlayers(); }
+        if (d.type === 'START_ROUND') {
+            if (d.round == 1) startGameR1();
+            if (d.round == 2) setupRound2();
+            if (d.round == 3) setupRound3();
+            if (d.round == 4) setupRound4();
+            if (d.round == 5) setupRound5();
+            if (d.round == 6) setupFinale();
+        }
+        if (d.type === 'SELECT_VIDEO' && currentRound === 5) loadBeeldVraag(d.index);
+        if (d.type === 'PLAY_VIDEO' && currentRound === 5) { const vp = document.getElementById('beeld-video-player'); if (vp) vp.play(); }
+        if (d.type === 'NEXT_QUESTION') {
+            if (currentRound === 2) { currentR2SetCount++; loadNewPuzzle(); }
+            if (currentRound === 3) returnToR3Grid();
+            if (currentRound === 4) { currentR4Index++; loadR4Vraag(); }
+            if (currentRound === 5) returnToVideoGrid();
+            if (currentRound === 6) { currentFinaleQuestionIndex++; loadFinaleQuestion(); }
+        }
+        if (d.type === 'SHOW_ANSWERS') {
+            if (currentRound === 2) showPuzzleAnswers();
+            if (currentRound === 3) showOpenDeurAnswers();
+            if (currentRound === 5) showBeeldAnswers();
+            if (currentRound === 6) showFinaleAnswers();
+        }
+    };
+    </script>
+</body>
+</html>
