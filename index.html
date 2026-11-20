@@ -1,828 +1,361 @@
-<!DOCTYPE html>
-<html lang="nl">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>F.C. De Kampioenen Quiz</title>
-    <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@600;700&family=Open+Sans:wght@400;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="stijl.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-</head>
-<body>
-
-    <div id="beeld-player-container" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #000; z-index: 9999; align-items: center; justify-content: center;">
-        <video id="beeld-video-player" playsinline style="width: 100%; height: 100%; object-fit: contain;"></video>
-    </div>
-
-    <div id="game-over-overlay">
-        <h2 id="game-over-subtitle">De slimste kampioen is:</h2>
-        <h1 id="game-over-text">WINNAAR!</h1>
-        <button onclick="generateDetailedPDF()" style="margin-top:20px; padding:15px 35px; font-size:1.2rem; background:var(--kamp-geel); color:#000; border:none; border-radius:10px; font-weight:bold; cursor:pointer; font-family:'Chakra Petch', sans-serif;">📄 Download Gedetailleerd PDF Rapport</button>
-    </div>
-
-    <div id="report-overlay" style="display: none; position: fixed; inset: 0; background: rgba(6,13,20,0.96); z-index: 1500; flex-direction: column; align-items: center; overflow-y: auto; padding: 36px 20px;">
-        <h1 style="margin-bottom: 10px;">📊 Eindrapport Spelers</h1>
-        <div style="display:flex; gap:15px; margin-bottom:25px;">
-            <button onclick="generateDetailedPDF()" style="padding: 12px 28px; font-size: 1.15rem; background: var(--kamp-geel); color: #000; border: none; border-radius: 8px; cursor: pointer; font-family: 'Chakra Petch', sans-serif; font-weight:bold;">📄 Download PDF (1 pagina per speler)</button>
-            <button onclick="document.getElementById('report-overlay').style.display='none'" style="padding: 12px 28px; font-size: 1.15rem; background: var(--kamp-rood); color: white; border: none; border-radius: 8px; cursor: pointer; font-family: 'Chakra Petch', sans-serif; font-weight:bold;">Sluit</button>
-        </div>
-        <div id="report-cards-container" style="display: flex; flex-wrap: wrap; gap: 20px; justify-content: center; width: 100%; max-width: 1400px;"></div>
-    </div>
-
-    <h1>F.C. De Kampioenen Quiz</h1>
-
-    <div id="setup-screen">
-        <h2>Spelers Instellen</h2>
-        <div class="setup-input-row">
-            <label for="num-players">Aantal spelers (2-10):</label>
-            <input type="number" id="num-players" min="2" max="10" value="4" onchange="updatePlayerInputs()">
-        </div>
-        <div id="player-name-inputs"></div>
-        <button id="start-quiz-btn" onclick="initializeGame()">Start Quiz</button>
-    </div>
-
-    <div id="player-container" style="display: none;"></div>
-
-    <div id="game-board" style="display: none;">
-        <h2 id="round-title"></h2>
-        <p id="question-counter"></p>
-
-        <div id="question-area">
-            <p id="question-text" style="display: none;"></p>
-
-            <!-- RONDE 2: DE PUZZEL -->
-            <div id="puzzle-display-area" style="display: none;">
-                <div id="puzzle-answers-container"></div>
-                <div id="puzzle-clues-container"></div>
-            </div>
-
-            <!-- RONDE 3: RADIO HALLO -->
-            <div id="opendeur-display-area" style="display: none; width: 100%; flex-direction: column; align-items: center;">
-                <div class="radio-studio-box">
-                    <div id="on-air-badge" class="on-air-badge">ON AIR</div>
-                    <div id="radio-visual" style="font-size: 4.5rem;">📻</div>
-                    <div id="radio-eq" class="equalizer">
-                        <div class="eq-bar"></div><div class="eq-bar"></div><div class="eq-bar"></div><div class="eq-bar"></div><div class="eq-bar"></div>
-                    </div>
-                </div>
-                <video id="r3-audio-player" style="display: none;" src=""></video>
-                <h3 id="opendeur-subject" style="font-size:1.8rem; margin:10px 0;"></h3>
-                <div id="opendeur-keywords-container"></div>
-            </div>
-
-            <!-- RONDE 4: BORDJES -->
-            <div id="r4-display-area" style="display: none; width: 100%; flex-direction: column; align-items: center; margin-top: 15px;">
-                <div id="r4-timer-container" style="width: 82%; background: rgba(255,255,255,0.12); height: 22px; border-radius: 12px; overflow: hidden; margin-bottom: 18px; display: none; border:1px solid rgba(255,255,255,0.2);">
-                    <div id="r4-timer-bar" style="width: 100%; height: 100%; background: var(--correct-color); transition: width 1s linear, background-color 0.5s ease;"></div>
-                </div>
-                <img id="r4-photo" style="max-width: 82%; max-height: 55vh; border: 4px solid var(--kamp-geel); border-radius: 14px; box-shadow: 0 15px 35px rgba(0,0,0,0.8); display: none; transition: filter 1s ease-out;" src="" />
-                <video id="r4-video" playsinline src="./fragmenten/bordjes.mp4" style="max-width: 82%; max-height: 55vh; border: 4px solid var(--kamp-geel); border-radius: 14px; display: none;"></video>
-                <h1 id="r4-answer" style="display: none; font-size: clamp(2.5rem, 5vw, 4.5rem); color: var(--correct-color); margin-top: 25px;"></h1>
-            </div>
-
-            <!-- RONDE 5: BEELDRONDE -->
-            <div id="beeld-display-area" style="display: none; width: 100%; flex-direction: column; align-items: center;">
-                <div id="beeld-grid" style="display: flex; gap: 18px; justify-content: center; flex-wrap: wrap; width: 95%; margin-top: 15px;"></div>
-                <div id="beeld-tasks-container" style="display: none; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; width: 100%; margin-top: 20px;"></div>
-            </div>
-
-            <!-- RONDE 6: FINALE -->
-            <div id="finale-display-area" style="display: none; width: 100%;">
-                <h3 id="finale-subject" style="font-size: 2rem;"></h3>
-                <div id="finale-keywords-container"></div>
-            </div>
-
-            <input type="text" id="answer-input" style="display: none;">
-        </div>
-    </div>
-
-    <script src="quizdata_r1.js"></script>
-    <script src="quizdata_r2.js"></script>
-    <script src="quizdata_r3.js"></script>
-    <script src="quizdata_r4.js"></script>
-    <script src="quizdata_r5.js"></script>
-    <script src="quizdata_r6.js"></script>
-    <script src="quizdata_loader.js"></script>
-
-    <script>
-    const channel = new BroadcastChannel('trivial_time_channel');
-    let quizData = {};
-
-    const SIMILARITY_THRESHOLD = 0.80;
-    const R1_BONUS = 20, R2_R3_R4_R5_BONUS = 40, R6_PENALTY = 20;
-
-    let players = [], isGameOver = false, finalists = [], activeFinalistIndex = 0;
-    let currentRound = 0, currentQuestionIndex = 0, activePlayerIndex = 0;
-    let timerInterval = null, isTimerRunning = false, timerPlayerIndex = null;
-    let currentSetAttempts = [], currentQuestionAttempts = [], startingPlayersThisRound = [], playedVideos = [];
-    let playerStats = {}, r1BaseIndex = 0;
-
-    const setupScreen = document.getElementById('setup-screen'), playerNameInputs = document.getElementById('player-name-inputs');
-    const numPlayersInput = document.getElementById('num-players'), playerContainer = document.getElementById('player-container');
-    const gameBoard = document.getElementById('game-board'), roundTitle = document.getElementById('round-title');
-    const questionText = document.getElementById('question-text'), questionCounter = document.getElementById('question-counter');
-    const inputAnswer = document.getElementById('answer-input'), opendeurSubject = document.getElementById('opendeur-subject');
-
-    function levenshteinDistance(s1, s2) {
-        s1 = s1.toLowerCase().trim().replace(/\s/g, ""); s2 = s2.toLowerCase().trim().replace(/\s/g, "");
-        const costs = [];
-        for (let i = 0; i <= s1.length; i++) {
-            let lastValue = i;
-            for (let j = 0; j <= s2.length; j++) {
-                if (i === 0) costs[j] = j;
-                else if (j > 0) {
-                    let newValue = costs[j - 1];
-                    if (s1.charAt(i - 1) !== s2.charAt(j - 1)) newValue = Math.min(Math.min(newValue, lastValue), costs[j]) + 1;
-                    costs[j - 1] = lastValue; lastValue = newValue;
-                }
-            }
-            if (i > 0) costs[s2.length] = lastValue;
-        }
-        return costs[s2.length];
-    }
-
-    function stringSimilarity(s1, s2) {
-        if (!s1 && !s2) return 1.0;
-        const longer = s1.length > s2.length ? s1 : s2, shorter = s1.length > s2.length ? s2 : s1;
-        return longer.length === 0 ? 1.0 : (longer.length - levenshteinDistance(longer, shorter)) / longer.length;
-    }
-
-    function shuffleArray(arr) {
-        for (let i = arr.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [arr[i], arr[j]] = [arr[j], arr[i]]; }
-        return arr;
-    }
-
-    function updatePlayerInputs() {
-        let num = Math.max(2, Math.min(10, parseInt(numPlayersInput.value) || 4));
-        numPlayersInput.value = num;
-        playerNameInputs.innerHTML = "";
-        for (let i = 0; i < num; i++) {
-            playerNameInputs.innerHTML += `<div class="setup-input-row"><label>Speler ${i + 1}:</label><input type="text" id="player-name-${i}" value="Speler ${i + 1}"></div>`;
-        }
-    }
-    window.addEventListener('load', updatePlayerInputs);
-
-    function initializeGame() {
-        if (!window.ThemeManager) return alert("Systeemfout: quizdata_loader.js niet geladen.");
-        quizData = window.ThemeManager.getTheme('KAMPIOENEN');
-        if (!quizData) return alert("Thema KAMPIOENEN niet gevonden.");
-
-        quizData.ronde1_pool = (quizData.ronde1_pool || []).map((q, i) => ({ ...q, id: i + 1 }));
-        quizData.ronde2_answer_pool = (quizData.ronde2_answer_pool || []).map((q, i) => ({ ...q, id: i + 1 }));
-        quizData.ronde3_openDeur = (quizData.ronde3_openDeur || []).map((q, i) => ({ ...q, id: i + 1, keywords: (q.keywords || []).map(w => ({ word: w, found: false, missed: false })) }));
-        quizData.ronde4_geheugen = (quizData.ronde4_geheugen || []).map((q, i) => ({ ...q, id: i + 1 }));
-        quizData.ronde5_beeld = (quizData.ronde5_beeld || []).map((q, i) => ({
-            ...q, id: i + 1,
-            ans_seizoen: { word: q.vraag1_seizoen || "?", found: false, missed: false, label: "Seizoen" },
-            ans_aflevering: { word: q.vraag2_aflevering || "?", found: false, missed: false, label: "Aflevering" },
-            ans_zin: { word: q.vraag3_zinEind || "?", found: false, missed: false, label: `Zin: "${q.vraag3_zinBegin || "..."}"` },
-            ans_kw1: { word: (q.vraag4_keywords && q.vraag4_keywords[0]) || "?", found: false, missed: false, label: "Trefwoord 1" },
-            ans_kw2: { word: (q.vraag4_keywords && q.vraag4_keywords[1]) || "?", found: false, missed: false, label: "Trefwoord 2" }
-        }));
-        quizData.ronde6_finale = (quizData.ronde6_finale || []).map((q, i) => ({ ...q, id: i + 1, keywords: (q.keywords || []).map(w => ({ word: w, found: false, missed: false })) }));
-
-        players = []; playerStats = {};
-        const inputs = playerNameInputs.querySelectorAll('input[type="text"]');
-        inputs.forEach((inp, i) => {
-            const name = inp.value.trim();
-            if (name) {
-                players.push({ name, seconds: 60, originalIndex: i });
-                playerStats[i] = {
-                    totalGained: 0, totalLost: 0,
-                    r1: { c: 0, w: 0, details: [] },
-                    r2: { c: 0, w: 0, foundWords: [] },
-                    r3: { c: 0, w: 0, foundWords: [] },
-                    r4: { c: 0, episodes: [] },
-                    r5: { c: 0, w: 0, foundItems: [] },
-                    r6: { c: 0, w: 0, stolenSec: 0, foundWords: [] }
-                };
-            }
-        });
-
-        if (players.length < 2) return alert("Minimaal 2 spelers nodig.");
-        setupScreen.style.display = 'none';
-        playerContainer.style.display = 'flex';
-        gameBoard.style.display = 'block';
-        activePlayerIndex = players[0].originalIndex;
-        renderPlayers();
-        hideAllGameAreas();
-        questionText.style.display = 'block';
-        questionText.textContent = "Klaar voor de aftrap! Wachten op de spelleider...";
-    }
-
-    function hideAllGameAreas() {
-        document.querySelectorAll('[id$="-display-area"]').forEach(el => el.style.display = 'none');
-        questionText.style.display = 'none';
-        questionCounter.style.display = 'none';
-        ['beeld-video-player', 'r4-video', 'r3-audio-player'].forEach(id => {
-            const el = document.getElementById(id);
-            if (el) { el.pause(); }
-        });
-        document.getElementById('beeld-player-container').style.display = 'none';
-        document.getElementById('on-air-badge').classList.remove('live');
-        document.getElementById('radio-eq').classList.remove('active');
-    }
-
-    function showBonusFeedback(playerIndex, amount) {
-        const card = document.querySelector(`.player-card[data-player-index="${playerIndex}"]`);
-        if (!card) return;
-        const fb = card.querySelector('.bonus-feedback');
-        fb.style.transition = 'none'; fb.style.opacity = '0'; fb.style.transform = 'translate(-50%, -50%)';
-        void fb.offsetWidth;
-        fb.textContent = `${amount > 0 ? '+' : ''}${amount}s`;
-        fb.style.color = amount > 0 ? 'var(--correct-color)' : 'var(--wrong-color)';
-        setTimeout(() => { fb.style.transition = 'transform 1s ease-out, opacity 1s ease-out'; fb.style.opacity = '1'; fb.style.transform = 'translate(-50%, -170%)'; }, 40);
-        setTimeout(() => { fb.style.opacity = '0'; }, 1600);
-    }
-
-    function updateSeconds(playerIndex, amount) {
-        const p = players.find(x => x.originalIndex === playerIndex);
-        if (!p) return;
-        if (amount > 0) playerStats[playerIndex].totalGained += amount;
-        if (amount < 0) playerStats[playerIndex].totalLost += Math.abs(amount);
-        p.seconds = Math.max(0, p.seconds + amount);
-        renderPlayers();
-    }
-
-    function renderPlayers() {
-        playerContainer.innerHTML = "";
-        const list = (currentRound === 6) ? finalists.map(f => f.player) : players;
-        let syncData = [];
-
-        list.forEach(p => {
-            const idx = p.originalIndex;
-            const card = document.createElement('div');
-            card.className = 'player-card';
-            card.dataset.playerIndex = idx;
-
-            if (currentRound >= 2 && currentRound <= 5 && currentRound !== 4 && currentSetAttempts.includes(idx)) card.classList.add('attempted');
-            else if (idx === activePlayerIndex) card.classList.add('active');
-            if (p.seconds > 0 && p.seconds <= 15) card.classList.add('low-time');
-
-            const isRunning = (isTimerRunning && timerPlayerIndex === idx);
-            const hasPlayed = (currentRound >= 2 && currentRound <= 5 && currentRound !== 4 && startingPlayersThisRound.includes(idx));
-
-            card.innerHTML = `<div class="player-name">${hasPlayed ? '✔️ ' : ''}${p.name}</div><div class="player-seconds">${p.seconds}</div><div class="bonus-feedback"></div>`;
-            playerContainer.appendChild(card);
-
-            syncData.push({ index: idx, name: p.name, seconds: p.seconds, isActive: idx === activePlayerIndex, isRunning, hasPlayed });
-        });
-        channel.postMessage({ type: 'SYNC_PLAYERS', players: syncData });
-    }
-
-    function getNextStartingPlayerIndex() {
-        let elig = players.filter(p => p.seconds > 0 && !startingPlayersThisRound.includes(p.originalIndex));
-        if (!elig.length) elig = players.filter(p => p.seconds > 0);
-        if (!elig.length) return players[0].originalIndex;
-        elig.sort((a, b) => a.seconds - b.seconds);
-        return elig[0].originalIndex;
-    }
-
-    function getNextPlayerForSet(attempts) {
-        let elig = players.filter(p => p.seconds > 0 && !attempts.includes(p.originalIndex));
-        if (!elig.length) return -1;
-        elig.sort((a, b) => a.seconds - b.seconds);
-        return elig[0].originalIndex;
-    }
-
-    function startTimer(playerIndex) {
-        const p = players.find(x => x.originalIndex === playerIndex);
-        if (!p || p.seconds <= 0 || isTimerRunning) return;
-        isTimerRunning = true; timerPlayerIndex = playerIndex;
-
-        if (currentRound === 2) document.getElementById('puzzle-clues-container').classList.remove('blurred-board');
-        if (currentRound === 3) { opendeurSubject.textContent = activeOpenDeurQuestions[currentOpenDeurIndex].subject || "Radio Hallo"; opendeurSubject.classList.remove('blurred-subject'); }
-        if (currentRound === 5) document.getElementById('beeld-tasks-container').classList.remove('blurred-board');
-        if (currentRound === 6) document.getElementById('finale-subject').classList.remove('blurred-subject');
-
-        timerInterval = setInterval(() => {
-            const cur = players.find(x => x.originalIndex === timerPlayerIndex);
-            cur.seconds--;
-            playerStats[cur.originalIndex].totalLost++;
-            if (cur.seconds <= 0) {
-                cur.seconds = 0; stopTimer();
-                if (currentRound === 6) {
-                    const win = finalists.map(f => f.player).find(w => w.originalIndex !== cur.originalIndex);
-                    if (win) { isGameOver = true; document.getElementById('game-over-text').textContent = win.name; document.getElementById('game-over-overlay').style.display = 'flex'; }
-                } else if (currentRound >= 2 && currentRound <= 5 && currentRound !== 4) { pasDeBeurt(); }
-            }
-            renderPlayers();
-        }, 1000);
-        renderPlayers();
-    }
-
-    function stopTimer() {
-        clearInterval(timerInterval); isTimerRunning = false; timerInterval = null;
-        if (currentRound === 2 && !document.getElementById('puzzle-clues-container').classList.contains('answers-shown')) document.getElementById('puzzle-clues-container').classList.add('blurred-board');
-        if (currentRound === 5 && !document.getElementById('beeld-tasks-container').classList.contains('answers-shown')) document.getElementById('beeld-tasks-container').classList.add('blurred-board');
-        renderPlayers();
-    }
-
-    function toggleTimer(idx) {
-        if (isGameOver) return;
-        if (!isTimerRunning) startTimer(idx);
-        else if (timerPlayerIndex === idx) { stopTimer(); if (currentRound >= 2 && currentRound !== 4) pasDeBeurt(); }
-        else { stopTimer(); startTimer(idx); }
-    }
-
-    function pasDeBeurt() {
-        const prev = activePlayerIndex; stopTimer();
-        if (currentRound === 1) {
-            let i = players.findIndex(p => p.originalIndex === activePlayerIndex);
-            activePlayerIndex = players[(i + 1) % players.length].originalIndex; renderPlayers();
-        } else if (currentRound >= 2 && currentRound <= 5 && currentRound !== 4) {
-            if (prev !== null && !currentSetAttempts.includes(prev)) currentSetAttempts.push(prev);
-            const next = getNextPlayerForSet(currentSetAttempts);
-            if (next !== -1) { activePlayerIndex = next; renderPlayers(); setTimeout(() => startTimer(activePlayerIndex), 200); }
-            else {
-                renderPlayers();
-                if (currentRound === 2) showPuzzleAnswers();
-                else if (currentRound === 3) showOpenDeurAnswers();
-                else if (currentRound === 5) showBeeldAnswers();
-            }
-        } else if (currentRound === 6) {
-            activeFinalistIndex = (activeFinalistIndex + 1) % finalists.length;
-            activePlayerIndex = finalists[activeFinalistIndex].player.originalIndex; renderPlayers();
-        }
-    }
-
-    // --- RONDE 1 ---
-    let activeRound1Questions = [];
-    function startGameR1() {
-        currentRound = 1; currentQuestionIndex = 0; r1BaseIndex = 0;
-        roundTitle.textContent = "Ronde 1: Algemene Kennis";
-        activeRound1Questions = shuffleArray([...quizData.ronde1_pool]).slice(0, Math.max(12, players.length * 2));
-        hideAllGameAreas(); questionText.style.display = 'block'; questionCounter.style.display = 'block';
-        stopTimer(); displayQuestionR1();
-    }
-    function displayQuestionR1() {
-        if (currentQuestionIndex < activeRound1Questions.length) {
-            currentQuestionAttempts = []; const q = activeRound1Questions[currentQuestionIndex];
-            questionText.textContent = q.q;
-            questionCounter.textContent = `Vraag ${currentQuestionIndex + 1} / ${activeRound1Questions.length}`;
-            activePlayerIndex = players[r1BaseIndex].originalIndex; renderPlayers();
-            channel.postMessage({ type: 'SYNC_QUESTION', round: 1, ids: [q.id] });
-        } else { hideAllGameAreas(); questionText.style.display = 'block'; questionText.textContent = "Einde van Ronde 1!"; }
-    }
-    function checkRound1Answer() {
-        const q = activeRound1Questions[currentQuestionIndex];
-        const ok = stringSimilarity(q.a, inputAnswer.value) >= SIMILARITY_THRESHOLD;
-        stopTimer(); inputAnswer.value = "";
-        if (ok) {
-            playerStats[activePlayerIndex].r1.c++;
-            playerStats[activePlayerIndex].r1.details.push(`✓ ${q.a}`);
-            updateSeconds(activePlayerIndex, R1_BONUS); showBonusFeedback(activePlayerIndex, R1_BONUS);
-            setTimeout(() => { currentQuestionIndex++; r1BaseIndex = (r1BaseIndex + 1) % players.length; displayQuestionR1(); }, 1800);
-        } else {
-            playerStats[activePlayerIndex].r1.w++;
-            playerStats[activePlayerIndex].r1.details.push(`✗ ${q.q.substring(0, 35)}...`);
-            if (!currentQuestionAttempts.includes(activePlayerIndex)) currentQuestionAttempts.push(activePlayerIndex);
-            let nextFound = false, curIdx = players.findIndex(p => p.originalIndex === activePlayerIndex);
-            for (let i = 1; i <= players.length; i++) {
-                let cand = players[(curIdx + i) % players.length];
-                if (!currentQuestionAttempts.includes(cand.originalIndex) && cand.seconds > 0) { activePlayerIndex = cand.originalIndex; nextFound = true; break; }
-            }
-            if (nextFound) {
-                questionText.textContent = `Doorgegeven aan ${players.find(p => p.originalIndex === activePlayerIndex).name}...`;
-                setTimeout(() => { questionText.textContent = q.q; renderPlayers(); }, 1200);
-            } else {
-                questionText.textContent = `Niemand wist het! Antwoord: ${q.a}`;
-                setTimeout(() => { currentQuestionIndex++; r1BaseIndex = (r1BaseIndex + 1) % players.length; displayQuestionR1(); }, 2800);
-            }
-        }
-    }
-
-    // --- RONDE 2: DE PUZZEL ---
-    let activeRound2Puzzles = [], currentPuzzleSet = null, currentR2SetCount = 0;
-    function setupRound2() {
-        currentRound = 2; currentR2SetCount = 0; startingPlayersThisRound = [];
-        roundTitle.textContent = "Ronde 2: De Puzzel";
-        if (!quizData.ronde2_answer_pool || quizData.ronde2_answer_pool.length < 3) return alert("Te weinig puzzeldata in quizdata_r2.js!");
-        const pool = shuffleArray([...quizData.ronde2_answer_pool]);
-        activeRound2Puzzles = [];
-        const maxSets = Math.min(players.length, Math.floor(pool.length / 3));
-        for (let i = 0; i < maxSets; i++) {
-            activeRound2Puzzles.push(pool.slice(i * 3, (i + 1) * 3).map((p, j) => ({
-                ...p, found: false, missed: false, color: `color-${(j % 3) + 1}`,
-                clues: p.clues.map(c => ({ text: c, color: `color-${(j % 3) + 1}` }))
-            })));
-        }
-        hideAllGameAreas();
-        document.getElementById('puzzle-display-area').style.display = 'flex';
-        questionCounter.style.display = 'block';
-        loadNewPuzzle();
-    }
-    function loadNewPuzzle() {
-        if (currentR2SetCount >= activeRound2Puzzles.length) { hideAllGameAreas(); questionText.style.display = 'block'; questionText.textContent = "Einde van Ronde 2!"; return; }
-        activePlayerIndex = getNextStartingPlayerIndex();
-        currentSetAttempts = []; currentPuzzleSet = activeRound2Puzzles[currentR2SetCount];
-        startingPlayersThisRound.push(activePlayerIndex);
-        questionCounter.textContent = `Puzzel ${currentR2SetCount + 1} / ${activeRound2Puzzles.length}`;
-        channel.postMessage({ type: 'SYNC_QUESTION', round: 2, ids: currentPuzzleSet.map(p => p.id) });
-
-        let clues = [];
-        currentPuzzleSet.forEach(p => p.clues.forEach(c => clues.push({ text: c.text, answer: p.answer, color: c.color })));
-        shuffleArray(clues);
-
-        document.getElementById('puzzle-answers-container').innerHTML = currentPuzzleSet.map(() => `<div class="puzzle-answer">???</div>`).join('');
-        const cc = document.getElementById('puzzle-clues-container');
-        cc.innerHTML = clues.map(c => `<div class="puzzle-clue" data-answer="${c.answer.toLowerCase()}">${c.text}</div>`).join('');
-        cc.classList.remove('answers-shown'); cc.classList.add('blurred-board');
-        stopTimer();
-    }
-    function checkRound2Answer() {
-        const found = currentPuzzleSet.find(p => !p.found && stringSimilarity(p.answer, inputAnswer.value) >= SIMILARITY_THRESHOLD);
-        inputAnswer.value = "";
-        if (found) {
-            playerStats[activePlayerIndex].r2.c++;
-            playerStats[activePlayerIndex].r2.foundWords.push(found.answer);
-            found.found = true; updateSeconds(activePlayerIndex, R2_R3_R4_R5_BONUS); showBonusFeedback(activePlayerIndex, R2_R3_R4_R5_BONUS);
-            document.getElementById('puzzle-answers-container').innerHTML = currentPuzzleSet.map(p => `<div class="puzzle-answer ${p.found && !p.missed ? 'found ' + p.color : ''} ${p.missed ? 'missed' : ''}">${p.found ? p.answer : '???'}</div>`).join('');
-            Array.from(document.getElementById('puzzle-clues-container').children).forEach(el => { if (el.dataset.answer === found.answer.toLowerCase()) el.className = `puzzle-clue found ${found.color}`; });
-            if (currentPuzzleSet.every(p => p.found)) {
-                document.getElementById('puzzle-clues-container').classList.add('answers-shown');
-                document.getElementById('puzzle-clues-container').classList.remove('blurred-board');
-                stopTimer(); currentSetAttempts = players.map(p => p.originalIndex);
-            }
-        } else { playerStats[activePlayerIndex].r2.w++; pasDeBeurt(); }
-    }
-    function showPuzzleAnswers() {
-        currentPuzzleSet.forEach(p => { if (!p.found) { p.found = true; p.missed = true; } });
-        document.getElementById('puzzle-answers-container').innerHTML = currentPuzzleSet.map(p => `<div class="puzzle-answer ${p.missed ? 'missed' : 'found ' + p.color}">${p.answer}</div>`).join('');
-        Array.from(document.getElementById('puzzle-clues-container').children).forEach(el => {
-            const p = currentPuzzleSet.find(x => x.answer.toLowerCase() === el.dataset.answer);
-            if (p) el.className = `puzzle-clue ${p.missed ? 'missed' : 'found ' + p.color}`;
-        });
-        document.getElementById('puzzle-clues-container').classList.add('answers-shown');
-        document.getElementById('puzzle-clues-container').classList.remove('blurred-board');
-        stopTimer(); currentSetAttempts = players.map(p => p.originalIndex);
-    }
-
-    // --- RONDE 3: RADIO HALLO ---
-    let activeOpenDeurQuestions = [], currentOpenDeurIndex = 0;
-    function setupRound3() {
-        currentRound = 3; currentOpenDeurIndex = 0; startingPlayersThisRound = [];
-        roundTitle.textContent = "Ronde 3: Radio Hallo";
-        activeOpenDeurQuestions = shuffleArray([...quizData.ronde3_openDeur]).slice(0, players.length);
-        hideAllGameAreas(); document.getElementById('opendeur-display-area').style.display = 'flex'; questionCounter.style.display = 'block';
-        loadOpenDeur();
-    }
-    function loadOpenDeur() {
-        if (currentOpenDeurIndex >= activeOpenDeurQuestions.length) { hideAllGameAreas(); questionText.style.display = 'block'; questionText.textContent = "Einde van Ronde 3!"; return; }
-        activePlayerIndex = getNextStartingPlayerIndex(); currentSetAttempts = [];
-        const q = activeOpenDeurQuestions[currentOpenDeurIndex];
-        startingPlayersThisRound.push(activePlayerIndex);
-        questionCounter.textContent = `Fragment ${currentOpenDeurIndex + 1} / ${activeOpenDeurQuestions.length}`;
-        const ap = document.getElementById('r3-audio-player'); if (ap) ap.src = q.mediaBron || "";
-        opendeurSubject.textContent = "Luister naar Radio Hallo..."; opendeurSubject.classList.add('blurred-subject');
-        channel.postMessage({ type: 'SYNC_QUESTION', round: 3, ids: [q.id] });
-        document.getElementById('opendeur-keywords-container').innerHTML = q.keywords.map(() => `<div class="opendeur-keyword">???</div>`).join('');
-        stopTimer();
-    }
-    function checkRound3Answer() {
-        const q = activeOpenDeurQuestions[currentOpenDeurIndex];
-        const found = q.keywords.find(k => !k.found && stringSimilarity(k.word, inputAnswer.value) >= SIMILARITY_THRESHOLD);
-        inputAnswer.value = "";
-        if (found) {
-            playerStats[activePlayerIndex].r3.c++; playerStats[activePlayerIndex].r3.foundWords.push(found.word);
-            found.found = true; updateSeconds(activePlayerIndex, R2_R3_R4_R5_BONUS); showBonusFeedback(activePlayerIndex, R2_R3_R4_R5_BONUS);
-            document.getElementById('opendeur-keywords-container').innerHTML = q.keywords.map(k => `<div class="opendeur-keyword ${k.found && !k.missed ? 'found' : ''} ${k.missed ? 'missed' : ''}">${k.found ? k.word : '???'}</div>`).join('');
-            if (q.keywords.every(k => k.found)) { stopTimer(); currentSetAttempts = players.map(p => p.originalIndex); }
-        } else { playerStats[activePlayerIndex].r3.w++; pasDeBeurt(); }
-    }
-    function showOpenDeurAnswers() {
-        const q = activeOpenDeurQuestions[currentOpenDeurIndex];
-        q.keywords.forEach(k => { if (!k.found) { k.found = true; k.missed = true; } });
-        document.getElementById('opendeur-keywords-container').innerHTML = q.keywords.map(k => `<div class="opendeur-keyword ${k.missed ? 'missed' : 'found'}">${k.word}</div>`).join('');
-        opendeurSubject.textContent = q.subject || "Radio Hallo"; opendeurSubject.classList.remove('blurred-subject');
-        stopTimer(); currentSetAttempts = players.map(p => p.originalIndex);
-    }
-
-    // --- RONDE 4: BORDJES (LED-BALK GROEN -> GEEL -> ROOD) ---
-    let activeRound4Questions = [], currentR4Index = 0, r4TimerInt = null;
-    function setupRound4() {
-        currentRound = 4; currentR4Index = 0; roundTitle.textContent = "Ronde 4: Raad de aflevering (Bordjes!)";
-        activeRound4Questions = quizData.ronde4_geheugen;
-        hideAllGameAreas(); document.getElementById('r4-display-area').style.display = 'flex'; questionCounter.style.display = 'block';
-        loadR4Vraag();
-    }
-    function loadR4Vraag() {
-        if (currentR4Index >= activeRound4Questions.length) { hideAllGameAreas(); questionText.style.display = 'block'; questionText.textContent = "Einde van Ronde 4!"; return; }
-        const q = activeRound4Questions[currentR4Index];
-        questionCounter.textContent = `Foto ${currentR4Index + 1} / ${activeRound4Questions.length}`;
-        document.getElementById('r4-timer-container').style.display = 'none';
-        const bar = document.getElementById('r4-timer-bar'); bar.style.width = '100%'; bar.style.backgroundColor = 'var(--correct-color)';
-        const photo = document.getElementById('r4-photo'); photo.src = q.foto; photo.style.display = 'block'; photo.style.filter = 'blur(40px)';
-        document.getElementById('r4-video').style.display = 'none'; document.getElementById('r4-answer').style.display = 'none';
-        questionText.style.display = 'none'; activePlayerIndex = -1; renderPlayers();
-        channel.postMessage({ type: 'SYNC_R4', answer: q.antwoord, qNum: currentR4Index + 1, total: activeRound4Questions.length });
-    }
-    function startR4Timer() {
-        document.getElementById('r4-timer-container').style.display = 'block';
-        document.getElementById('r4-photo').style.filter = 'blur(0px)';
-        let timeLeft = 15; const bar = document.getElementById('r4-timer-bar');
-        clearInterval(r4TimerInt);
-        r4TimerInt = setInterval(() => {
-            timeLeft--;
-            bar.style.width = `${(timeLeft / 15) * 100}%`;
-            if (timeLeft <= 10 && timeLeft > 5) bar.style.backgroundColor = 'var(--kamp-geel)';
-            if (timeLeft <= 5) bar.style.backgroundColor = 'var(--kamp-rood)';
-            if (timeLeft <= 0) {
-                clearInterval(r4TimerInt);
-                document.getElementById('r4-timer-container').style.display = 'none';
-                document.getElementById('r4-photo').style.display = 'none';
-                const vid = document.getElementById('r4-video');
-                vid.style.display = 'block'; vid.currentTime = 0; vid.play().catch(() => {});
-                vid.onended = () => {
-                    vid.style.display = 'none';
-                    questionText.textContent = "Kijken naar de bordjes..."; questionText.style.display = 'block';
-                    setTimeout(() => {
-                        questionText.style.display = 'none';
-                        document.getElementById('r4-answer').textContent = activeRound4Questions[currentR4Index].antwoord;
-                        document.getElementById('r4-answer').style.display = 'block';
-                    }, 5000);
-                };
-            }
-        }, 1000);
-    }
-
-    // --- RONDE 5: BEELDRONDE ---
-    let activeBeeldQuestions = [], currentBeeldIndex = -1;
-    function setupRound5() {
-        currentRound = 5; currentBeeldIndex = -1; startingPlayersThisRound = []; playedVideos = [];
-        roundTitle.textContent = "Ronde 5: De Beeldronde";
-        activeBeeldQuestions = shuffleArray([...quizData.ronde5_beeld]).slice(0, players.length);
-        hideAllGameAreas(); document.getElementById('beeld-display-area').style.display = 'flex'; questionText.style.display = 'block'; questionCounter.style.display = 'block';
-        renderVideoGrid();
-    }
-    function renderVideoGrid() {
-        if (playedVideos.length >= activeBeeldQuestions.length) { hideAllGameAreas(); questionText.style.display = 'block'; questionText.textContent = "Einde van de Beeldronde!"; return; }
-        activePlayerIndex = getNextStartingPlayerIndex();
-        questionText.textContent = "Kies een fragment!";
-        questionCounter.textContent = `Aan de beurt: ${players.find(p => p.originalIndex === activePlayerIndex).name}`;
-        document.getElementById('beeld-grid').innerHTML = activeBeeldQuestions.map((q, i) => {
-            const done = playedVideos.includes(i);
-            return `<div style="width:200px; height:140px; background:rgba(0,0,0,0.5) ${q.thumbnail ? `url('${q.thumbnail}') center/cover` : ''}; border:3px solid var(--kamp-geel); border-radius:12px; display:flex; align-items:center; justify-content:center; font-family:'Chakra Petch',sans-serif; font-size:1.5rem; font-weight:700; opacity:${done ? 0.3 : 1};">${done ? '❌' : 'Fragment ' + (i + 1)}</div>`;
-        }).join('');
-        document.getElementById('beeld-grid').style.display = 'flex';
-        document.getElementById('beeld-player-container').style.display = 'none';
-        document.getElementById('beeld-tasks-container').style.display = 'none';
-        stopTimer();
-        channel.postMessage({ type: 'SYNC_R5_GRID', total: activeBeeldQuestions.length, played: playedVideos });
-    }
-    function returnToVideoGrid() {
-        if (currentBeeldIndex !== -1 && !playedVideos.includes(currentBeeldIndex)) playedVideos.push(currentBeeldIndex);
-        currentBeeldIndex = -1; currentSetAttempts = []; renderVideoGrid();
-    }
-    function loadBeeldVraag(index) {
-        currentBeeldIndex = index; currentSetAttempts = []; const q = activeBeeldQuestions[index];
-        startingPlayersThisRound.push(activePlayerIndex);
-        document.getElementById('beeld-grid').style.display = 'none';
-        const vc = document.getElementById('beeld-player-container'), vp = document.getElementById('beeld-video-player');
-        vc.style.display = 'flex'; vp.src = q.videoBron;
-        vp.onended = () => {
-            vc.style.display = 'none'; renderBeeldUI();
-            const tc = document.getElementById('beeld-tasks-container');
-            tc.style.display = 'grid'; tc.classList.remove('blurred-board', 'answers-shown');
-            questionText.textContent = "Wat weet je nog?";
-            channel.postMessage({ type: 'SYNC_QUESTION', round: 5, ids: [q.id] });
-            setTimeout(() => startTimer(activePlayerIndex), 200);
-        };
-        stopTimer();
-    }
-    function renderBeeldUI() {
-        const q = activeBeeldQuestions[currentBeeldIndex];
-        const tasks = [q.ans_seizoen, q.ans_aflevering, q.ans_zin, q.ans_kw1, q.ans_kw2];
-        document.getElementById('beeld-tasks-container').innerHTML = tasks.map(t => `<div class="opendeur-keyword ${t.found && !t.missed ? 'found' : ''} ${t.missed ? 'missed' : ''}"><div style="font-size:0.75rem; color:var(--kamp-geel); margin-bottom:4px;">${t.label}</div>${t.found ? t.word : '???'}</div>`).join('');
-    }
-    function checkRound5Answer() {
-        const q = activeBeeldQuestions[currentBeeldIndex];
-        const tasks = [q.ans_seizoen, q.ans_aflevering, q.ans_zin, q.ans_kw1, q.ans_kw2];
-        const found = tasks.find(t => !t.found && stringSimilarity(t.word, inputAnswer.value) >= SIMILARITY_THRESHOLD);
-        inputAnswer.value = "";
-        if (found) {
-            playerStats[activePlayerIndex].r5.c++; playerStats[activePlayerIndex].r5.foundItems.push(`${found.label}: ${found.word}`);
-            found.found = true; updateSeconds(activePlayerIndex, R2_R3_R4_R5_BONUS); showBonusFeedback(activePlayerIndex, R2_R3_R4_R5_BONUS); renderBeeldUI();
-            if (tasks.every(t => t.found)) { document.getElementById('beeld-tasks-container').classList.add('answers-shown'); stopTimer(); setTimeout(returnToVideoGrid, 3000); }
-        } else { playerStats[activePlayerIndex].r5.w++; pasDeBeurt(); }
-    }
-    function showBeeldAnswers() {
-        const q = activeBeeldQuestions[currentBeeldIndex];
-        [q.ans_seizoen, q.ans_aflevering, q.ans_zin, q.ans_kw1, q.ans_kw2].forEach(t => { if (!t.found) { t.found = true; t.missed = true; } });
-        document.getElementById('beeld-tasks-container').classList.add('answers-shown');
-        document.getElementById('beeld-tasks-container').classList.remove('blurred-board');
-        renderBeeldUI(); stopTimer(); setTimeout(returnToVideoGrid, 3500);
-    }
-
-    // --- RONDE 6: FINALE ---
-    let activeFinaleQuestions = [], currentFinaleQuestionIndex = 0;
-    function setupFinale() {
-        currentRound = 6; currentFinaleQuestionIndex = 0; roundTitle.textContent = "Ronde 6: De Finale";
-        const top2 = [...players].sort((a, b) => b.seconds - a.seconds).slice(0, 2);
-        finalists = top2.map(p => ({ player: p, originalIndex: p.originalIndex })).sort((a, b) => a.player.seconds - b.player.seconds);
-        activeFinaleQuestions = shuffleArray([...quizData.ronde6_finale]);
-        activeFinalistIndex = 0; activePlayerIndex = finalists[0].originalIndex;
-        hideAllGameAreas(); document.getElementById('finale-display-area').style.display = 'block'; questionCounter.style.display = 'block';
-        loadFinaleQuestion();
-    }
-    function loadFinaleQuestion() {
-        const q = activeFinaleQuestions[currentFinaleQuestionIndex];
-        document.getElementById('finale-subject').textContent = q.subject;
-        document.getElementById('finale-subject').classList.add('blurred-subject');
-        questionCounter.textContent = `FINALE — Aan de beurt: ${finalists[activeFinalistIndex].player.name}`;
-        channel.postMessage({ type: 'SYNC_QUESTION', round: 6, ids: [q.id] });
-        document.getElementById('finale-keywords-container').innerHTML = q.keywords.map(() => `<div class="finale-keyword">???</div>`).join('');
-        stopTimer();
-    }
-    function checkFinaleAnswer() {
-        const q = activeFinaleQuestions[currentFinaleQuestionIndex];
-        const found = q.keywords.find(k => !k.found && stringSimilarity(k.word, inputAnswer.value) >= SIMILARITY_THRESHOLD);
-        inputAnswer.value = "";
-        if (found) {
-            playerStats[activePlayerIndex].r6.c++; playerStats[activePlayerIndex].r6.stolenSec += R6_PENALTY;
-            playerStats[activePlayerIndex].r6.foundWords.push(found.word);
-            found.found = true;
-            const opp = finalists.map(f => f.player).find(p => p.originalIndex !== activePlayerIndex);
-            if (opp) { showBonusFeedback(opp.originalIndex, -R6_PENALTY); updateSeconds(opp.originalIndex, -R6_PENALTY); }
-            document.getElementById('finale-subject').classList.remove('blurred-subject');
-            document.getElementById('finale-keywords-container').innerHTML = q.keywords.map(k => `<div class="finale-keyword ${k.found && !k.missed ? 'found' : ''} ${k.missed ? 'missed' : ''}">${k.found ? k.word : '???'}</div>`).join('');
-            if (q.keywords.every(k => k.found)) stopTimer();
-        } else { playerStats[activePlayerIndex].r6.w++; }
-    }
-    function showFinaleAnswers() {
-        const q = activeFinaleQuestions[currentFinaleQuestionIndex];
-        q.keywords.forEach(k => { if (!k.found) { k.found = true; k.missed = true; } });
-        document.getElementById('finale-keywords-container').innerHTML = q.keywords.map(k => `<div class="finale-keyword ${k.missed ? 'missed' : 'found'}">${k.word}</div>`).join('');
-        document.getElementById('finale-subject').classList.remove('blurred-subject');
-        stopTimer();
-    }
-
-    // --- EINDRAPPORT OP SCHERM + GEDETAILLEERDE MULTI-PAGE PDF ---
-    function generateReport() {
-        const container = document.getElementById('report-cards-container');
-        const sorted = [...players].sort((a, b) => b.seconds - a.seconds);
-        container.innerHTML = sorted.map((p, rank) => {
-            const s = playerStats[p.originalIndex];
-            const totC = s.r1.c + s.r2.c + s.r3.c + s.r4.c + s.r5.c + s.r6.c;
-            const totW = s.r1.w + s.r2.w + s.r3.w + s.r5.w + s.r6.w;
-            const acc = (totC + totW) > 0 ? Math.round((totC / (totC + totW)) * 100) : 0;
-            return `<div style="background:var(--glass-bg); border:2px solid var(--kamp-geel); border-radius:14px; padding:20px; width:310px; text-align:left;">
-                <h2 style="color:var(--kamp-geel); margin:0 0 10px 0; text-align:center;">#${rank + 1} ${p.name}</h2>
-                <div style="text-align:center; font-size:2rem; font-family:'Chakra Petch',sans-serif; color:#fff; margin-bottom:12px;">⏱️ ${p.seconds}s <span style="font-size:0.9rem; color:var(--kamp-groen);">(${acc}% juist)</span></div>
-                <p><strong>R1 Algemeen:</strong> ${s.r1.c}✓ / ${s.r1.w}✗</p>
-                <p><strong>R2 Puzzel:</strong> ${s.r2.c}✓ / ${s.r2.w}✗</p>
-                <p><strong>R3 Radio Hallo:</strong> ${s.r3.c}✓ / ${s.r3.w}✗</p>
-                <p><strong>R4 Bordjes:</strong> ${s.r4.c}✓</p>
-                <p><strong>R5 Beeld:</strong> ${s.r5.c}✓ / ${s.r5.w}✗</p>
-                <p><strong>R6 Finale:</strong> ${s.r6.c}✓ (${s.r6.stolenSec}s afgepakt)</p>
-            </div>`;
-        }).join('');
-        document.getElementById('report-overlay').style.display = 'flex';
-        channel.postMessage({ type: 'SYNC_REPORT', html: container.innerHTML });
-    }
-
-    function getKampioenenTitel(rank, acc, seconds) {
-        if (rank === 0) return "PDG van de Quiz (Balthasar Boma-niveau)";
-        if (acc >= 80) return "De Slimste Kampioen van het Veld";
-        if (acc >= 60) return "Vaste Klant op Dagschotel-niveau";
-        if (seconds > 40) return "Tactisch Meesterbrein (Fernand Costermans)";
-        return "Gezellige Tooghang-Kampioen (Mijn gedacht!)";
-    }
-
-    function generateDetailedPDF() {
-        const { jsPDF } = window.jspdf;
-        const doc = new jsPDF({ unit: 'mm', format: 'a4' });
-        const sorted = [...players].sort((a, b) => b.seconds - a.seconds);
-        const dateStr = new Date().toLocaleDateString('nl-BE');
-
-        sorted.forEach((p, rank) => {
-            if (rank > 0) doc.addPage();
-            const s = playerStats[p.originalIndex];
-            const totC = s.r1.c + s.r2.c + s.r3.c + s.r4.c + s.r5.c + s.r6.c;
-            const totW = s.r1.w + s.r2.w + s.r3.w + s.r5.w + s.r6.w;
-            const acc = (totC + totW) > 0 ? Math.round((totC / (totC + totW)) * 100) : 0;
-
-            doc.setFillColor(6, 78, 59);
-            doc.rect(0, 0, 210, 38, 'F');
-            doc.setTextColor(251, 191, 36);
-            doc.setFont("helvetica", "bold");
-            doc.setFontSize(22);
-            doc.text("F.C. DE KAMPIOENEN QUIZ - RAPPORT", 15, 17);
-            doc.setTextColor(255, 255, 255);
-            doc.setFontSize(12);
-            doc.text(`Speler: ${p.name}   |   Eindplaats: #${rank + 1} van ${players.length}   |   Datum: ${dateStr}`, 15, 29);
-
-            doc.setFillColor(245, 247, 250);
-            doc.roundedRect(15, 46, 180, 28, 3, 3, 'F');
-            doc.setTextColor(15, 23, 42);
-            doc.setFontSize(11);
-            doc.text(`Eindscore: ${p.seconds} sec`, 22, 56);
-            doc.text(`Nauwkeurigheid: ${acc}% (${totC} juist / ${totW} fout)`, 78, 56);
-            doc.text(`Gewonnen: +${s.totalGained}s  |  Verloren: -${s.totalLost}s`, 22, 66);
-            doc.setTextColor(6, 78, 59);
-            doc.text(`Titel: ${getKampioenenTitel(rank, acc, p.seconds)}`, 78, 66);
-
-            let y = 86;
-            const addRoundSection = (title, statsLine, items) => {
-                doc.setFillColor(236, 253, 245);
-                doc.rect(15, y - 5, 180, 8, 'F');
-                doc.setFont("helvetica", "bold");
-                doc.setFontSize(12);
-                doc.setTextColor(6, 78, 59);
-                doc.text(title, 18, y);
-                doc.setTextColor(51, 65, 85);
-                doc.setFontSize(10);
-                doc.text(statsLine, 192, y, { align: 'right' });
-                y += 7;
-
-                doc.setFont("helvetica", "normal");
-                doc.setTextColor(30, 41, 59);
-                const text = items.length ? items.join('  •  ') : 'Geen antwoorden geregistreerd in deze ronde.';
-                const lines = doc.splitTextToSize(text, 174);
-                doc.text(lines, 18, y);
-                y += (lines.length * 5) + 8;
-            };
-
-            addRoundSection("Ronde 1: Algemene Kennis", `${s.r1.c} juist / ${s.r1.w} fout`, s.r1.details);
-            addRoundSection("Ronde 2: De Puzzel", `${s.r2.c} woorden / ${s.r2.w} fout`, s.r2.foundWords);
-            addRoundSection("Ronde 3: Radio Hallo", `${s.r3.c} trefwoorden / ${s.r3.w} fout`, s.r3.foundWords);
-            addRoundSection("Ronde 4: Raad de Aflevering (Bordjes)", `${s.r4.c} juist`, s.r4.episodes);
-            addRoundSection("Ronde 5: De Beeldronde", `${s.r5.c} juist / ${s.r5.w} fout`, s.r5.foundItems);
-            addRoundSection("Ronde 6: De Finale", `${s.r6.c} juist (-${s.r6.stolenSec}s bij tegenstander)`, s.r6.foundWords);
-
-            doc.setFontSize(9);
-            doc.setTextColor(148, 163, 184);
-            doc.text(`Pagina ${rank + 1} van ${sorted.length} — Officieel F.C. De Kampioenen Quiz Rapport`, 105, 288, { align: 'center' });
-        });
-
-        doc.save(`FC_De_Kampioenen_Eindrapport.pdf`);
-    }
-
-    // --- BROADCAST CHANNEL ---
-    channel.onmessage = (e) => {
-        const d = e.data; if (!d) return;
-        if (d.type === 'REQUEST_REPORT') generateReport();
-        if (d.type === 'DOWNLOAD_PDF_REPORT') generateDetailedPDF();
-        if (d.type === 'START_R4_TIMER') startR4Timer();
-        if (d.type === 'PLAY_AUDIO' && currentRound === 3) {
-            const ap = document.getElementById('r3-audio-player');
-            if (ap) {
-                ap.play().catch(() => {});
-                document.getElementById('on-air-badge').classList.add('live');
-                document.getElementById('radio-eq').classList.add('active');
-                ap.onended = () => { document.getElementById('on-air-badge').classList.remove('live'); document.getElementById('radio-eq').classList.remove('active'); };
-            }
-        }
-        if (d.type === 'ADJUST_TIME') {
-            const t = d.targetPlayer !== undefined ? d.targetPlayer : activePlayerIndex;
-            if (currentRound === 4 && d.amount > 0) {
-                playerStats[t].r4.c++;
-                playerStats[t].r4.episodes.push(activeRound4Questions[currentR4Index]?.antwoord || "Aflevering");
-            }
-            updateSeconds(t, d.amount); showBonusFeedback(t, d.amount);
-        }
-        if (d.type === 'FILL_ANSWER') {
-            inputAnswer.value = d.answer;
-            if (currentRound === 1) checkRound1Answer();
-            else if (currentRound === 2) checkRound2Answer();
-            else if (currentRound === 3) checkRound3Answer();
-            else if (currentRound === 5) checkRound5Answer();
-            else if (currentRound === 6) checkFinaleAnswer();
-        }
-        if (d.type === 'TRIGGER_FAIL') {
-            inputAnswer.value = "###FAIL###";
-            if (currentRound === 1) checkRound1Answer();
-            else if (currentRound === 2) { playerStats[activePlayerIndex].r2.w++; pasDeBeurt(); }
-            else if (currentRound === 3) { playerStats[activePlayerIndex].r3.w++; pasDeBeurt(); }
-            else if (currentRound === 5) { playerStats[activePlayerIndex].r5.w++; pasDeBeurt(); }
-            else if (currentRound === 6) checkFinaleAnswer();
-        }
-        if (d.type === 'TOGGLE_TIMER') toggleTimer(activePlayerIndex);
-        if (d.type === 'SELECT_PLAYER') { activePlayerIndex = d.playerIndex; renderPlayers(); }
-        if (d.type === 'START_ROUND') {
-            if (d.round == 1) startGameR1();
-            if (d.round == 2) setupRound2();
-            if (d.round == 3) setupRound3();
-            if (d.round == 4) setupRound4();
-            if (d.round == 5) setupRound5();
-            if (d.round == 6) setupFinale();
-        }
-        if (d.type === 'SELECT_VIDEO' && currentRound === 5) loadBeeldVraag(d.index);
-        if (d.type === 'PLAY_VIDEO' && currentRound === 5) { const vp = document.getElementById('beeld-video-player'); if (vp) vp.play(); }
-        if (d.type === 'NEXT_QUESTION') {
-            if (currentRound === 2) { currentR2SetCount++; loadNewPuzzle(); }
-            if (currentRound === 3) { currentOpenDeurIndex++; loadOpenDeur(); }
-            if (currentRound === 4) { currentR4Index++; loadR4Vraag(); }
-            if (currentRound === 5) returnToVideoGrid();
-            if (currentRound === 6) { currentFinaleQuestionIndex++; loadFinaleQuestion(); }
-        }
-        if (d.type === 'SHOW_ANSWERS') {
-            if (currentRound === 2) showPuzzleAnswers();
-            if (currentRound === 3) showOpenDeurAnswers();
-            if (currentRound === 5) showBeeldAnswers();
-            if (currentRound === 6) showFinaleAnswers();
-        }
-    };
-    </script>
-</body>
-</html>
+:root {
+    --kamp-groen: #009b48;
+    --kamp-donkergroen: #044723;
+    --kamp-geel: #ffd700;
+    --kamp-rood: #ef4444;
+    --bg-dark: #032212;
+    --glass-bg: rgba(4, 54, 28, 0.82);
+    --glass-border: rgba(255, 215, 0, 0.45);
+    --correct-color: #22c55e;
+    --wrong-color: #ef4444;
+    --text-muted: #b7e4c7;
+}
+
+* { box-sizing: border-box; }
+
+body {
+    margin: 0;
+    padding: 20px;
+    min-height: 100vh;
+    font-family: 'Open Sans', sans-serif;
+    color: #f8fafc;
+    background:
+        radial-gradient(circle at 15% 10%, rgba(0, 155, 72, 0.45), transparent 45%),
+        radial-gradient(circle at 85% 10%, rgba(255, 215, 0, 0.25), transparent 45%),
+        radial-gradient(circle at 50% 95%, rgba(0, 110, 50, 0.55), transparent 60%),
+        var(--bg-dark);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+h1, h2, h3 {
+    font-family: 'Chakra Petch', sans-serif;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+}
+
+h1 {
+    color: var(--kamp-geel);
+    font-size: clamp(1.8rem, 3.5vw, 3rem);
+    margin: 0 0 18px 0;
+    text-shadow: 0 0 25px rgba(255, 215, 0, 0.45), 0 3px 6px rgba(0, 0, 0, 0.7);
+    text-align: center;
+}
+
+/* --- SETUP SCHERM --- */
+#setup-screen {
+    background: var(--glass-bg);
+    backdrop-filter: blur(14px);
+    border: 2px solid var(--kamp-geel);
+    border-radius: 18px;
+    padding: 30px 40px;
+    width: 100%;
+    max-width: 520px;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.65);
+    text-align: center;
+}
+
+.setup-input-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+    gap: 12px;
+}
+
+.setup-input-row input {
+    flex: 1;
+    padding: 10px 14px;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 215, 0, 0.35);
+    background: rgba(0, 20, 10, 0.55);
+    color: #fff;
+    font-size: 1rem;
+}
+
+#start-quiz-btn {
+    margin-top: 18px;
+    width: 100%;
+    padding: 14px;
+    font-size: 1.25rem;
+    font-family: 'Chakra Petch', sans-serif;
+    font-weight: 700;
+    background: linear-gradient(135deg, var(--kamp-geel), #eab308);
+    color: #032212;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    box-shadow: 0 8px 25px rgba(255, 215, 0, 0.4);
+    transition: transform 0.2s;
+}
+#start-quiz-btn:hover { transform: translateY(-2px); }
+
+/* --- SPELERSKAARTEN --- */
+#player-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 16px;
+    width: 100%;
+    max-width: 1300px;
+    margin-bottom: 22px;
+}
+
+.player-card {
+    position: relative;
+    min-width: 165px;
+    padding: 16px 22px;
+    border-radius: 14px;
+    background: var(--glass-bg);
+    backdrop-filter: blur(12px);
+    border: 2px solid rgba(255, 215, 0, 0.22);
+    text-align: center;
+    transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.45);
+}
+
+.player-card.active {
+    border-color: var(--kamp-geel);
+    transform: translateY(-6px) scale(1.06);
+    box-shadow: 0 0 32px rgba(255, 215, 0, 0.55), inset 0 0 18px rgba(255, 215, 0, 0.2);
+    background: linear-gradient(160deg, rgba(0, 155, 72, 0.9), rgba(4, 71, 35, 0.95));
+}
+
+.player-card.attempted {
+    opacity: 0.42;
+    filter: grayscale(60%);
+    transform: scale(0.96);
+}
+
+.player-card.low-time {
+    border-color: var(--kamp-rood) !important;
+    animation: lowTimePulse 0.9s infinite;
+}
+
+@keyframes lowTimePulse {
+    0%, 100% { box-shadow: 0 0 15px rgba(239, 68, 68, 0.4); }
+    50% { box-shadow: 0 0 35px rgba(239, 68, 68, 0.95); }
+}
+
+.player-name {
+    font-family: 'Chakra Petch', sans-serif;
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 4px;
+}
+
+.player-seconds {
+    font-family: 'Chakra Petch', sans-serif;
+    font-size: 2.8rem;
+    font-weight: 700;
+    color: var(--kamp-geel);
+    line-height: 1;
+}
+
+.player-card.low-time .player-seconds { color: var(--kamp-rood); }
+
+.bonus-feedback {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    font-family: 'Chakra Petch', sans-serif;
+    font-size: 2.2rem;
+    font-weight: 700;
+    pointer-events: none;
+    opacity: 0;
+    text-shadow: 0 4px 12px #000;
+}
+
+/* --- SPELBORD --- */
+#game-board {
+    width: 100%;
+    max-width: 1200px;
+    background: var(--glass-bg);
+    backdrop-filter: blur(16px);
+    border: 2px solid var(--kamp-geel);
+    border-radius: 20px;
+    padding: 28px 34px;
+    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.65), inset 0 0 30px rgba(0, 155, 72, 0.18);
+    text-align: center;
+}
+
+#round-title {
+    color: var(--kamp-geel);
+    font-size: 1.9rem;
+    margin: 0 0 6px 0;
+}
+
+#question-counter {
+    color: var(--text-muted);
+    font-size: 1rem;
+    margin: 0 0 20px 0;
+    font-weight: 600;
+}
+
+#question-text {
+    font-size: clamp(1.4rem, 2.5vw, 2.2rem);
+    font-weight: 700;
+    line-height: 1.4;
+    margin: 25px auto;
+    max-width: 900px;
+}
+
+/* --- RONDE 2: PUZZEL MET 3D-FLIP --- */
+#puzzle-display-area {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    width: 100%;
+}
+
+#puzzle-answers-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 14px;
+    width: 100%;
+}
+
+.puzzle-answer {
+    padding: 12px 26px;
+    border-radius: 10px;
+    background: rgba(0, 25, 12, 0.6);
+    border: 2px solid rgba(255, 215, 0, 0.35);
+    font-family: 'Chakra Petch', sans-serif;
+    font-size: 1.35rem;
+    font-weight: 700;
+    min-width: 200px;
+    transition: all 0.4s ease;
+}
+
+#puzzle-clues-container {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+    width: 100%;
+    transition: filter 0.5s ease;
+    perspective: 900px;
+}
+
+.blurred-board { filter: blur(18px); pointer-events: none; user-select: none; }
+.blurred-subject { filter: blur(14px); user-select: none; }
+
+.puzzle-clue {
+    padding: 20px 14px;
+    border-radius: 12px;
+    background: rgba(0, 30, 15, 0.55);
+    border: 2px solid rgba(255, 215, 0, 0.25);
+    font-size: 1.15rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 76px;
+    transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1), background 0.4s, border-color 0.4s;
+}
+
+.puzzle-clue.found, .puzzle-answer.found { transform: rotateX(360deg); color: #fff; border-color: #fff; }
+.color-1 { background: linear-gradient(135deg, #009b48, #046c34) !important; box-shadow: 0 0 18px rgba(0, 155, 72, 0.55); }
+.color-2 { background: linear-gradient(135deg, #eab308, #ca8a04) !important; color: #032212 !important; box-shadow: 0 0 18px rgba(255, 215, 0, 0.55); }
+.color-3 { background: linear-gradient(135deg, #166534, #14532d) !important; border-color: var(--kamp-geel) !important; box-shadow: 0 0 18px rgba(34, 197, 94, 0.45); }
+.missed { background: rgba(239, 68, 68, 0.78) !important; border-color: #fca5a5 !important; color: #fff !important; }
+
+/* --- RONDE 3: RADIO HALLO + ON AIR + EQUALIZER --- */
+.radio-studio-box {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 24px;
+    margin-bottom: 18px;
+}
+
+.on-air-badge {
+    padding: 8px 18px;
+    border-radius: 8px;
+    font-family: 'Chakra Petch', sans-serif;
+    font-weight: 700;
+    font-size: 1.1rem;
+    letter-spacing: 2px;
+    background: rgba(0, 25, 12, 0.55);
+    border: 2px solid rgba(255, 215, 0, 0.3);
+    color: var(--text-muted);
+    transition: all 0.3s;
+}
+
+.on-air-badge.live {
+    background: var(--kamp-rood);
+    border-color: #fecaca;
+    color: #fff;
+    box-shadow: 0 0 25px rgba(239, 68, 68, 0.9);
+    animation: lowTimePulse 1s infinite;
+}
+
+.equalizer {
+    display: flex;
+    align-items: flex-end;
+    gap: 5px;
+    height: 44px;
+}
+
+.eq-bar {
+    width: 8px;
+    height: 10px;
+    background: var(--kamp-geel);
+    border-radius: 4px;
+    transition: height 0.2s;
+}
+
+.equalizer.active .eq-bar { animation: eqBounce 0.6s infinite ease-in-out alternate; }
+.equalizer.active .eq-bar:nth-child(2) { animation-delay: 0.15s; }
+.equalizer.active .eq-bar:nth-child(3) { animation-delay: 0.3s; }
+.equalizer.active .eq-bar:nth-child(4) { animation-delay: 0.1s; }
+.equalizer.active .eq-bar:nth-child(5) { animation-delay: 0.25s; }
+
+@keyframes eqBounce {
+    0% { height: 8px; }
+    100% { height: 42px; }
+}
+
+#opendeur-keywords-container, #finale-keywords-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 14px;
+    width: 100%;
+    margin-top: 16px;
+}
+
+.opendeur-keyword, .finale-keyword {
+    padding: 18px;
+    border-radius: 12px;
+    background: rgba(0, 25, 12, 0.55);
+    border: 2px solid rgba(255, 215, 0, 0.3);
+    font-family: 'Chakra Petch', sans-serif;
+    font-size: 1.3rem;
+    font-weight: 700;
+    transition: all 0.35s ease;
+}
+
+.opendeur-keyword.found, .finale-keyword.found {
+    background: linear-gradient(135deg, var(--kamp-groen), var(--kamp-donkergroen));
+    border-color: var(--kamp-geel);
+    color: #fff;
+    box-shadow: 0 0 20px rgba(255, 215, 0, 0.35);
+}
+
+/* --- OVERLAYS --- */
+#game-over-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(3, 34, 18, 0.95);
+    z-index: 2000;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+#game-over-text { font-size: 5rem; color: var(--kamp-geel); margin: 10px 0; }
