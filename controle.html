@@ -10,15 +10,15 @@
         body { padding: 0; align-items: stretch; min-height: 100vh; }
         #header {
             display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between;
-            gap: 10px; padding: 12px 18px; background: rgba(0,0,0,0.75); border-bottom: 2px solid var(--kamp-geel);
+            gap: 10px; padding: 12px 18px; background: rgba(3, 34, 18, 0.92); border-bottom: 2px solid var(--kamp-geel);
         }
         #header h1 { margin: 0; font-size: 1.4rem; text-align: left; }
         .round-bar { display: flex; flex-wrap: wrap; gap: 6px; }
         .round-bar button {
-            padding: 8px 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.2);
-            background: rgba(255,255,255,0.08); color: #fff; font-weight: 700; cursor: pointer; font-family: 'Chakra Petch', sans-serif;
+            padding: 8px 12px; border-radius: 8px; border: 1px solid rgba(255, 215, 0, 0.35);
+            background: rgba(0, 155, 72, 0.25); color: #fff; font-weight: 700; cursor: pointer; font-family: 'Chakra Petch', sans-serif;
         }
-        .round-bar button.active-round { background: var(--kamp-geel); color: #000; border-color: #fff; }
+        .round-bar button.active-round { background: var(--kamp-geel); color: #032212; border-color: #fff; }
         .header-reports { display: flex; gap: 8px; }
         .header-reports button {
             padding: 8px 12px; border-radius: 8px; border: none; font-weight: 700; cursor: pointer; font-family: 'Chakra Petch', sans-serif;
@@ -38,7 +38,7 @@
             background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 14px;
             padding: 16px; display: flex; flex-direction: column;
         }
-        .panel h2 { font-size: 1.05rem; margin: 0 0 12px 0; border-bottom: 1px solid rgba(255,255,255,0.12); padding-bottom: 8px; color: var(--kamp-geel); }
+        .panel h2 { font-size: 1.05rem; margin: 0 0 12px 0; border-bottom: 1px solid rgba(255, 215, 0, 0.25); padding-bottom: 8px; color: var(--kamp-geel); }
 
         .sidebar-player {
             padding: 10px 12px; margin-bottom: 8px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; cursor: pointer;
@@ -57,12 +57,13 @@
             background: var(--kamp-donkergroen); color: #fff; border: 2px solid var(--kamp-groen);
             padding: 9px 14px; border-radius: 8px; cursor: pointer; font-weight: 700; margin: 4px 4px 4px 0;
         }
-        .correct-btn:hover { background: var(--correct-color); color: #000; }
+        .correct-btn:hover { background: var(--kamp-geel); color: #032212; border-color: #fff; }
         .grid-select-btn {
             background: var(--kamp-groen); color: #fff; padding: 12px; border-radius: 8px; border: 2px solid var(--kamp-geel);
             cursor: pointer; font-weight: 700; flex: 1; min-width: 110px;
         }
-        .grid-select-btn:disabled { background: #334155; color: #94a3b8; border-color: #475569; cursor: not-allowed; }
+        .grid-select-btn:hover { background: var(--kamp-geel); color: #032212; }
+        .grid-select-btn:disabled { background: #1e293b; color: #64748b; border-color: #334155; cursor: not-allowed; }
     </style>
 </head>
 <body>
@@ -85,8 +86,8 @@
             <button data-round="6" onclick="startRoundDirect(6)">R6 Finale</button>
         </div>
         <div class="header-reports">
-            <button style="background:#2563eb; color:#fff;" onclick="channel.postMessage({ type: 'REQUEST_REPORT' })">📊 Scherm</button>
-            <button style="background:var(--kamp-geel); color:#000;" onclick="channel.postMessage({ type: 'DOWNLOAD_PDF_REPORT' })">📄 PDF Rapport</button>
+            <button style="background:var(--kamp-groen); color:#fff;" onclick="channel.postMessage({ type: 'REQUEST_REPORT' })">📊 Scherm</button>
+            <button style="background:var(--kamp-geel); color:#032212;" onclick="channel.postMessage({ type: 'DOWNLOAD_PDF_REPORT' })">📄 PDF Rapport</button>
         </div>
     </div>
 
@@ -100,19 +101,19 @@
             <h2>⏱️ Klok & Beurt</h2>
             <div id="active-player-name">—</div>
             <div id="active-player-score">0</div>
-            <button id="btn-massive-timer" class="big-btn" style="background:var(--kamp-geel); color:#000;" onclick="channel.postMessage({ type: 'TOGGLE_TIMER' })">▶ START TIMER</button>
+            <button id="btn-massive-timer" class="big-btn" style="background:var(--kamp-geel); color:#032212;" onclick="channel.postMessage({ type: 'TOGGLE_TIMER' })">▶ START TIMER</button>
             <button class="big-btn" style="background:var(--kamp-rood); color:#fff;" onclick="channel.postMessage({ type: 'TRIGGER_FAIL' })">❌ FOUT / PAS</button>
             <div class="row-btns">
                 <button style="background:#991b1b; color:#fff;" onclick="channel.postMessage({ type: 'ADJUST_TIME', amount: -20 })">-20s</button>
-                <button style="background:#047857; color:#fff;" onclick="channel.postMessage({ type: 'ADJUST_TIME', amount: 10 })">+10s</button>
-                <button style="background:#047857; color:#fff;" onclick="channel.postMessage({ type: 'ADJUST_TIME', amount: 20 })">+20s</button>
+                <button style="background:var(--kamp-groen); color:#fff;" onclick="channel.postMessage({ type: 'ADJUST_TIME', amount: 10 })">+10s</button>
+                <button style="background:var(--kamp-groen); color:#fff;" onclick="channel.postMessage({ type: 'ADJUST_TIME', amount: 20 })">+20s</button>
             </div>
         </div>
 
         <div class="panel">
             <h2>📝 Antwoorden & Verloop</h2>
             <div class="row-btns" id="flow-buttons">
-                <button style="background:var(--kamp-geel); color:#000;" onclick="channel.postMessage({ type: 'NEXT_QUESTION' })">▶ Volgende</button>
+                <button style="background:var(--kamp-geel); color:#032212;" onclick="channel.postMessage({ type: 'NEXT_QUESTION' })">▶ Volgende</button>
                 <button style="background:var(--kamp-rood); color:#fff;" onclick="channel.postMessage({ type: 'SHOW_ANSWERS' })">👁️ Toon Alles</button>
             </div>
             <div id="result-area" style="overflow-y:auto; flex:1;">
@@ -150,7 +151,7 @@
                 let activeP = null;
                 c.innerHTML = d.players.map(p => {
                     if (p.isActive) activeP = p;
-                    return `<div class="sidebar-player" style="background:${p.isActive ? 'rgba(251,191,36,0.18)' : 'rgba(255,255,255,0.05)'}; border:2px solid ${p.isActive ? 'var(--kamp-geel)' : 'transparent'};" onclick="channel.postMessage({ type: 'SELECT_PLAYER', playerIndex: ${p.index} })">
+                    return `<div class="sidebar-player" style="background:${p.isActive ? 'rgba(255,215,0,0.2)' : 'rgba(0,25,12,0.45)'}; border:2px solid ${p.isActive ? 'var(--kamp-geel)' : 'transparent'};" onclick="channel.postMessage({ type: 'SELECT_PLAYER', playerIndex: ${p.index} })">
                         <strong>${p.isActive ? '👉 ' : ''}${p.hasPlayed ? '✔️ ' : ''}${p.name}</strong>
                         <span style="font-family:'Chakra Petch',sans-serif; font-size:1.3rem; color:${p.isRunning ? 'var(--kamp-rood)' : 'var(--kamp-geel)'};">${p.seconds}</span>
                     </div>`;
@@ -162,8 +163,18 @@
                     const btn = document.getElementById('btn-massive-timer');
                     btn.textContent = activeP.isRunning ? '❚❚ STOP TIMER' : '▶ START TIMER';
                     btn.style.background = activeP.isRunning ? 'var(--kamp-rood)' : 'var(--kamp-geel)';
-                    btn.style.color = activeP.isRunning ? '#fff' : '#000';
+                    btn.style.color = activeP.isRunning ? '#fff' : '#032212';
                 }
+            }
+
+            if (d.type === 'SYNC_R3_GRID') {
+                document.getElementById('flow-buttons').style.display = 'flex';
+                let html = `<p style="color:var(--kamp-geel); font-weight:bold; margin:0 0 10px 0;">Speler kiest een Radio Hallo fragment:</p><div style="display:flex; gap:8px; flex-wrap:wrap;">`;
+                for (let i = 0; i < d.total; i++) {
+                    const done = d.played.includes(i);
+                    html += `<button class="grid-select-btn" ${done ? 'disabled' : `onclick="channel.postMessage({ type: 'SELECT_AUDIO_R3', index: ${i} })"`}>${done ? '❌' : '📻'} Fragment ${i + 1}</button>`;
+                }
+                resultArea.innerHTML = html + `</div>`;
             }
 
             if (d.type === 'SYNC_R4') {
@@ -171,12 +182,12 @@
                 resultArea.innerHTML = `
                     <div style="text-align:center;">
                         <h3 style="color:var(--kamp-geel); margin:0;">Foto ${d.qNum} / ${d.total}</h3>
-                        <p style="font-size:1.25rem; color:var(--correct-color); font-weight:bold; margin:8px 0 14px 0;">${d.answer}</p>
+                        <p style="font-size:1.25rem; color:var(--kamp-geel); font-weight:bold; margin:8px 0 14px 0;">${d.answer}</p>
                         <button class="big-btn" style="background:var(--kamp-groen); color:#fff;" onclick="channel.postMessage({ type: 'START_R4_TIMER' })">⏱️ START 15 SEC TIMER</button>
                         <div style="display:flex; flex-direction:column; gap:8px; margin:12px 0;">
-                            ${lastPlayers.map(p => `<button style="padding:10px; border-radius:8px; border:none; background:var(--kamp-geel); color:#000; font-weight:bold; cursor:pointer; text-align:left;" onclick="this.style.background='var(--kamp-groen)'; this.style.color='#fff'; this.textContent='✔️ ${p.name} (+40s)'; channel.postMessage({ type: 'ADJUST_TIME', amount: 40, targetPlayer: ${p.index} })">✅ Geef ${p.name} +40 sec</button>`).join('')}
+                            ${lastPlayers.map(p => `<button style="padding:10px; border-radius:8px; border:none; background:var(--kamp-geel); color:#032212; font-weight:bold; cursor:pointer; text-align:left;" onclick="this.style.background='var(--kamp-groen)'; this.style.color='#fff'; this.textContent='✔️ ${p.name} (+40s)'; channel.postMessage({ type: 'ADJUST_TIME', amount: 40, targetPlayer: ${p.index} })">✅ Geef ${p.name} +40 sec</button>`).join('')}
                         </div>
-                        <button class="big-btn" style="background:#2563eb; color:#fff;" onclick="channel.postMessage({ type: 'NEXT_QUESTION' })">▶ VOLGENDE FOTO</button>
+                        <button class="big-btn" style="background:var(--kamp-donkergroen); color:#fff; border:1px solid var(--kamp-geel);" onclick="channel.postMessage({ type: 'NEXT_QUESTION' })">▶ VOLGENDE FOTO</button>
                     </div>`;
             }
 
@@ -207,7 +218,7 @@
                 const q = pool.find(x => x.id === id) || pool[id - 1];
                 if (!q) return '';
                 if (activeRound === 1) return `<div style="margin-bottom:12px;"><p style="margin:0 0 8px 0;">${q.q}</p><button class="correct-btn" onclick="sendAnswer('${esc(q.a)}')">✅ ${q.a}</button></div>`;
-                if (activeRound === 2) return `<div style="margin-bottom:10px; padding:10px; background:rgba(255,255,255,0.05); border-radius:8px;"><div style="font-size:0.85rem; color:var(--text-muted);">${q.clues.join(' • ')}</div><button class="correct-btn" onclick="sendAnswer('${esc(q.answer)}')">✅ ${q.answer}</button></div>`;
+                if (activeRound === 2) return `<div style="margin-bottom:10px; padding:10px; background:rgba(0,25,12,0.45); border-radius:8px;"><div style="font-size:0.85rem; color:var(--text-muted);">${q.clues.join(' • ')}</div><button class="correct-btn" onclick="sendAnswer('${esc(q.answer)}')">✅ ${q.answer}</button></div>`;
                 if (activeRound === 3) return `<button class="big-btn" style="background:var(--kamp-groen); color:#fff;" onclick="channel.postMessage({ type: 'PLAY_AUDIO' })">📻 SPEEL RADIO HALLO</button><div>${q.keywords.map(k => `<button class="correct-btn" onclick="sendAnswer('${esc(k.word || k)}')">✅ ${k.word || k}</button>`).join('')}</div>`;
                 if (activeRound === 5) return `<div style="display:flex; flex-direction:column; gap:6px;">
                     <button class="correct-btn" onclick="sendAnswer('${esc(q.vraag1_seizoen)}')">Seizoen: ${q.vraag1_seizoen}</button>
