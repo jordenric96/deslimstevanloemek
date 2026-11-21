@@ -17,7 +17,7 @@ const RONDE2_DATA = {
         { answer: "Eddy Wally", clues: ["Xavier valt voor hem in", "Bij BTW", "Pol op de piano", "Marc aan de drum"] },
         { answer: "Proost", clues: ["Schol", "Pater Benny", "Oh ik ben zo zat, ik ben zo zat", "Amberkleurig"] },
         { answer: "Wafel", clues: ["Geen frikandellen", "Brussels of Luiks?", "één boekske van tien..", "Om te eten"] },
-         { answer: "Duivenmelker", clues: ["Fernand is het", "Xavier en Marc zijn het eens geworden", "Niet met koeien", "Ze moeten zondag vallen!"] },
+         { answer: "Duivenmelker", clues: ["Fernand is het", "Xavier en Marc zijn het eens geworden", "Niet met koeien", "Mijn duiven moeten vallen"] },
         { 
     answer: "Infr frfra frastructuur", 
     clues: [
