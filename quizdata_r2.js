@@ -17,6 +17,15 @@ const RONDE2_DATA = {
         { answer: "Eddy Wally", clues: ["Xavier valt voor hem in", "Bij BTW", "Pol op de piano", "Marc aan de drum"] },
         { answer: "Proost", clues: ["Schol", "Pater Benny", "Oh ik ben zo zat, ik ben zo zat", "Amberkleurig"] },
         { answer: "Wafel", clues: ["Geen frikandellen", "Brussels of Luiks?", "één boekske van tien..", "Om te eten"] },
+        { 
+    answer: "Infr frfra frastructuur", 
+    clues: [
+        "Niet beledigen", 
+        "DDT zegt het", 
+        "Struikelen over je tong", 
+        "Zeg het zelf"
+    ] 
+},
         { answer: "Bolleke", clues: ["Auto", "Fiat 500", "Marc", "Klein"] }
     ]
 };
